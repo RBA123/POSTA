@@ -1,0 +1,117 @@
+import React from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../components/BottomNav';
+import { Card } from '../components/ui/Card';
+
+const activities = [
+  {
+    id: 1,
+    question: '¿Messi mete el penal?',
+    side: 'Sí',
+    amount: 25,
+    status: 'pending',
+    time: 'Hace 5 min',
+    potential: 37.31,
+  },
+  {
+    id: 2,
+    question: 'México vs Sudáfrica: ¿Gana México?',
+    side: 'No',
+    amount: 10,
+    status: 'won',
+    time: 'Ayer',
+    winnings: 45.23,
+  },
+  {
+    id: 3,
+    question: '¿Argentina gana la Copa del Mundo 2026?',
+    side: 'Sí',
+    amount: 15,
+    status: 'lost',
+    time: 'Hace 3 días',
+  },
+];
+
+const ActivityScreen: React.FC = () => {
+  return (
+    <View className="flex-1 bg-background pb-24">
+      {/* Header */}
+      <View className="bg-background border-b border-border px-6 py-4">
+        <Text className="text-2xl font-bold text-foreground">Actividad</Text>
+        <Text className="text-sm text-muted-foreground">Tus posiciones activas</Text>
+      </View>
+
+      {/* Activity List */}
+      <ScrollView className="px-4 py-4" showsVerticalScrollIndicator={false}>
+        <View className="gap-3">
+          {activities.map((activity) => (
+            <Card key={activity.id}>
+              <View className="flex-row items-start justify-between mb-2">
+                <View className="flex-1">
+                  <Text className="font-semibold text-card-foreground text-sm leading-tight">
+                    {activity.question}
+                  </Text>
+                  <View className="flex-row items-center gap-2 mt-1">
+                    <View
+                      className={`px-2 py-0.5 rounded-full ${
+                        activity.side === 'Sí'
+                          ? 'bg-success/10'
+                          : 'bg-destructive/10'
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-bold ${
+                          activity.side === 'Sí' ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        {activity.side}
+                      </Text>
+                    </View>
+                    <Text className="text-xs text-muted-foreground">
+                      ${activity.amount}
+                    </Text>
+                  </View>
+                </View>
+                <View className="items-end">
+                  {activity.status === 'pending' && (
+                    <View className="flex-row items-center gap-1">
+                      <Ionicons name="time-outline" size={16} color="#F97316" />
+                      <Text className="text-sm font-medium text-primary">Pendiente</Text>
+                    </View>
+                  )}
+                  {activity.status === 'won' && (
+                    <View className="flex-row items-center gap-1">
+                      <Ionicons name="trending-up" size={16} color="#22C55E" />
+                      <Text className="text-sm font-bold text-success">
+                        +${activity.winnings?.toFixed(2)}
+                      </Text>
+                    </View>
+                  )}
+                  {activity.status === 'lost' && (
+                    <View className="flex-row items-center gap-1">
+                      <Ionicons name="trending-down" size={16} color="#EF4444" />
+                      <Text className="text-sm font-medium text-destructive">Perdido</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+              <Text className="text-xs text-muted-foreground">{activity.time}</Text>
+            </Card>
+          ))}
+
+          {activities.length === 0 && (
+            <View className="items-center py-12">
+              <Text className="text-muted-foreground">No tienes posiciones activas</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      <BottomNav />
+    </View>
+  );
+};
+
+export default ActivityScreen;
+
