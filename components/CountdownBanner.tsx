@@ -25,7 +25,7 @@ const CountdownBanner: React.FC<CountdownBannerProps> = ({ endTime }) => {
   if (timeLeft <= 0) return null;
 
   return (
-    <View className="mx-4 my-4 bg-primary rounded-[12px] p-4">
+    <View className="mx-4 mt-4 bg-primary rounded-[12px] p-4">
       <View className="flex-row items-center justify-center gap-3">
         <Ionicons name="time-outline" size={20} color={Colors.white} />
         <Text className="font-semibold text-white">Mercado activo</Text>
