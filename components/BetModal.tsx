@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, Pressable, TextInput, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Button } from './ui/Button';
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  TextInput,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Button } from "./ui/Button";
 
 interface Market {
   id: string;
@@ -14,7 +21,7 @@ interface Market {
 
 interface BetModalProps {
   market: Market;
-  side: 'si' | 'no';
+  side: "si" | "no";
   balance: number;
   onClose: () => void;
   onConfirm: (amount: number) => void;
@@ -22,11 +29,18 @@ interface BetModalProps {
 
 const presetAmounts = [5, 10, 25, 50];
 
-const BetModal: React.FC<BetModalProps> = ({ market, side, balance, onClose, onConfirm }) => {
-  const [amount, setAmount] = useState('10');
+const BetModal: React.FC<BetModalProps> = ({
+  market,
+  side,
+  balance,
+  onClose,
+  onConfirm,
+}) => {
+  const [amount, setAmount] = useState("10");
 
   const amountNum = parseFloat(amount) || 0;
-  const probability = side === 'si' ? market.siProbability : market.noProbability;
+  const probability =
+    side === "si" ? market.siProbability : market.noProbability;
   const potentialWin = (amountNum / (probability / 100)).toFixed(2);
 
   const handleConfirm = () => {
@@ -57,15 +71,15 @@ const BetModal: React.FC<BetModalProps> = ({ market, side, balance, onClose, onC
             <View className="items-center mb-6">
               <View
                 className={`px-4 py-1 rounded-full mb-3 ${
-                  side === 'si' ? 'bg-success/10' : 'bg-destructive/10'
+                  side === "si" ? "bg-success/10" : "bg-destructive/10"
                 }`}
               >
                 <Text
                   className={`text-sm font-bold ${
-                    side === 'si' ? 'text-success' : 'text-destructive'
+                    side === "si" ? "text-success" : "text-destructive"
                   }`}
                 >
-                  {side === 'si' ? 'SÍ' : 'NO'} • {probability}%
+                  {side === "si" ? "SÍ" : "NO"} • {probability}%
                 </Text>
               </View>
               <Text className="text-lg font-bold text-card-foreground text-center">
@@ -104,14 +118,14 @@ const BetModal: React.FC<BetModalProps> = ({ market, side, balance, onClose, onC
                   key={preset}
                   onPress={() => setAmount(preset.toString())}
                   className={`flex-1 py-3 rounded-xl font-semibold ${
-                    amountNum === preset
-                      ? 'bg-primary'
-                      : 'bg-secondary'
+                    amountNum === preset ? "bg-primary" : "bg-secondary"
                   }`}
                 >
                   <Text
                     className={`text-center ${
-                      amountNum === preset ? 'text-white' : 'text-secondary-foreground'
+                      amountNum === preset
+                        ? "text-white"
+                        : "text-secondary-foreground"
                     }`}
                   >
                     ${preset}
@@ -123,26 +137,34 @@ const BetModal: React.FC<BetModalProps> = ({ market, side, balance, onClose, onC
             {/* Potential Win */}
             <View className="bg-secondary/50 rounded-xl p-4 mb-6">
               <View className="flex-row justify-between items-center">
-                <Text className="text-muted-foreground">Ganancia potencial</Text>
-                <Text className="text-2xl font-bold text-success">${potentialWin}</Text>
+                <Text className="text-muted-foreground">
+                  Ganancia potencial
+                </Text>
+                <Text className="text-2xl font-bold text-success">
+                  ${potentialWin}
+                </Text>
               </View>
             </View>
 
             {/* Balance Info */}
             <Text className="text-center text-sm text-muted-foreground mb-4">
-              Balance disponible:{' '}
-              <Text className="font-semibold text-foreground">${balance.toFixed(2)}</Text>
+              Balance disponible:{" "}
+              <Text className="font-semibold text-foreground">
+                ${balance.toFixed(2)}
+              </Text>
             </Text>
 
             {/* Confirm Button */}
             <Button
-              variant={side === 'si' ? 'success' : 'destructive'}
+              variant={side === "si" ? "success" : "destructive"}
               size="lg"
               className="w-full"
               onPress={handleConfirm}
               disabled={amountNum <= 0 || amountNum > balance}
             >
-              Confirmar apuesta
+              <Text className="text-white font-semibold">
+                Confirmar apuesta
+              </Text>
             </Button>
           </ScrollView>
         </Pressable>
@@ -152,4 +174,3 @@ const BetModal: React.FC<BetModalProps> = ({ market, side, balance, onClose, onC
 };
 
 export default BetModal;
-

@@ -219,9 +219,11 @@ const SignupScreen: React.FC = () => {
 
           {/* Friend code */}
           <View>
-            <Text className="text-sm font-medium text-foreground mb-2">
-              Código de amistad <Text className="text-muted-foreground font-normal">(opcional)</Text>
-            </Text>
+            <View className="mb-2">
+              <Text className="text-sm font-medium text-foreground">
+                Código de amistad <Text className="text-muted-foreground font-normal">(opcional)</Text>
+              </Text>
+            </View>
             <Input
               value={friendCode}
               onChangeText={(text) => setFriendCode(text.toUpperCase())}
@@ -240,7 +242,7 @@ const SignupScreen: React.FC = () => {
           disabled={!isFormValid}
           className="w-full"
         >
-          Continuar
+          <Text className="text-white font-semibold">Continuar</Text>
           <Ionicons name="chevron-forward" size={20} color="white" />
         </Button>
 

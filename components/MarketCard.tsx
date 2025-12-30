@@ -96,14 +96,14 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, onBet }) => {
           className="flex-1"
           onPress={() => onBet(market, 'si')}
         >
-          Sí
+          <Text className="text-white font-semibold">Sí</Text>
         </Button>
         <Button
           variant="no"
           className="flex-1"
           onPress={() => onBet(market, 'no')}
         >
-          No
+          <Text className="text-white font-semibold">No</Text>
         </Button>
       </View>
 

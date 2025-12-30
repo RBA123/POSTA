@@ -77,11 +77,12 @@ const NotificationsScreen: React.FC = () => {
             Activa las notificaciones
           </Text>
 
-          <Text className="text-muted-foreground mb-8 max-w-xs text-center">
-            Los mercados EN VIVO de LIBERTA solo están activos por{' '}
-            <Text className="font-bold text-foreground">2 minutos</Text>. No te pierdas ningún
-            momento.
-          </Text>
+          <View className="mb-8 max-w-xs">
+            <Text className="text-muted-foreground text-center">
+              Los mercados EN VIVO de LIBERTA solo están activos por{' '}
+              <Text className="font-bold text-foreground">2 minutos</Text>. No te pierdas ningún momento.
+            </Text>
+          </View>
 
           {/* Features */}
           <View className="w-full gap-4 mb-8">
@@ -139,7 +140,7 @@ const NotificationsScreen: React.FC = () => {
           className="w-full"
         >
           <Ionicons name="notifications" size={20} color="white" />
-          Activar notificaciones
+          <Text className="text-white font-semibold">Activar notificaciones</Text>
         </Button>
 
         <Button variant="ghost" size="lg" onPress={handleSkip} className="w-full">

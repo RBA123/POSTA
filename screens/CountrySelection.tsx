@@ -77,7 +77,7 @@ const CountrySelection: React.FC = () => {
           disabled={!selectedCountry}
           className="w-full"
         >
-          Continuar
+          <Text className="text-white font-semibold">Continuar</Text>
           <Ionicons name="chevron-forward" size={20} color="white" />
         </Button>
       </View>

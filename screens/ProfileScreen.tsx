@@ -149,7 +149,7 @@ const ProfileScreen: React.FC = () => {
               onPress={handleLogout}
             >
               <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-              Cerrar sesión
+              <Text className="text-destructive font-semibold">Cerrar sesión</Text>
             </Button>
           </View>
         </View>
