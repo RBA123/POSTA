@@ -5,9 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const navItems = [
-  { icon: 'home' as const, label: 'Mercados', route: 'Home' },
-  { icon: 'stats-chart' as const, label: 'Actividad', route: 'Activity' },
-  { icon: 'person' as const, label: 'Perfil', route: 'Profile' },
+  { icon: 'home' as const, label: 'Mercados', route: 'HomeTab' },
+  { icon: 'stats-chart' as const, label: 'Actividad', route: 'ActivityTab' },
+  { icon: 'person' as const, label: 'Perfil', route: 'ProfileTab' },
 ] as const;
 
 const BottomNav: React.FC = () => {

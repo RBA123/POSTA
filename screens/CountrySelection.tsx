@@ -24,7 +24,7 @@ const CountrySelection: React.FC = () => {
   const handleContinue = async () => {
     if (selectedCountry) {
       await Storage.setItem('liberta_country', selectedCountry);
-      navigation.navigate('Home', { country: selectedCountry });
+      navigation.navigate('Main');
     }
   };
 

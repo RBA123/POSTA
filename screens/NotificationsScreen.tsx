@@ -29,7 +29,7 @@ const NotificationsScreen: React.FC = () => {
 
     const savedCountry = await Storage.getItem("liberta_country");
     if (savedCountry) {
-      navigation.navigate("Home", { country: savedCountry });
+      navigation.navigate("Main");
     } else {
       navigation.navigate("CountrySelection");
     }
@@ -40,7 +40,7 @@ const NotificationsScreen: React.FC = () => {
 
     const savedCountry = await Storage.getItem("liberta_country");
     if (savedCountry) {
-      navigation.navigate("Home", { country: savedCountry });
+      navigation.navigate("Main");
     } else {
       navigation.navigate("CountrySelection");
     }
