@@ -65,6 +65,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
   ) => {
     const isGradient =
       variant === "default" || variant === "pillActive" || variant === "hero";
+    const isPill = variant === "pill" || variant === "pillActive";
     const textColor =
       variant === "outline" || variant === "ghost" || variant === "link"
         ? "text-primary"
@@ -156,7 +157,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
           disabled && "opacity-50",
           className
         )}
-        style={{ borderRadius: 12 }}
+        style={{ borderRadius: isPill ? 9999 : 12 }}
         {...props}
       >
         {isGradient ? (
@@ -170,7 +171,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
               right: 0,
               top: 0,
               bottom: 0,
-              borderRadius: 12,
+              borderRadius: isPill ? 9999 : 12,
             }}
           />
         ) : null}
