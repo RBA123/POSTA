@@ -1,45 +1,44 @@
-import { MMKV } from 'react-native-mmkv';
-
-const storage = new MMKV();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const Storage = {
-  getItem: (key: string): string | null => {
+  async getItem(key: string): Promise<string | null> {
     try {
-      const value = storage.getString(key);
-      return value ?? null;
-    } catch {
+      return await AsyncStorage.getItem(key);
+    } catch (error) {
+      console.error('Storage getItem error:', error);
       return null;
     }
   },
 
-  setItem: (key: string, value: string): void => {
+  async setItem(key: string, value: string): Promise<void> {
     try {
-      storage.set(key, value);
+      await AsyncStorage.setItem(key, value);
     } catch (error) {
       console.error('Storage setItem error:', error);
     }
   },
 
-  removeItem: (key: string): void => {
+  async removeItem(key: string): Promise<void> {
     try {
-      storage.delete(key);
+      await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error('Storage removeItem error:', error);
     }
   },
 
-  getObject: <T>(key: string): T | null => {
+  async getObject<T>(key: string): Promise<T | null> {
     try {
-      const value = storage.getString(key);
+      const value = await AsyncStorage.getItem(key);
       return value ? JSON.parse(value) : null;
-    } catch {
+    } catch (error) {
+      console.error('Storage getObject error:', error);
       return null;
     }
   },
 
-  setObject: <T>(key: string, value: T): void => {
+  async setObject<T>(key: string, value: T): Promise<void> {
     try {
-      storage.set(key, JSON.stringify(value));
+      await AsyncStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.error('Storage setObject error:', error);
     }

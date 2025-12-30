@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,11 +9,21 @@ import { Storage } from '../lib/storage';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-
-  const userData = Storage.getObject<any>('liberta_user') || {
+  const [userData, setUserData] = useState<any>({
     firstName: 'Usuario',
     lastName: '',
-  };
+  });
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const data = await Storage.getObject<any>('liberta_user');
+      if (data) {
+        setUserData(data);
+      }
+    };
+    loadUserData();
+  }, []);
+
   const initials = `${userData.firstName?.charAt(0) || 'U'}${userData.lastName?.charAt(0) || ''}`;
   const fullName = `${userData.firstName || 'Usuario'} ${userData.lastName || ''}`.trim();
 
@@ -30,10 +40,10 @@ const ProfileScreen: React.FC = () => {
     overallTotal: 95.23,
   };
 
-  const handleLogout = () => {
-    Storage.removeItem('liberta_user');
-    Storage.removeItem('liberta_country');
-    Storage.removeItem('liberta_notifications');
+  const handleLogout = async () => {
+    await Storage.removeItem('liberta_user');
+    await Storage.removeItem('liberta_country');
+    await Storage.removeItem('liberta_notifications');
     navigation.navigate('Welcome' as never);
   };
 

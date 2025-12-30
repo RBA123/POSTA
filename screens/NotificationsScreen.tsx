@@ -16,16 +16,16 @@ const NotificationsScreen: React.FC = () => {
 
     try {
       const { status } = await Notifications.requestPermissionsAsync();
-      Storage.setItem(
+      await Storage.setItem(
         'liberta_notifications',
         status === 'granted' ? 'enabled' : 'disabled'
       );
     } catch (error) {
       console.error('Notification permission error:', error);
-      Storage.setItem('liberta_notifications', 'disabled');
+      await Storage.setItem('liberta_notifications', 'disabled');
     }
 
-    const savedCountry = Storage.getItem('liberta_country');
+    const savedCountry = await Storage.getItem('liberta_country');
     if (savedCountry) {
       navigation.navigate('Home' as never, { country: savedCountry } as never);
     } else {
@@ -33,10 +33,10 @@ const NotificationsScreen: React.FC = () => {
     }
   };
 
-  const handleSkip = () => {
-    Storage.setItem('liberta_notifications', 'disabled');
+  const handleSkip = async () => {
+    await Storage.setItem('liberta_notifications', 'disabled');
 
-    const savedCountry = Storage.getItem('liberta_country');
+    const savedCountry = await Storage.getItem('liberta_country');
     if (savedCountry) {
       navigation.navigate('Home' as never, { country: savedCountry } as never);
     } else {

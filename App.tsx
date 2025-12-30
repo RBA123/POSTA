@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Screens
 import WelcomeScreen from './screens/WelcomeScreen';
@@ -70,37 +71,49 @@ function TabNavigator() {
 
 export default function App() {
   const [initialRouteName, setInitialRouteName] = useState<string>('Welcome');
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const user = Storage.getItem('liberta_user');
-    const country = Storage.getItem('liberta_country');
+    const checkOnboarding = async () => {
+      const user = await Storage.getItem('liberta_user');
+      const country = await Storage.getItem('liberta_country');
+      
+      if (user && country) {
+        setInitialRouteName('Main');
+      }
+      setIsReady(true);
+    };
     
-    if (user && country) {
-      setInitialRouteName('Main');
-    }
+    checkOnboarding();
   }, []);
 
+  if (!isReady) {
+    return null; // or a loading screen
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <NavigationContainer>
-        <StatusBar style="auto" />
-        <Stack.Navigator
-          initialRouteName={initialRouteName}
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Signup" component={SignupScreen} />
-          <Stack.Screen name="Notifications" component={NotificationsScreen} />
-          <Stack.Screen name="CountrySelection" component={CountrySelection} />
-          <Stack.Screen name="Main" component={TabNavigator} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Activity" component={ActivityScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
-          <Stack.Screen name="NotificationsHistory" component={NotificationsHistoryScreen} />
-          <Stack.Screen name="NotFound" component={NotFound} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer>
+          <StatusBar style="auto" />
+          <Stack.Navigator
+            initialRouteName={initialRouteName}
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="CountrySelection" component={CountrySelection} />
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Activity" component={ActivityScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
+            <Stack.Screen name="NotificationsHistory" component={NotificationsHistoryScreen} />
+            <Stack.Screen name="NotFound" component={NotFound} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }

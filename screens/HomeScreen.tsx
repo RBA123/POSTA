@@ -197,9 +197,23 @@ const categories: { id: Category; label: string }[] = [
 
 const HomeScreen: React.FC = () => {
   const route = useRoute();
-  const countryCode =
-    (route.params as any)?.country || Storage.getItem('liberta_country') || 'AR';
+  const [countryCode, setCountryCode] = useState<string>('AR');
   const countryName = countryNames[countryCode] || 'Argentina';
+
+  useEffect(() => {
+    const loadCountry = async () => {
+      const routeCountry = (route.params as any)?.country;
+      if (routeCountry) {
+        setCountryCode(routeCountry);
+      } else {
+        const savedCountry = await Storage.getItem('liberta_country');
+        if (savedCountry) {
+          setCountryCode(savedCountry);
+        }
+      }
+    };
+    loadCountry();
+  }, [route.params]);
 
   const [activeCategory, setActiveCategory] = useState<Category>('en_vivo');
   const [showBetModal, setShowBetModal] = useState(false);

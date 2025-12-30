@@ -19,9 +19,9 @@ const CountrySelection: React.FC = () => {
   const navigation = useNavigation();
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedCountry) {
-      Storage.setItem('liberta_country', selectedCountry);
+      await Storage.setItem('liberta_country', selectedCountry);
       navigation.navigate('Home' as never, { country: selectedCountry } as never);
     }
   };

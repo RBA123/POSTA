@@ -74,13 +74,13 @@ const SignupScreen: React.FC = () => {
     );
   }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isAdult) {
       setAgeError(true);
       return;
     }
 
-    Storage.setObject('liberta_user', {
+    await Storage.setObject('liberta_user', {
       firstName,
       lastName,
       dob: { day, month, year },
