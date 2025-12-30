@@ -279,26 +279,33 @@ const HomeScreen: React.FC = () => {
           />
         )}
 
-        {/* Categories */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          nestedScrollEnabled={true}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
-        >
-          <View className="flex-row gap-2">
-            {categories.map((cat) => (
-              <Button
-                key={cat.id}
-                variant={activeCategory === cat.id ? "pillActive" : "pill"}
-                size="pill"
-                onPress={() => setActiveCategory(cat.id)}
-              >
-                {cat.label}
-              </Button>
-            ))}
-          </View>
-        </ScrollView>
+        {/* Category Filter */}
+        <View className="py-4">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 0 }}
+          >
+            <View className="flex-row gap-2">
+              {categories.map((category) => {
+                const isActive = activeCategory === category.id;
+                return (
+                  <Button
+                    key={category.id}
+                    variant={isActive ? "pillActive" : "pill"}
+                    size="pill"
+                    onPress={() => {
+                      setActiveCategory(category.id);
+                    }}
+                  >
+                    {category.label}
+                  </Button>
+                );
+              })}
+            </View>
+          </ScrollView>
+        </View>
 
         {/* Market Cards */}
         <View className="gap-4 pb-4 px-4">

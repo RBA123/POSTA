@@ -8,6 +8,7 @@ import * as Notifications from "expo-notifications";
 import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
 import libertaLogo from "../assets/liberta-logo.png";
+import Colors from "../constants/Colors";
 
 const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
