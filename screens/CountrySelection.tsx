@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Image, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../components/ui/Button';
 import { Storage } from '../lib/storage';
@@ -16,18 +18,18 @@ const countries = [
 ];
 
 const CountrySelection: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   const handleContinue = async () => {
     if (selectedCountry) {
       await Storage.setItem('liberta_country', selectedCountry);
-      navigation.navigate('Home' as never, { country: selectedCountry } as never);
+      navigation.navigate('Home', { country: selectedCountry });
     }
   };
 
   return (
-    <View className="flex-1 bg-background px-6 py-8">
+    <SafeAreaView className="flex-1 bg-background px-6 py-8">
       {/* Header */}
       <View className="flex-row items-center gap-3 mb-8">
         <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
@@ -81,7 +83,7 @@ const CountrySelection: React.FC = () => {
           <Ionicons name="chevron-forward" size={20} color="white" />
         </Button>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

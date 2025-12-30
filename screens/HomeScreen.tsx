@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { Button } from '../components/ui/Button';
 import MarketCard from '../components/MarketCard';
@@ -239,7 +240,7 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 bg-background pb-24">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       {/* Confetti */}
       {showConfetti && <ConfettiAnimation />}
 
@@ -317,7 +318,7 @@ const HomeScreen: React.FC = () => {
 
       {/* Bottom Navigation */}
       <BottomNav />
-    </View>
+    </SafeAreaView>
   );
 };
 

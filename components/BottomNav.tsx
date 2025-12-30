@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -12,9 +13,13 @@ const navItems = [
 const BottomNav: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-card border-t border-border">
+    <View 
+      className="absolute bottom-0 left-0 right-0 bg-card border-t border-border"
+      style={{ paddingBottom: insets.bottom }}
+    >
       <View className="flex-row justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = route.name === item.route;
