@@ -63,31 +63,34 @@ const SignupScreen: React.FC = () => {
     return age >= 18;
   }, [day, month, year]);
 
-  const isFormValid = useMemo(() => {
-    return (
-      firstName.trim().length > 0 &&
-      lastName.trim().length > 0 &&
-      day !== null &&
-      month !== null &&
-      year !== null &&
-      phoneNumber.trim().length >= 8 &&
-      isAdult
-    );
-  }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
+  // TEMPORARILY DISABLED - Form validation commented out for easy testing
+  // const isFormValid = useMemo(() => {
+  //   return (
+  //     firstName.trim().length > 0 &&
+  //     lastName.trim().length > 0 &&
+  //     day !== null &&
+  //     month !== null &&
+  //     year !== null &&
+  //     phoneNumber.trim().length >= 8 &&
+  //     isAdult
+  //   );
+  // }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
 
   const handleContinue = async () => {
-    if (!isAdult) {
-      setAgeError(true);
-      return;
-    }
+    // TEMPORARILY DISABLED - Age check commented out for easy testing
+    // if (!isAdult) {
+    //   setAgeError(true);
+    //   return;
+    // }
 
-    await Storage.setObject("liberta_user", {
-      firstName,
-      lastName,
-      dob: { day, month, year },
-      phone: `${phoneCode.code}${phoneNumber}`,
-      friendCode: friendCode || null,
-    });
+    // TEMPORARILY DISABLED - Save user data commented out for easy testing
+    // await Storage.setObject("liberta_user", {
+    //   firstName,
+    //   lastName,
+    //   dob: { day, month, year },
+    //   phone: `${phoneCode.code}${phoneNumber}`,
+    //   friendCode: friendCode || null,
+    // });
 
     navigation.navigate("Notifications" as never);
   };
@@ -274,7 +277,7 @@ const SignupScreen: React.FC = () => {
             variant="default"
             size="lg"
             onPress={handleContinue}
-            disabled={!isFormValid}
+            disabled={false}
             className="w-full"
           >
             <Text className="text-white font-semibold">Continuar</Text>
