@@ -25,7 +25,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(
         <TextInput
           ref={ref}
           className={cn(
-            'h-12 px-4 rounded-xl border border-border bg-card text-foreground',
+            'h-12 px-4 rounded-lg border border-border bg-card text-foreground',
             error && 'border-destructive',
             className
           )}

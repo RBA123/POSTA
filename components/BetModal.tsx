@@ -104,7 +104,7 @@ const BetModal: React.FC<BetModalProps> = ({
                     setAmount(clamped.toString());
                   }}
                   keyboardType="numeric"
-                  className="w-full h-16 pl-10 pr-4 text-3xl font-bold text-center bg-secondary rounded-2xl border-2 border-transparent"
+                  className="w-full h-16 pl-10 pr-4 text-3xl font-bold text-center bg-secondary rounded-lg border-2 border-transparent"
                   placeholder="0"
                   placeholderTextColor="#999"
                 />
