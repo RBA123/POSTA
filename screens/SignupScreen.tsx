@@ -228,7 +228,7 @@ const SignupScreen: React.FC = () => {
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={() => setShowCodePicker(true)}
-                  className="h-12 px-3 rounded-lg border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
+                  className="h-12 px-3 rounded-[12px] border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
                 >
                   <Text>{phoneCode.flag}</Text>
                   <Text className="text-foreground font-medium">

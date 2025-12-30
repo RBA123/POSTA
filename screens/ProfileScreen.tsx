@@ -120,7 +120,7 @@ const ProfileScreen: React.FC = () => {
         <View className="gap-2">
           <Pressable
             onPress={() => navigation.navigate('PaymentMethods' as never)}
-            className="flex-row items-center gap-4 p-4 bg-card rounded-xl"
+            className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
             <Ionicons name="card-outline" size={20} color="#999" />
             <Text className="flex-1 font-medium text-foreground">Métodos de pago</Text>
@@ -129,7 +129,7 @@ const ProfileScreen: React.FC = () => {
 
           <Pressable
             onPress={() => navigation.navigate('NotificationsHistory' as never)}
-            className="flex-row items-center gap-4 p-4 bg-card rounded-xl"
+            className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
             <Ionicons name="notifications-outline" size={20} color="#999" />
             <Text className="flex-1 font-medium text-foreground">Notificaciones</Text>

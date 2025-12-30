@@ -12,7 +12,7 @@ export const Card = React.forwardRef<View, CardProps>(
     return (
       <View
         ref={ref}
-        className={cn('bg-card rounded-2xl p-5 shadow-lg border border-border', className)}
+        className={cn('bg-card rounded-[12px] p-5 shadow-lg border border-border', className)}
         {...props}
       >
         {children}

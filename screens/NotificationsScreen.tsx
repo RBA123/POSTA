@@ -89,7 +89,7 @@ const NotificationsScreen: React.FC = () => {
           {/* Features */}
           <View className="w-full gap-4 mb-8">
             <View className="flex-row items-center gap-4 p-4 bg-card rounded-[12px] border border-border overflow-hidden">
-              <View className="w-10 h-10 rounded-xl bg-primary items-center justify-center">
+              <View className="w-10 h-10 rounded-[6px] bg-primary items-center justify-center">
                 <Ionicons name="time-outline" size={20} color="white" />
               </View>
               <View className="flex-1">
@@ -103,7 +103,7 @@ const NotificationsScreen: React.FC = () => {
             </View>
 
             <View className="flex-row items-center gap-4 p-4 bg-card rounded-[12px] border border-border overflow-hidden">
-              <View className="w-10 h-10 rounded-xl bg-primary items-center justify-center">
+              <View className="w-10 h-10 rounded-[6px] bg-primary items-center justify-center">
                 <Ionicons name="flash" size={20} color="white" />
               </View>
               <View className="flex-1">

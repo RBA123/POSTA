@@ -50,7 +50,7 @@ const CountrySelection: React.FC = () => {
             <Pressable
               key={country.code}
               onPress={() => setSelectedCountry(country.code)}
-              className={`flex-row items-center gap-4 p-4 rounded-2xl border-2 ${
+              className={`flex-row items-center gap-4 p-4 rounded-[12px] border-2 ${
                 selectedCountry === country.code
                   ? 'border-primary bg-primary/5'
                   : 'border-border bg-card'

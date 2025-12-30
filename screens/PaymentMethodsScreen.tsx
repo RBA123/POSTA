@@ -58,7 +58,7 @@ const PaymentMethodsScreen: React.FC = () => {
           {paymentMethods.map((method) => (
             <Pressable
               key={method.id}
-              className="flex-row items-center gap-4 p-4 bg-card rounded-2xl"
+              className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
             >
               <View className="w-12 h-12 rounded-xl bg-secondary items-center justify-center">
                 <Ionicons name={method.icon} size={24} color="#000" />
