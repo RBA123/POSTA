@@ -228,7 +228,7 @@ const HomeScreen: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [balance, setBalance] = useState(100);
 
-  const markets = allMarkets[activeCategory];
+  const markets = allMarkets[activeCategory] || [];
   const showCountdown = activeCategory === "en_vivo";
 
   const handleBet = (market: Market, side: "si" | "no") => {
@@ -283,7 +283,8 @@ const HomeScreen: React.FC = () => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="px-4 py-4"
+          nestedScrollEnabled={true}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
         >
           <View className="flex-row gap-2">
             {categories.map((cat) => (
