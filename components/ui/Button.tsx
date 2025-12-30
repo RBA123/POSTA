@@ -1,14 +1,15 @@
 import React from "react";
 import { Pressable, Text, ActivityIndicator, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { cn } from "../../lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const buttonVariants = cva(
-  "flex-row items-center justify-center gap-2 rounded-xl font-semibold",
+  "flex-row items-center justify-center gap-2 rounded-[12px] font-bold overflow-hidden",
   {
     variants: {
       variant: {
-        default: "bg-primary shadow-lg",
+        default: "shadow-lg",
         destructive: "bg-destructive",
         outline: "border-2 border-primary bg-transparent",
         secondary: "bg-secondary",
@@ -18,8 +19,8 @@ const buttonVariants = cva(
         si: "bg-success shadow-lg",
         no: "bg-destructive shadow-lg",
         pill: "bg-secondary rounded-full",
-        pillActive: "bg-primary rounded-full shadow-lg",
-        hero: "bg-primary shadow-lg",
+        pillActive: "rounded-full shadow-lg",
+        hero: "shadow-lg",
       },
       size: {
         default: "h-12 px-6",
@@ -74,18 +75,17 @@ export const Button = React.forwardRef<any, ButtonProps>(
         ? "text-secondary-foreground"
         : "text-primary-foreground";
 
-    return (
-      <Pressable
-        ref={ref}
-        onPress={onPress}
-        disabled={disabled || loading}
-        className={cn(
-          buttonVariants({ variant, size }),
-          disabled && "opacity-50",
-          className
-        )}
-        {...props}
-      >
+    const textSizeClass =
+      size === "xl"
+        ? "text-xl"
+        : size === "lg"
+        ? "text-lg"
+        : size === "sm"
+        ? "text-sm"
+        : "text-base";
+
+    const buttonContent = (
+      <>
         {loading ? (
           <ActivityIndicator
             color={
@@ -97,7 +97,14 @@ export const Button = React.forwardRef<any, ButtonProps>(
         ) : (
           <>
             {typeof children === "string" ? (
-              <Text className={cn("font-semibold", textColor, textClassName)}>
+              <Text
+                className={cn(
+                  "font-bold",
+                  textSizeClass,
+                  textColor,
+                  textClassName
+                )}
+              >
                 {children}
               </Text>
             ) : (
@@ -107,7 +114,8 @@ export const Button = React.forwardRef<any, ButtonProps>(
                     return (
                       <Text
                         className={cn(
-                          "font-semibold",
+                          "font-bold",
+                          textSizeClass,
                           textColor,
                           textClassName
                         )}
@@ -116,12 +124,56 @@ export const Button = React.forwardRef<any, ButtonProps>(
                       </Text>
                     );
                   }
+                  if (React.isValidElement(child) && child.type === Text) {
+                    const textChild = child as React.ReactElement<{
+                      className?: string;
+                    }>;
+                    return React.cloneElement(textChild, {
+                      className: cn(
+                        textChild.props.className,
+                        textSizeClass,
+                        "font-bold"
+                      ),
+                    });
+                  }
                   return child;
                 })}
               </View>
             )}
           </>
         )}
+      </>
+    );
+
+    return (
+      <Pressable
+        ref={ref}
+        onPress={onPress}
+        disabled={disabled || loading}
+        className={cn(
+          buttonVariants({ variant, size }),
+          disabled && "opacity-50",
+          className
+        )}
+        style={{ borderRadius: 12 }}
+        {...props}
+      >
+        {isGradient ? (
+          <LinearGradient
+            colors={["#FF9F5A", "#F97316"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              borderRadius: 12,
+            }}
+          />
+        ) : null}
+        {buttonContent}
       </Pressable>
     );
   }

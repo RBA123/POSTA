@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, Image, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import type { NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { Button } from "../components/ui/Button";
@@ -9,7 +10,7 @@ import { Storage } from "../lib/storage";
 import libertaLogo from "../assets/liberta-logo.png";
 
 const NotificationsScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEnable = async () => {
@@ -28,9 +29,9 @@ const NotificationsScreen: React.FC = () => {
 
     const savedCountry = await Storage.getItem("liberta_country");
     if (savedCountry) {
-      navigation.navigate("Home" as never, { country: savedCountry } as never);
+      navigation.navigate("Home", { country: savedCountry });
     } else {
-      navigation.navigate("CountrySelection" as never);
+      navigation.navigate("CountrySelection");
     }
   };
 
@@ -39,9 +40,9 @@ const NotificationsScreen: React.FC = () => {
 
     const savedCountry = await Storage.getItem("liberta_country");
     if (savedCountry) {
-      navigation.navigate("Home" as never, { country: savedCountry } as never);
+      navigation.navigate("Home", { country: savedCountry });
     } else {
-      navigation.navigate("CountrySelection" as never);
+      navigation.navigate("CountrySelection");
     }
   };
 
