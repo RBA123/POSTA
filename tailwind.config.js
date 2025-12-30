@@ -10,39 +10,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "hsl(220, 13%, 91%)",
-        input: "hsl(220, 13%, 91%)",
-        ring: "hsl(24, 95%, 53%)",
-        background: "hsl(0, 0%, 98%)",
-        foreground: "hsl(220, 20%, 10%)",
+        // Primary (Orange)
         primary: {
-          DEFAULT: "hsl(24, 95%, 53%)",
-          hover: "hsl(24, 95%, 45%)",
-          foreground: "hsl(0, 0%, 100%)",
+          DEFAULT: '#F97316',
+          300: '#FFA366',
+          400: '#FF9F5A',
+          500: '#F97316',
+          foreground: '#FFFFFF',
         },
-        secondary: {
-          DEFAULT: "hsl(220, 14%, 96%)",
-          foreground: "hsl(220, 20%, 25%)",
-        },
-        destructive: {
-          DEFAULT: "hsl(0, 84%, 60%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
-        success: {
-          DEFAULT: "hsl(142, 76%, 36%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
-        muted: {
-          DEFAULT: "hsl(220, 14%, 96%)",
-          foreground: "hsl(220, 10%, 50%)",
-        },
-        accent: {
-          DEFAULT: "hsl(24, 95%, 53%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
+        // Backgrounds
+        background: '#FAFAFA',
         card: {
-          DEFAULT: "hsl(0, 0%, 100%)",
-          foreground: "hsl(220, 20%, 10%)",
+          DEFAULT: '#FFFFFF',
+          foreground: '#1A1A1A',
+        },
+        // Text
+        foreground: '#1A1A1A',
+        // Borders
+        border: '#E5E5E5',
+        input: '#E5E5E5',
+        ring: '#F97316',
+        // Secondary/Neutral
+        secondary: {
+          DEFAULT: '#F5F5F5',
+          foreground: '#404040',
+        },
+        // Success (Green)
+        success: {
+          DEFAULT: '#22C55E',
+          foreground: '#FFFFFF',
+        },
+        // Destructive (Red)
+        destructive: {
+          DEFAULT: '#EF4444',
+          foreground: '#FFFFFF',
+        },
+        // Muted
+        muted: {
+          DEFAULT: '#F5F5F5',
+          foreground: '#737373',
+        },
+        // Accent
+        accent: {
+          DEFAULT: '#F97316',
+          foreground: '#FFFFFF',
         },
       },
       borderRadius: {

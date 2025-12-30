@@ -3,6 +3,7 @@ import { Pressable, Text, ActivityIndicator, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { cn } from "../../lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import Colors from "../../constants/Colors";
 
 const buttonVariants = cva(
   "flex-row items-center justify-center gap-2 rounded-[12px] font-bold overflow-hidden",
@@ -90,8 +91,8 @@ export const Button = React.forwardRef<any, ButtonProps>(
           <ActivityIndicator
             color={
               variant === "outline" || variant === "ghost"
-                ? "#F97316"
-                : "#FFFFFF"
+                ? Colors.primary500
+                : Colors.white
             }
           />
         ) : (
@@ -160,7 +161,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
       >
         {isGradient ? (
           <LinearGradient
-            colors={["#FF9F5A", "#F97316"]}
+            colors={[Colors.primary400, Colors.primary500]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={{

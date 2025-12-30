@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/ui/Card';
+import Colors from '../constants/Colors';
 
 const notifications = [
   {
@@ -37,7 +38,7 @@ const NotificationsHistoryScreen: React.FC = () => {
       <View className="bg-background border-b border-border px-4 py-4">
         <View className="flex-row items-center gap-3">
           <Pressable onPress={() => navigation.goBack()} className="p-2 -ml-2">
-            <Ionicons name="chevron-back" size={24} color="#000" />
+            <Ionicons name="chevron-back" size={24} color={Colors.foreground} />
           </Pressable>
           <Text className="text-xl font-bold text-foreground">Notificaciones</Text>
         </View>

@@ -55,7 +55,7 @@ const NotificationsScreen: React.FC = () => {
           <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
         </View>
         <Pressable onPress={handleSkip}>
-          <Ionicons name="close" size={24} color="#999" />
+          <Ionicons name="close" size={24} color={Colors.foregroundMuted} />
         </Pressable>
       </View>
 

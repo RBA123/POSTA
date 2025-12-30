@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "./ui/Button";
+import Colors from "../constants/Colors";
 
 interface Market {
   id: string;
@@ -64,7 +65,7 @@ const BetModal: React.FC<BetModalProps> = ({
               onPress={onClose}
               className="absolute top-4 right-4 p-2 z-10"
             >
-              <Ionicons name="close" size={24} color="#666" />
+              <Ionicons name="close" size={24} color={Colors.foregroundMuted} />
             </Pressable>
 
             {/* Header */}
@@ -106,7 +107,7 @@ const BetModal: React.FC<BetModalProps> = ({
                   keyboardType="numeric"
                   className="w-full h-16 pl-10 pr-4 text-3xl font-bold text-center bg-secondary rounded-lg border-2 border-transparent"
                   placeholder="0"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={Colors.foregroundMuted}
                 />
               </View>
             </View>

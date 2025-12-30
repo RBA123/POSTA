@@ -7,6 +7,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Storage } from "../lib/storage";
 import libertaLogo from "../assets/liberta-logo.png";
+import Colors from "../constants/Colors";
 
 const phoneCodes = [
   { code: "+54", country: "Argentina", flag: "🇦🇷" },
@@ -215,7 +216,7 @@ const SignupScreen: React.FC = () => {
               {/* Age error */}
               {!isAdult && day && month && year && (
                 <View className="flex-row items-center gap-2 mt-3">
-                  <Ionicons name="alert-circle" size={16} color="#EF4444" />
+                  <Ionicons name="alert-circle" size={16} color={Colors.destructive} />
                   <Text className="text-sm text-destructive">
                     Debes ser mayor de 18 años para usar LIBERTA
                   </Text>
@@ -237,7 +238,7 @@ const SignupScreen: React.FC = () => {
                   <Text className="text-foreground font-medium">
                     {phoneCode.code}
                   </Text>
-                  <Ionicons name="chevron-down" size={16} color="#999" />
+                  <Ionicons name="chevron-down" size={16} color={Colors.foregroundMuted} />
                 </Pressable>
 
                 <Input

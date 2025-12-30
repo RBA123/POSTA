@@ -19,6 +19,7 @@ import PaymentMethodsScreen from './screens/PaymentMethodsScreen';
 import NotificationsHistoryScreen from './screens/NotificationsHistoryScreen';
 import NotFound from './screens/NotFound';
 import { Storage } from './lib/storage';
+import Colors from './constants/Colors';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,8 +31,8 @@ function TabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#F97316',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: Colors.primary500,
+        tabBarInactiveTintColor: Colors.foregroundMuted,
         tabBarStyle: {
           display: 'none', // Hide default tab bar since we use custom BottomNav
         },

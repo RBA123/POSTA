@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import Colors from '../constants/Colors';
 
 interface Market {
   id: string;
@@ -54,7 +55,7 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, onBet }) => {
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-            <Ionicons name="time-outline" size={16} color="#F97316" />
+            <Ionicons name="time-outline" size={16} color={Colors.primary500} />
             <Text className="text-sm font-bold text-primary tabular-nums">
               {formatTime(timeLeft)}
             </Text>

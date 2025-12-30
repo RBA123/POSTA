@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Colors from '../constants/Colors';
 
 const paymentMethods = [
   {
@@ -46,7 +47,7 @@ const PaymentMethodsScreen: React.FC = () => {
             onPress={() => navigation.goBack()}
             className="p-2 -ml-2"
           >
-            <Ionicons name="chevron-back" size={24} color="#000" />
+            <Ionicons name="chevron-back" size={24} color={Colors.foreground} />
           </Pressable>
           <Text className="text-xl font-bold text-foreground">Métodos de pago</Text>
         </View>
@@ -61,7 +62,7 @@ const PaymentMethodsScreen: React.FC = () => {
               className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
             >
               <View className="w-12 h-12 rounded-xl bg-secondary items-center justify-center">
-                <Ionicons name={method.icon} size={24} color="#000" />
+                <Ionicons name={method.icon} size={24} color={Colors.foreground} />
               </View>
               <View className="flex-1">
                 <Text className="font-semibold text-foreground">{method.name}</Text>

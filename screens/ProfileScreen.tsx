@@ -7,6 +7,7 @@ import BottomNav from '../components/BottomNav';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Storage } from '../lib/storage';
+import Colors from '../constants/Colors';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -123,24 +124,24 @@ const ProfileScreen: React.FC = () => {
             onPress={() => navigation.navigate('PaymentMethods' as never)}
             className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
-            <Ionicons name="card-outline" size={20} color="#999" />
+            <Ionicons name="card-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Métodos de pago</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <Pressable
             onPress={() => navigation.navigate('NotificationsHistory' as never)}
             className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
-            <Ionicons name="notifications-outline" size={20} color="#999" />
+            <Ionicons name="notifications-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Notificaciones</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <Pressable className="flex-row items-center gap-4 p-4 bg-card rounded-xl">
-            <Ionicons name="help-circle-outline" size={20} color="#999" />
+            <Ionicons name="help-circle-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Ayuda y soporte</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <View className="pt-4">
@@ -149,7 +150,7 @@ const ProfileScreen: React.FC = () => {
               className="w-full border-destructive/30"
               onPress={handleLogout}
             >
-              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <Ionicons name="log-out-outline" size={20} color={Colors.destructive} />
               <Text className="text-destructive font-semibold">Cerrar sesión</Text>
             </Button>
           </View>

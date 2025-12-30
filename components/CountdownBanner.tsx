@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Colors from '../constants/Colors';
 
 interface CountdownBannerProps {
   endTime: number;
@@ -26,7 +27,7 @@ const CountdownBanner: React.FC<CountdownBannerProps> = ({ endTime }) => {
   return (
     <View className="mx-4 my-4 bg-primary rounded-[12px] p-4">
       <View className="flex-row items-center justify-center gap-3">
-        <Ionicons name="time-outline" size={20} color="white" />
+        <Ionicons name="time-outline" size={20} color={Colors.white} />
         <Text className="font-semibold text-white">Mercado activo</Text>
         <View className="bg-white/20 px-3 py-1 rounded-lg">
           <Text className="font-mono font-bold text-lg text-white">

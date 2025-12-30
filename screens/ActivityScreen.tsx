@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNav from "../components/BottomNav";
 import { Card } from "../components/ui/Card";
+import Colors from "../constants/Colors";
 
 const activities = [
   {
@@ -81,7 +82,11 @@ const ActivityScreen: React.FC = () => {
                 <View className="items-end">
                   {activity.status === "pending" && (
                     <View className="flex-row items-center gap-1">
-                      <Ionicons name="time-outline" size={16} color="#F97316" />
+                      <Ionicons
+                        name="time-outline"
+                        size={16}
+                        color={Colors.primary500}
+                      />
                       <Text className="text-sm font-medium text-primary">
                         Pendiente
                       </Text>
@@ -89,7 +94,11 @@ const ActivityScreen: React.FC = () => {
                   )}
                   {activity.status === "won" && (
                     <View className="flex-row items-center gap-1">
-                      <Ionicons name="trending-up" size={16} color="#22C55E" />
+                      <Ionicons
+                        name="trending-up"
+                        size={16}
+                        color={Colors.success}
+                      />
                       <Text className="text-sm font-bold text-success">
                         +${activity.winnings?.toFixed(2)}
                       </Text>
@@ -100,7 +109,7 @@ const ActivityScreen: React.FC = () => {
                       <Ionicons
                         name="trending-down"
                         size={16}
-                        color="#EF4444"
+                        color={Colors.destructive}
                       />
                       <Text className="text-sm font-medium text-destructive">
                         Perdido

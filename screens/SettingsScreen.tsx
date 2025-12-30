@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import Colors from '../constants/Colors';
 
 export default function SettingsScreen() {
   return (
@@ -11,7 +12,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },

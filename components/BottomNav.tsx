@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Colors from '../constants/Colors';
 
 const navItems = [
   { icon: 'home' as const, label: 'Mercados', route: 'HomeTab' },
@@ -32,7 +33,7 @@ const BottomNav: React.FC = () => {
               <Ionicons
                 name={item.icon}
                 size={24}
-                color={isActive ? '#F97316' : '#999'}
+                color={isActive ? Colors.primary500 : Colors.foregroundMuted}
               />
               <Text
                 className={`text-xs font-medium ${
