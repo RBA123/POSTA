@@ -35,7 +35,7 @@ const CountdownBanner: React.FC<CountdownBannerProps> = ({ endTime }) => {
           </Text>
         </View>
       </View>
-      <Text className="text-center text-sm mt-2 text-white/90">
+      <Text className="text-center text-sm mt-2 text-primary-50">
         ¡Apuesta antes de que cierre!
       </Text>
     </View>
