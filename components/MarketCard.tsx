@@ -5,16 +5,7 @@ import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import Colors from '../constants/Colors';
 
-interface Market {
-  id: string;
-  question: string;
-  siProbability: number;
-  noProbability: number;
-  volume: string;
-  category: string;
-  isUrgent?: boolean;
-  endTime?: number;
-}
+import { Market } from '../types';
 
 interface MarketCardProps {
   market: Market;

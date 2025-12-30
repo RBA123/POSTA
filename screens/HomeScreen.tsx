@@ -11,23 +11,7 @@ import CountdownBanner from "../components/CountdownBanner";
 import { Storage } from "../lib/storage";
 import libertaLogo from "../assets/liberta-logo.png";
 
-type Category =
-  | "en_vivo"
-  | "partidos"
-  | "torneos"
-  | "fase_grupos"
-  | "jugadores";
-
-interface Market {
-  id: string;
-  question: string;
-  siProbability: number;
-  noProbability: number;
-  volume: string;
-  category: Category;
-  isUrgent?: boolean;
-  endTime?: number;
-}
+import { Market, Category } from "../types";
 
 const countryNames: Record<string, string> = {
   AR: "Argentina",

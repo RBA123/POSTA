@@ -17,7 +17,7 @@ const BottomNav: React.FC = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View 
+    <View
       className="absolute bottom-0 left-0 right-0 bg-card border-t border-border"
       style={{ paddingBottom: insets.bottom }}
     >
@@ -36,9 +36,8 @@ const BottomNav: React.FC = () => {
                 color={isActive ? Colors.primary500 : Colors.foregroundMuted}
               />
               <Text
-                className={`text-xs font-medium ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`}
+                className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'
+                  }`}
               >
                 {item.label}
               </Text>

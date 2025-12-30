@@ -10,18 +10,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "shadow-lg",
+        default: "", // Removed shadow-lg
         destructive: "bg-destructive",
         outline: "border-2 border-primary bg-transparent",
         secondary: "bg-secondary",
         ghost: "bg-transparent",
         link: "bg-transparent",
         success: "bg-success",
-        si: "bg-success shadow-lg",
-        no: "bg-destructive shadow-lg",
+        si: "bg-success", // Removed shadow-lg
+        no: "bg-destructive", // Removed shadow-lg
         pill: "bg-secondary rounded-full",
-        pillActive: "rounded-full shadow-lg",
-        hero: "shadow-lg",
+        pillActive: "rounded-full", // Removed shadow-lg
+        hero: "", // Removed shadow-lg
       },
       size: {
         default: "h-12 px-6",
@@ -70,21 +70,21 @@ export const Button = React.forwardRef<any, ButtonProps>(
       variant === "outline" || variant === "ghost" || variant === "link"
         ? "text-primary"
         : variant === "si" || variant === "success"
-        ? "text-white"
-        : variant === "no" || variant === "destructive"
-        ? "text-white"
-        : variant === "secondary" || variant === "pill"
-        ? "text-secondary-foreground"
-        : "text-primary-foreground";
+          ? "text-white"
+          : variant === "no" || variant === "destructive"
+            ? "text-white"
+            : variant === "secondary" || variant === "pill"
+              ? "text-secondary-foreground"
+              : "text-primary-foreground";
 
     const textSizeClass =
       size === "xl"
         ? "text-xl"
         : size === "lg"
-        ? "text-lg"
-        : size === "sm"
-        ? "text-sm"
-        : "text-base";
+          ? "text-lg"
+          : size === "sm"
+            ? "text-sm"
+            : "text-base";
 
     const buttonContent = (
       <>
