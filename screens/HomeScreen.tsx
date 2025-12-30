@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/native";
+import { BOTTOM_NAV_HEIGHT } from "../constants/Layout";
 import { Button } from "../components/ui/Button";
 import MarketCard from "../components/MarketCard";
 import BetModal from "../components/BetModal";
@@ -187,6 +189,7 @@ const categories: { id: Category; label: string }[] = [
 
 const HomeScreen: React.FC = () => {
   const route = useRoute();
+  const insets = useSafeAreaInsets();
   const [countryCode, setCountryCode] = useState<string>("AR");
   const countryName = countryNames[countryCode] || "Argentina";
 
@@ -255,7 +258,13 @@ const HomeScreen: React.FC = () => {
       </View>
 
       {/* Markets */}
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: BOTTOM_NAV_HEIGHT + insets.bottom + 20,
+        }}
+      >
         {/* Countdown Banner for EN VIVO */}
         {showCountdown && (
           <CountdownBanner
