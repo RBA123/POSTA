@@ -22,7 +22,7 @@ const CountdownBanner: React.FC<CountdownBannerProps> = ({ endTime }) => {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  if (timeLeft <= 0) return null;
+
 
   return (
     <View className="mx-4 mt-4 bg-primary rounded-[12px] p-4">

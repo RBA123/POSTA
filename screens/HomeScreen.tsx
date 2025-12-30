@@ -257,7 +257,7 @@ const HomeScreen: React.FC = () => {
       {/* Markets */}
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Countdown Banner for EN VIVO */}
-        {showCountdown && markets.some((m) => m.isUrgent) && (
+        {showCountdown && (
           <CountdownBanner
             endTime={markets.find((m) => m.isUrgent)?.endTime || Date.now()}
           />
