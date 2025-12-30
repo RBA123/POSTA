@@ -179,13 +179,32 @@ const SignupScreen: React.FC = () => {
                   <Input
                     value={year?.toString() || ""}
                     onChangeText={(text) => {
-                      const num = parseInt(text) || null;
-                      if (num && num >= 1900 && num <= currentYear)
+                      // Allow empty input
+                      if (text === "") {
+                        setYear(null);
+                        return;
+                      }
+
+                      // Only allow numeric input
+                      const num = parseInt(text);
+                      if (isNaN(num)) return;
+
+                      // Allow partial input (1-3 digits) - let user type freely
+                      if (text.length < 4) {
                         setYear(num);
-                      else if (text === "") setYear(null);
+                      }
+                      // For 4-digit input, validate it's a reasonable year
+                      else if (text.length === 4) {
+                        if (num >= 1900 && num <= currentYear) {
+                          setYear(num);
+                        }
+                        // If invalid, don't update (prevents invalid years)
+                      }
+                      // Don't allow more than 4 digits
                     }}
                     placeholder="Año"
                     keyboardType="numeric"
+                    maxLength={4}
                   />
                 </View>
               </View>
@@ -209,7 +228,7 @@ const SignupScreen: React.FC = () => {
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={() => setShowCodePicker(true)}
-                  className="h-12 px-3 rounded-xl border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
+                  className="h-12 px-3 rounded-lg border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
                 >
                   <Text>{phoneCode.flag}</Text>
                   <Text className="text-foreground font-medium">
