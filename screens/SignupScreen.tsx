@@ -7,6 +7,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Storage } from "../lib/storage";
 import libertaLogo from "../assets/liberta-logo.png";
+import Colors from "../constants/Colors";
 
 const phoneCodes = [
   { code: "+54", country: "Argentina", flag: "🇦🇷" },
@@ -63,31 +64,34 @@ const SignupScreen: React.FC = () => {
     return age >= 18;
   }, [day, month, year]);
 
-  const isFormValid = useMemo(() => {
-    return (
-      firstName.trim().length > 0 &&
-      lastName.trim().length > 0 &&
-      day !== null &&
-      month !== null &&
-      year !== null &&
-      phoneNumber.trim().length >= 8 &&
-      isAdult
-    );
-  }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
+  // TEMPORARILY DISABLED - Form validation commented out for easy testing
+  // const isFormValid = useMemo(() => {
+  //   return (
+  //     firstName.trim().length > 0 &&
+  //     lastName.trim().length > 0 &&
+  //     day !== null &&
+  //     month !== null &&
+  //     year !== null &&
+  //     phoneNumber.trim().length >= 8 &&
+  //     isAdult
+  //   );
+  // }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
 
   const handleContinue = async () => {
-    if (!isAdult) {
-      setAgeError(true);
-      return;
-    }
+    // TEMPORARILY DISABLED - Age check commented out for easy testing
+    // if (!isAdult) {
+    //   setAgeError(true);
+    //   return;
+    // }
 
-    await Storage.setObject("liberta_user", {
-      firstName,
-      lastName,
-      dob: { day, month, year },
-      phone: `${phoneCode.code}${phoneNumber}`,
-      friendCode: friendCode || null,
-    });
+    // TEMPORARILY DISABLED - Save user data commented out for easy testing
+    // await Storage.setObject("liberta_user", {
+    //   firstName,
+    //   lastName,
+    //   dob: { day, month, year },
+    //   phone: `${phoneCode.code}${phoneNumber}`,
+    //   friendCode: friendCode || null,
+    // });
 
     navigation.navigate("Notifications" as never);
   };
@@ -212,7 +216,7 @@ const SignupScreen: React.FC = () => {
               {/* Age error */}
               {!isAdult && day && month && year && (
                 <View className="flex-row items-center gap-2 mt-3">
-                  <Ionicons name="alert-circle" size={16} color="#EF4444" />
+                  <Ionicons name="alert-circle" size={16} color={Colors.destructive} />
                   <Text className="text-sm text-destructive">
                     Debes ser mayor de 18 años para usar LIBERTA
                   </Text>
@@ -228,13 +232,13 @@ const SignupScreen: React.FC = () => {
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={() => setShowCodePicker(true)}
-                  className="h-12 px-3 rounded-lg border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
+                  className="h-12 px-3 rounded-[12px] border border-border bg-card flex-row items-center gap-2 min-w-[100px]"
                 >
                   <Text>{phoneCode.flag}</Text>
                   <Text className="text-foreground font-medium">
                     {phoneCode.code}
                   </Text>
-                  <Ionicons name="chevron-down" size={16} color="#999" />
+                  <Ionicons name="chevron-down" size={16} color={Colors.foregroundMuted} />
                 </Pressable>
 
                 <Input
@@ -274,7 +278,7 @@ const SignupScreen: React.FC = () => {
             variant="default"
             size="lg"
             onPress={handleContinue}
-            disabled={!isFormValid}
+            disabled={false}
             className="w-full"
           >
             <Text className="text-white font-semibold">Continuar</Text>

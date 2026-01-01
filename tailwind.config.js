@@ -1,3 +1,5 @@
+const Colors = require("./constants/Colors").default;
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -10,40 +12,58 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "hsl(220, 13%, 91%)",
-        input: "hsl(220, 13%, 91%)",
-        ring: "hsl(24, 95%, 53%)",
-        background: "hsl(0, 0%, 98%)",
-        foreground: "hsl(220, 20%, 10%)",
+        // Primary (Orange)
         primary: {
-          DEFAULT: "hsl(24, 95%, 53%)",
-          hover: "hsl(24, 95%, 45%)",
-          foreground: "hsl(0, 0%, 100%)",
+          DEFAULT: Colors.primary500,
+          50: Colors.primary50,
+          100: Colors.primary100,
+          300: Colors.primary300,
+          400: Colors.primary400,
+          500: Colors.primary500,
+          foreground: Colors.white,
         },
-        secondary: {
-          DEFAULT: "hsl(220, 14%, 96%)",
-          foreground: "hsl(220, 20%, 25%)",
-        },
-        destructive: {
-          DEFAULT: "hsl(0, 84%, 60%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
-        success: {
-          DEFAULT: "hsl(142, 76%, 36%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
-        muted: {
-          DEFAULT: "hsl(220, 14%, 96%)",
-          foreground: "hsl(220, 10%, 50%)",
-        },
-        accent: {
-          DEFAULT: "hsl(24, 95%, 53%)",
-          foreground: "hsl(0, 0%, 100%)",
-        },
+        // Backgrounds
+        background: Colors.background,
         card: {
-          DEFAULT: "hsl(0, 0%, 100%)",
-          foreground: "hsl(220, 20%, 10%)",
+          DEFAULT: Colors.card,
+          foreground: Colors.foreground,
         },
+        // Text
+        foreground: Colors.foreground,
+        // Borders
+        border: Colors.border,
+        input: Colors.border,
+        ring: Colors.primary500,
+        // Secondary/Neutral
+        secondary: {
+          DEFAULT: Colors.secondary,
+          foreground: Colors.secondaryForeground,
+        },
+        // Success (Green)
+        success: {
+          DEFAULT: Colors.success,
+          foreground: Colors.white,
+          light: Colors.successLight,
+        },
+        // Destructive (Red)
+        destructive: {
+          DEFAULT: Colors.destructive,
+          foreground: Colors.white,
+          light: Colors.destructiveLight,
+        },
+        // Muted
+        muted: {
+          DEFAULT: Colors.secondary,
+          foreground: Colors.foregroundMuted,
+        },
+        // Accent
+        accent: {
+          DEFAULT: Colors.primary500,
+          foreground: Colors.white,
+        },
+        // Utility
+        overlay: Colors.overlay,
+        transparent: Colors.transparent,
       },
       borderRadius: {
         lg: "1rem",
@@ -56,4 +76,3 @@ module.exports = {
   },
   plugins: [],
 };
-

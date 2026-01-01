@@ -3,17 +3,9 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import Colors from '../constants/Colors';
 
-interface Market {
-  id: string;
-  question: string;
-  siProbability: number;
-  noProbability: number;
-  volume: string;
-  category: string;
-  isUrgent?: boolean;
-  endTime?: number;
-}
+import { Market } from '../types';
 
 interface MarketCardProps {
   market: Market;
@@ -43,7 +35,7 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, onBet }) => {
   };
 
   return (
-    <Card className={market.isUrgent ? 'border-primary border-2' : ''}>
+    <Card className={market.isUrgent ? 'border-primary-100 border-2' : ''}>
       {/* Urgent Badge with Timer */}
       {market.isUrgent && (
         <View className="flex-row items-center justify-between mb-3">
@@ -53,8 +45,8 @@ const MarketCard: React.FC<MarketCardProps> = ({ market, onBet }) => {
               EN VIVO
             </Text>
           </View>
-          <View className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-            <Ionicons name="time-outline" size={16} color="#F97316" />
+          <View className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary-100">
+            <Ionicons name="time-outline" size={16} color={Colors.primary500} />
             <Text className="text-sm font-bold text-primary tabular-nums">
               {formatTime(timeLeft)}
             </Text>

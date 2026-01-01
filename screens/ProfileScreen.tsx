@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Storage } from '../lib/storage';
+import Colors from '../constants/Colors';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -48,24 +51,39 @@ const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 bg-background pb-24">
-      {/* Header */}
-      <View className="bg-primary px-6 py-8 pb-16">
-        <View className="flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center">
-            <Text className="text-2xl font-bold text-white">{initials}</Text>
-          </View>
-          <View>
-            <Text className="text-xl font-bold text-white">{fullName}</Text>
-            <Text className="text-sm text-white/90">
-              @{userData.firstName?.toLowerCase() || 'usuario'}
-            </Text>
-            <Text className="text-xs text-white/75 mt-1">
-              Código de Amistad: {friendCode}
-            </Text>
+    <View className="flex-1 bg-background">
+      {/* Gradient Background - extends to top */}
+      <LinearGradient
+        colors={[Colors.primary500, Colors.primary400]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 200,
+        }}
+      />
+      
+      <SafeAreaView className="flex-1" edges={['top']}>
+        {/* Header */}
+        <View className="px-6 py-8 pb-16">
+          <View className="flex-row items-center gap-4">
+            <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center">
+              <Text className="text-2xl font-bold text-white">{initials}</Text>
+            </View>
+            <View>
+              <Text className="text-xl font-bold text-white">{fullName}</Text>
+              <Text className="text-sm text-white/90">
+                @{userData.firstName?.toLowerCase() || 'usuario'}
+              </Text>
+              <Text className="text-xs text-white/75 mt-1">
+                Código de Amistad: {friendCode}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
       {/* Stats Card */}
       <View className="px-4 -mt-8">
@@ -120,26 +138,26 @@ const ProfileScreen: React.FC = () => {
         <View className="gap-2">
           <Pressable
             onPress={() => navigation.navigate('PaymentMethods' as never)}
-            className="flex-row items-center gap-4 p-4 bg-card rounded-xl"
+            className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
-            <Ionicons name="card-outline" size={20} color="#999" />
+            <Ionicons name="card-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Métodos de pago</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <Pressable
             onPress={() => navigation.navigate('NotificationsHistory' as never)}
-            className="flex-row items-center gap-4 p-4 bg-card rounded-xl"
+            className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
           >
-            <Ionicons name="notifications-outline" size={20} color="#999" />
+            <Ionicons name="notifications-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Notificaciones</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <Pressable className="flex-row items-center gap-4 p-4 bg-card rounded-xl">
-            <Ionicons name="help-circle-outline" size={20} color="#999" />
+            <Ionicons name="help-circle-outline" size={20} color={Colors.foregroundMuted} />
             <Text className="flex-1 font-medium text-foreground">Ayuda y soporte</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={Colors.foregroundMuted} />
           </Pressable>
 
           <View className="pt-4">
@@ -148,7 +166,7 @@ const ProfileScreen: React.FC = () => {
               className="w-full border-destructive/30"
               onPress={handleLogout}
             >
-              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <Ionicons name="log-out-outline" size={20} color={Colors.destructive} />
               <Text className="text-destructive font-semibold">Cerrar sesión</Text>
             </Button>
           </View>
@@ -161,6 +179,7 @@ const ProfileScreen: React.FC = () => {
       </ScrollView>
 
       <BottomNav />
+      </SafeAreaView>
     </View>
   );
 };

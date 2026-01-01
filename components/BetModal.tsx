@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "./ui/Button";
+import Colors from "../constants/Colors";
 
 interface Market {
   id: string;
@@ -53,7 +54,7 @@ const BetModal: React.FC<BetModalProps> = ({
     <Modal
       visible={true}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
       <Pressable className="flex-1 bg-black/40 justify-end" onPress={onClose}>
@@ -64,7 +65,7 @@ const BetModal: React.FC<BetModalProps> = ({
               onPress={onClose}
               className="absolute top-4 right-4 p-2 z-10"
             >
-              <Ionicons name="close" size={24} color="#666" />
+              <Ionicons name="close" size={24} color={Colors.foregroundMuted} />
             </Pressable>
 
             {/* Header */}
@@ -104,9 +105,10 @@ const BetModal: React.FC<BetModalProps> = ({
                     setAmount(clamped.toString());
                   }}
                   keyboardType="numeric"
-                  className="w-full h-16 pl-10 pr-4 text-3xl font-bold text-center bg-secondary rounded-lg border-2 border-transparent"
+                  className="w-full h-16 pl-10 pr-4 text-3xl font-bold text-center bg-secondary rounded-[12px] border-2 border-transparent"
+                  style={{ borderRadius: 12 }}
                   placeholder="0"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={Colors.foregroundMuted}
                 />
               </View>
             </View>
@@ -117,9 +119,10 @@ const BetModal: React.FC<BetModalProps> = ({
                 <Pressable
                   key={preset}
                   onPress={() => setAmount(preset.toString())}
-                  className={`flex-1 py-3 rounded-xl font-semibold ${
+                  className={`flex-1 py-3 rounded-[12px] font-semibold ${
                     amountNum === preset ? "bg-primary" : "bg-secondary"
                   }`}
+                  style={{ borderRadius: 12 }}
                 >
                   <Text
                     className={`text-center ${
@@ -135,7 +138,10 @@ const BetModal: React.FC<BetModalProps> = ({
             </View>
 
             {/* Potential Win */}
-            <View className="bg-secondary/50 rounded-xl p-4 mb-6">
+            <View
+              className="bg-secondary/50 rounded-[12px] p-4 mb-6"
+              style={{ borderRadius: 12 }}
+            >
               <View className="flex-row justify-between items-center">
                 <Text className="text-muted-foreground">
                   Ganancia potencial

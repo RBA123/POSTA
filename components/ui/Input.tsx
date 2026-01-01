@@ -1,6 +1,7 @@
 import React from 'react';
 import { TextInput, TextInputProps, View, Text } from 'react-native';
 import { cn } from '../../lib/utils';
+import Colors from '../../constants/Colors';
 
 export interface InputProps extends TextInputProps {
   label?: React.ReactNode;
@@ -29,7 +30,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             error && 'border-destructive',
             className
           )}
-          placeholderTextColor="#999"
+          placeholderTextColor={Colors.foregroundMuted}
           {...props}
         />
         {error && (
