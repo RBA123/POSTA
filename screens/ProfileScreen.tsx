@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
@@ -50,24 +51,39 @@ const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      {/* Header */}
-      <View className="bg-primary px-6 py-8 pb-16">
-        <View className="flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center">
-            <Text className="text-2xl font-bold text-white">{initials}</Text>
-          </View>
-          <View>
-            <Text className="text-xl font-bold text-white">{fullName}</Text>
-            <Text className="text-sm text-white/90">
-              @{userData.firstName?.toLowerCase() || 'usuario'}
-            </Text>
-            <Text className="text-xs text-white/75 mt-1">
-              Código de Amistad: {friendCode}
-            </Text>
+    <View className="flex-1 bg-background">
+      {/* Gradient Background - extends to top */}
+      <LinearGradient
+        colors={[Colors.primary500, Colors.primary400]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 200,
+        }}
+      />
+      
+      <SafeAreaView className="flex-1" edges={['top']}>
+        {/* Header */}
+        <View className="px-6 py-8 pb-16">
+          <View className="flex-row items-center gap-4">
+            <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center">
+              <Text className="text-2xl font-bold text-white">{initials}</Text>
+            </View>
+            <View>
+              <Text className="text-xl font-bold text-white">{fullName}</Text>
+              <Text className="text-sm text-white/90">
+                @{userData.firstName?.toLowerCase() || 'usuario'}
+              </Text>
+              <Text className="text-xs text-white/75 mt-1">
+                Código de Amistad: {friendCode}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
       {/* Stats Card */}
       <View className="px-4 -mt-8">
@@ -163,7 +179,8 @@ const ProfileScreen: React.FC = () => {
       </ScrollView>
 
       <BottomNav />
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
