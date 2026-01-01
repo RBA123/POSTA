@@ -40,8 +40,8 @@ const ActivityScreen: React.FC = () => {
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}
       <View className="bg-background border-b border-border px-6 py-4">
-        <Text className="text-2xl font-bold text-foreground">Actividad</Text>
-        <Text className="text-sm text-muted-foreground">
+        <Text className="text-3xl font-bold text-foreground">Actividad</Text>
+        <Text className="text-base text-muted-foreground">
           Tus posiciones activas
         </Text>
       </View>
@@ -53,41 +53,19 @@ const ActivityScreen: React.FC = () => {
             <Card key={activity.id}>
               <View className="flex-row items-start justify-between mb-2">
                 <View className="flex-1">
-                  <Text className="font-semibold text-card-foreground text-sm leading-tight">
+                  <Text className="font-semibold text-card-foreground text-base leading-tight">
                     {activity.question}
                   </Text>
-                  <View className="flex-row items-center gap-2 mt-1">
-                    <View
-                      className={`px-2 py-0.5 rounded-full ${
-                        activity.side === "Sí"
-                          ? "bg-success/10"
-                          : "bg-destructive/10"
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-bold ${
-                          activity.side === "Sí"
-                            ? "text-success"
-                            : "text-destructive"
-                        }`}
-                      >
-                        {activity.side}
-                      </Text>
-                    </View>
-                    <Text className="text-xs text-muted-foreground">
-                      ${activity.amount}
-                    </Text>
-                  </View>
                 </View>
                 <View className="items-end">
                   {activity.status === "pending" && (
                     <View className="flex-row items-center gap-1">
                       <Ionicons
                         name="time-outline"
-                        size={16}
+                        size={18}
                         color={Colors.primary500}
                       />
-                      <Text className="text-sm font-medium text-primary">
+                      <Text className="text-base font-medium text-primary">
                         Pendiente
                       </Text>
                     </View>
@@ -96,10 +74,10 @@ const ActivityScreen: React.FC = () => {
                     <View className="flex-row items-center gap-1">
                       <Ionicons
                         name="trending-up"
-                        size={16}
+                        size={18}
                         color={Colors.success}
                       />
-                      <Text className="text-sm font-bold text-success">
+                      <Text className="text-base font-bold text-success">
                         +${activity.winnings?.toFixed(2)}
                       </Text>
                     </View>
@@ -108,25 +86,49 @@ const ActivityScreen: React.FC = () => {
                     <View className="flex-row items-center gap-1">
                       <Ionicons
                         name="trending-down"
-                        size={16}
+                        size={18}
                         color={Colors.destructive}
                       />
-                      <Text className="text-sm font-medium text-destructive">
+                      <Text className="text-base font-medium text-destructive">
                         Perdido
                       </Text>
                     </View>
                   )}
                 </View>
               </View>
-              <Text className="text-xs text-muted-foreground">
-                {activity.time}
-              </Text>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <View
+                    className={`px-2 py-0.5 rounded-full ${
+                      activity.side === "Sí"
+                        ? "bg-success/10"
+                        : "bg-destructive/10"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-bold ${
+                        activity.side === "Sí"
+                          ? "text-success"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {activity.side}
+                    </Text>
+                  </View>
+                  <Text className="text-sm text-muted-foreground">
+                    ${activity.amount}
+                  </Text>
+                </View>
+                <Text className="text-sm text-muted-foreground">
+                  {activity.time}
+                </Text>
+              </View>
             </Card>
           ))}
 
           {activities.length === 0 && (
             <View className="items-center py-12">
-              <Text className="text-muted-foreground">
+              <Text className="text-base text-muted-foreground">
                 No tienes posiciones activas
               </Text>
             </View>
