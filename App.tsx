@@ -20,6 +20,7 @@ import NotificationsHistoryScreen from './screens/NotificationsHistoryScreen';
 import NotFound from './screens/NotFound';
 import { Storage } from './lib/storage';
 import Colors from './constants/Colors';
+import app from './lib/firebaseConfig';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -78,6 +79,11 @@ export default function App() {
 
   useEffect(() => {
     const checkOnboarding = async () => {
+      // Test Firebase connection
+      console.log('🔥 Firebase initialized successfully!');
+      console.log('Firebase App Name:', app.name);
+      console.log('Firebase Project ID:', app.options.projectId);
+      
       const user = await Storage.getItem('liberta_user');
       const country = await Storage.getItem('liberta_country');
       
