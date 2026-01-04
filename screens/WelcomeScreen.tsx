@@ -1,23 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Button } from '../components/ui/Button';
-import libertaLogo from '../assets/liberta-logo.png';
+import React from "react";
+import { View, Text, Image, Pressable } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Button } from "../components/ui/Button";
+import libertaLogo from "../assets/liberta-logo.png";
 
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleClaim = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      navigation.navigate('Signup' as never);
-    }, 300);
+    navigation.navigate("Signup" as never);
   };
 
   return (
     <View className="flex-1 bg-background items-center justify-center px-6 py-12">
-      <View className={`flex-col items-center ${isAnimating ? 'opacity-0' : ''}`}>
+      <View className="flex-col items-center">
         {/* Logo */}
         <View className="mb-6">
           <Image source={libertaLogo} className="w-24 h-24 rounded-3xl" />
@@ -30,7 +26,7 @@ const WelcomeScreen: React.FC = () => {
 
         {/* Tagline */}
         <Text className="text-lg text-muted-foreground max-w-xs text-center leading-relaxed mb-12">
-          Porque pase lo que pase,{'\n'}
+          Porque pase lo que pase,{"\n"}
           date la oportunidad de ganar.
         </Text>
 
@@ -61,4 +57,3 @@ const WelcomeScreen: React.FC = () => {
 };
 
 export default WelcomeScreen;
-
