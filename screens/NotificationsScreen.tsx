@@ -121,7 +121,7 @@ const NotificationsScreen: React.FC = () => {
 
           {/* Example notification */}
           <View className="w-full p-4 bg-muted/50 rounded-[12px] border border-border mb-8 overflow-hidden">
-            <View className="flex-row items-start gap-3">
+            <View className="flex-row items-center gap-3">
               <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
               <View className="flex-1">
                 <View className="flex-row items-center justify-between mb-1">
