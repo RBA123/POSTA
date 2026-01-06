@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/ui/Card';
@@ -33,7 +34,7 @@ const NotificationsHistoryScreen: React.FC = () => {
   const navigation = useNavigation();
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       {/* Header */}
       <View className="bg-background border-b border-border px-4 py-4">
         <View className="flex-row items-center gap-3">
@@ -71,7 +72,7 @@ const NotificationsHistoryScreen: React.FC = () => {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
