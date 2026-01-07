@@ -1,53 +1,89 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../lib/firebaseConfig';
+import { subscribeToUser } from '../lib/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Storage } from '../lib/storage';
 import Colors from '../constants/Colors';
+import type { User } from '../firebase/types/firestore.types';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState<any>({
-    firstName: 'Usuario',
-    lastName: '',
-  });
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUserData = async () => {
-      const data = await Storage.getObject<any>('liberta_user');
-      if (data) {
-        setUserData(data);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+        setUserData(null);
+        setLoading(false);
       }
-    };
-    loadUserData();
+    });
+    return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+    const unsubscribe = subscribeToUser(userId, (user) => {
+      setUserData(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center">
+        <ActivityIndicator size="large" color={Colors.primary500} />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center">
+        <Text className="text-muted-foreground">No se pudo cargar el perfil</Text>
+      </View>
+    );
+  }
 
   const initials = `${userData.firstName?.charAt(0) || 'U'}${userData.lastName?.charAt(0) || ''}`;
   const fullName = `${userData.firstName || 'Usuario'} ${userData.lastName || ''}`.trim();
-
-  const friendCode =
-    userData.friendCode ||
-    `${userData.firstName?.toUpperCase() || 'USER'}${String(Math.floor(Math.random() * 900 + 100))}`;
+  const friendCode = userData.friendCode || 'N/A';
 
   const stats = {
-    totalPositions: 7,
-    activePositions: 3,
-    winRate: 71,
-    totalWins: 145.23,
-    totalLosses: 50.0,
-    overallTotal: 95.23,
+    totalPositions: userData.totalPositions || 0,
+    activePositions: userData.activePositions || 0,
+    winRate: userData.winRate || 0,
+    totalWins: userData.totalWinnings || 0,
+    totalLosses: userData.totalLosses || 0,
+    overallTotal: (userData.totalWinnings || 0) - (userData.totalLosses || 0),
   };
 
   const handleLogout = async () => {
-    await Storage.removeItem('liberta_user');
-    await Storage.removeItem('liberta_country');
-    await Storage.removeItem('liberta_notifications');
-    navigation.navigate('Welcome' as never);
+    try {
+      await signOut(auth);
+      await Storage.removeItem('liberta_user');
+      await Storage.removeItem('liberta_country');
+      await Storage.removeItem('liberta_notifications');
+      navigation.navigate('Welcome' as never);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
