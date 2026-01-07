@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Image, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Image, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRoute } from "@react-navigation/native";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebaseConfig";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { BOTTOM_NAV_HEIGHT } from "../constants/Layout";
 import { Button } from "../components/ui/Button";
 import MarketCard from "../components/MarketCard";
@@ -13,12 +11,15 @@ import ConfettiAnimation from "../components/ConfettiAnimation";
 import BottomNav from "../components/BottomNav";
 import CountdownBanner from "../components/CountdownBanner";
 import { Storage } from "../lib/storage";
-import { subscribeToMarkets, subscribeToUser, formatVolume } from "../lib/firestore";
-import { placeBet } from "../lib/functions";
+import { formatVolume } from "../lib/firestore";
+import { useAuth } from "../hooks/useAuth";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useMarkets } from "../hooks/useMarkets";
+import { useBets } from "../hooks/useBets";
 import libertaLogo from "../assets/liberta-logo.png";
 
 import { Market, Category } from "../types";
-import type { Market as FirestoreMarket, User } from "../firebase/types/firestore.types";
+import type { Market as FirestoreMarket } from "../firebase/types/firestore.types";
 
 const countryNames: Record<string, string> = {
   AR: "Argentina",
@@ -54,13 +55,23 @@ const categories: { id: Category; label: string }[] = [
 
 const HomeScreen: React.FC = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const { user: authUser } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile(authUser?.uid || null);
   const [countryCode, setCountryCode] = useState<string>("AR");
   const countryName = countryNames[countryCode] || "Argentina";
-  const [userId, setUserId] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [markets, setMarkets] = useState<Market[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<Category>("en_vivo");
+  
+  // Use markets hook
+  const { markets: firestoreMarkets, loading: marketsLoading, error: marketsError } = useMarkets(
+    activeCategory as any,
+    true // real-time updates
+  );
+
+  // Convert Firestore markets to UI format
+  const markets = firestoreMarkets.map(convertMarket);
+  const loading = marketsLoading || profileLoading;
 
   useEffect(() => {
     const loadCountry = async () => {
@@ -77,82 +88,54 @@ const HomeScreen: React.FC = () => {
     loadCountry();
   }, [route.params]);
 
-  // Listen to auth state
+  // Redirect to welcome if not authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-        setUser(null);
-      }
-    });
-    return unsubscribe;
-  }, []);
-
-  // Subscribe to user data
-  useEffect(() => {
-    if (!userId) return;
-
-    const unsubscribe = subscribeToUser(userId, (userData) => {
-      setUser(userData);
-    });
-
-    return unsubscribe;
-  }, [userId]);
-
-  // Subscribe to markets based on active category
-  const [activeCategory, setActiveCategory] = useState<Category>("en_vivo");
-  useEffect(() => {
-    setLoading(true);
-    const unsubscribe = subscribeToMarkets(
-      activeCategory as any,
-      (firestoreMarkets) => {
-        const convertedMarkets = firestoreMarkets.map(convertMarket);
-        setMarkets(convertedMarkets);
-        setLoading(false);
-      }
-    );
-
-    return unsubscribe;
-  }, [activeCategory]);
+    if (!authUser) {
+      navigation.navigate("Welcome" as never);
+    }
+  }, [authUser, navigation]);
 
   const [showBetModal, setShowBetModal] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [selectedSide, setSelectedSide] = useState<"si" | "no">("si");
   const [showConfetti, setShowConfetti] = useState(false);
-  const [placingBet, setPlacingBet] = useState(false);
 
-  const balance = user?.virtualBalance || 0;
+  // Use bets hook for placing bets
+  const { placeBet: placeBetHook } = useBets(authUser?.uid || null);
+
+  const balance = profile?.virtualBalance || 0;
   const showCountdown = activeCategory === "en_vivo";
 
   const handleBet = (market: Market, side: "si" | "no") => {
+    if (!authUser) {
+      Alert.alert("Error", "Debes iniciar sesión para apostar");
+      navigation.navigate("Welcome" as never);
+      return;
+    }
     setSelectedMarket(market);
     setSelectedSide(side);
     setShowBetModal(true);
   };
 
   const handleConfirmBet = async (amount: number) => {
-    if (!selectedMarket || !userId) return;
+    if (!selectedMarket || !authUser) return;
 
-    setPlacingBet(true);
     try {
-      await placeBet({
-        marketId: selectedMarket.id,
-        side: selectedSide,
-        amount,
-      });
-      
+      await placeBetHook(selectedMarket.id, selectedSide, amount);
       setShowBetModal(false);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
-    } catch (error) {
-      console.error("Error placing bet:", error);
-      // TODO: Show error toast
-    } finally {
-      setPlacingBet(false);
+    } catch (error: any) {
+      Alert.alert("Error al apostar", error.message || "Por favor intenta de nuevo");
     }
   };
+
+  // Show error if markets fail to load
+  useEffect(() => {
+    if (marketsError) {
+      Alert.alert("Error", "No se pudieron cargar los mercados. Por favor intenta de nuevo.");
+    }
+  }, [marketsError]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -238,11 +221,24 @@ const HomeScreen: React.FC = () => {
                 <MarketCard key={market.id} market={market} onBet={handleBet} />
               ))}
 
-              {markets.length === 0 && (
+              {markets.length === 0 && !loading && (
                 <View className="items-center py-12">
                   <Text className="text-muted-foreground">
                     No hay mercados disponibles en esta categoría
                   </Text>
+                  {marketsError && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onPress={() => {
+                        // Retry by refetching markets
+                        // Markets will auto-refresh via real-time subscription
+                      }}
+                      className="mt-4"
+                    >
+                      <Text>Reintentar</Text>
+                    </Button>
+                  )}
                 </View>
               )}
             </>

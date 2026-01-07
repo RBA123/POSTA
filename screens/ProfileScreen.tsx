@@ -1,49 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../lib/firebaseConfig';
-import { subscribeToUser } from '../lib/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Storage } from '../lib/storage';
+import { useAuth } from '../hooks/useAuth';
+import { useUserProfile } from '../hooks/useUserProfile';
 import Colors from '../constants/Colors';
-import type { User } from '../firebase/types/firestore.types';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user: authUser, signOut } = useAuth();
+  const { profile, stats, loading, updateProfile } = useUserProfile(authUser?.uid || null);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-        setUserData(null);
-        setLoading(false);
-      }
-    });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    setLoading(true);
-    const unsubscribe = subscribeToUser(userId, (user) => {
-      setUserData(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [userId]);
+    if (!authUser) {
+      navigation.navigate('Welcome' as never);
+    }
+  }, [authUser, navigation]);
 
   if (loading) {
     return (
@@ -53,7 +32,7 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
-  if (!userData) {
+  if (!profile) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
         <Text className="text-muted-foreground">No se pudo cargar el perfil</Text>
@@ -61,28 +40,28 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
-  const initials = `${userData.firstName?.charAt(0) || 'U'}${userData.lastName?.charAt(0) || ''}`;
-  const fullName = `${userData.firstName || 'Usuario'} ${userData.lastName || ''}`.trim();
-  const friendCode = userData.friendCode || 'N/A';
+  const initials = `${profile.firstName?.charAt(0) || 'U'}${profile.lastName?.charAt(0) || ''}`;
+  const fullName = `${profile.firstName || 'Usuario'} ${profile.lastName || ''}`.trim();
+  const friendCode = profile.friendCode || 'N/A';
 
-  const stats = {
-    totalPositions: userData.totalPositions || 0,
-    activePositions: userData.activePositions || 0,
-    winRate: userData.winRate || 0,
-    totalWins: userData.totalWinnings || 0,
-    totalLosses: userData.totalLosses || 0,
-    overallTotal: (userData.totalWinnings || 0) - (userData.totalLosses || 0),
+  const displayStats = stats || {
+    totalPositions: 0,
+    activePositions: 0,
+    winRate: 0,
+    totalWinnings: 0,
+    totalLosses: 0,
+    overallTotal: 0,
   };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut();
       await Storage.removeItem('liberta_user');
       await Storage.removeItem('liberta_country');
       await Storage.removeItem('liberta_notifications');
       navigation.navigate('Welcome' as never);
-    } catch (error) {
-      console.error('Error logging out:', error);
+    } catch (error: any) {
+      Alert.alert('Error', 'No se pudo cerrar sesión. Por favor intenta de nuevo.');
     }
   };
 
@@ -112,7 +91,7 @@ const ProfileScreen: React.FC = () => {
             <View>
               <Text className="text-xl font-bold text-white">{fullName}</Text>
               <Text className="text-sm text-white/90">
-                @{userData.firstName?.toLowerCase() || 'usuario'}
+                @{profile.username || profile.firstName?.toLowerCase() || 'usuario'}
               </Text>
               <Text className="text-xs text-white/75 mt-1">
                 Código de Amistad: {friendCode}
@@ -127,16 +106,16 @@ const ProfileScreen: React.FC = () => {
           <View className="flex-row justify-between mb-4">
             <View className="items-center flex-1">
               <Text className="text-2xl font-bold text-foreground">
-                {stats.totalPositions}
+                {displayStats.totalPositions}
               </Text>
               <Text className="text-xs text-muted-foreground">Posiciones Totales</Text>
             </View>
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-primary">{stats.activePositions}</Text>
+              <Text className="text-2xl font-bold text-primary">{displayStats.activePositions}</Text>
               <Text className="text-xs text-muted-foreground">Posiciones Activas</Text>
             </View>
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-success">{stats.winRate}%</Text>
+              <Text className="text-2xl font-bold text-success">{displayStats.winRate.toFixed(0)}%</Text>
               <Text className="text-xs text-muted-foreground">Win Rate</Text>
             </View>
           </View>
@@ -144,23 +123,23 @@ const ProfileScreen: React.FC = () => {
             <View className="flex-row justify-between">
               <View className="items-center flex-1">
                 <Text className="text-lg font-bold text-success">
-                  +${stats.totalWins.toFixed(2)}
+                  +${displayStats.totalWinnings.toFixed(2)}
                 </Text>
                 <Text className="text-xs text-muted-foreground">Ganancias</Text>
               </View>
               <View className="items-center flex-1">
                 <Text className="text-lg font-bold text-destructive">
-                  -${stats.totalLosses.toFixed(2)}
+                  -${displayStats.totalLosses.toFixed(2)}
                 </Text>
                 <Text className="text-xs text-muted-foreground">Pérdidas</Text>
               </View>
               <View className="items-center flex-1">
                 <Text
                   className={`text-lg font-bold ${
-                    stats.overallTotal >= 0 ? 'text-success' : 'text-destructive'
+                    displayStats.overallTotal >= 0 ? 'text-success' : 'text-destructive'
                   }`}
                 >
-                  {stats.overallTotal >= 0 ? '+' : ''}${stats.overallTotal.toFixed(2)}
+                  {displayStats.overallTotal >= 0 ? '+' : ''}${displayStats.overallTotal.toFixed(2)}
                 </Text>
                 <Text className="text-xs text-muted-foreground">Total</Text>
               </View>

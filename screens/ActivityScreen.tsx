@@ -1,56 +1,91 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebaseConfig";
 import BottomNav from "../components/BottomNav";
 import { Card } from "../components/ui/Card";
-import { subscribeToUserBets, formatRelativeTime } from "../lib/firestore";
+import { Button } from "../components/ui/Button";
+import { formatRelativeTime } from "../lib/firestore";
+import { useAuth } from "../hooks/useAuth";
+import { useBets } from "../hooks/useBets";
 import Colors from "../constants/Colors";
-import type { UserBet } from "../firebase/types/firestore.types";
+import type { BetStatus } from "../firebase/types/firestore.types";
 
 const ActivityScreen: React.FC = () => {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [bets, setBets] = useState<UserBet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+  const { user: authUser } = useAuth();
+  const [filterStatus, setFilterStatus] = useState<BetStatus | undefined>(undefined);
+  const { bets, loading, refetch } = useBets(authUser?.uid || null, filterStatus, true);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-        setBets([]);
-        setLoading(false);
-      }
-    });
-    return unsubscribe;
-  }, []);
+    if (!authUser) {
+      navigation.navigate("Welcome" as never);
+    }
+  }, [authUser, navigation]);
 
-  useEffect(() => {
-    if (!userId) return;
+  const [refreshing, setRefreshing] = useState(false);
 
-    setLoading(true);
-    const unsubscribe = subscribeToUserBets(userId, undefined, (userBets) => {
-      setBets(userBets);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [userId]);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}
       <View className="bg-background border-b border-border px-6 py-4">
         <Text className="text-3xl font-bold text-foreground">Actividad</Text>
         <Text className="text-base text-muted-foreground">
-          Tus posiciones activas
+          Tus posiciones {filterStatus === "pending" ? "pendientes" : filterStatus === "won" ? "ganadas" : filterStatus === "lost" ? "perdidas" : "activas"}
         </Text>
       </View>
 
+      {/* Filter Buttons */}
+      <View className="px-4 py-3 border-b border-border">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row gap-2">
+            <Button
+              variant={filterStatus === undefined ? "pillActive" : "pill"}
+              size="pill"
+              onPress={() => setFilterStatus(undefined)}
+            >
+              <Text>Todas</Text>
+            </Button>
+            <Button
+              variant={filterStatus === "pending" ? "pillActive" : "pill"}
+              size="pill"
+              onPress={() => setFilterStatus("pending")}
+            >
+              <Text>Pendientes</Text>
+            </Button>
+            <Button
+              variant={filterStatus === "won" ? "pillActive" : "pill"}
+              size="pill"
+              onPress={() => setFilterStatus("won")}
+            >
+              <Text>Ganadas</Text>
+            </Button>
+            <Button
+              variant={filterStatus === "lost" ? "pillActive" : "pill"}
+              size="pill"
+              onPress={() => setFilterStatus("lost")}
+            >
+              <Text>Perdidas</Text>
+            </Button>
+          </View>
+        </ScrollView>
+      </View>
+
       {/* Activity List */}
-      <ScrollView className="px-4 py-4" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="px-4 py-4"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View className="gap-3">
           {loading ? (
             <View className="items-center py-12">

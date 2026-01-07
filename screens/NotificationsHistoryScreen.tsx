@@ -1,56 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../lib/firebaseConfig';
-import { subscribeToUserNotifications, formatRelativeTime } from '../lib/firestore';
-import { markNotificationRead } from '../lib/functions';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/ui/Card';
+import { formatRelativeTime } from '../lib/firestore';
+import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../hooks/useNotifications';
 import Colors from '../constants/Colors';
 import type { UserNotification } from '../firebase/types/firestore.types';
 
 const NotificationsHistoryScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [notifications, setNotifications] = useState<UserNotification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user: authUser } = useAuth();
+  const { notifications, unreadCount, loading, markAsRead, refreshNotifications } = useNotifications(
+    authUser?.uid || null,
+    true // real-time updates
+  );
 
+  // Redirect if not authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-        setNotifications([]);
-        setLoading(false);
-      }
-    });
-    return unsubscribe;
-  }, []);
+    if (!authUser) {
+      navigation.navigate("Welcome" as never);
+    }
+  }, [authUser, navigation]);
 
-  useEffect(() => {
-    if (!userId) return;
+  const [refreshing, setRefreshing] = useState(false);
 
-    setLoading(true);
-    const unsubscribe = subscribeToUserNotifications(userId, (notifs) => {
-      setNotifications(notifs);
-      setLoading(false);
-    });
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshNotifications();
+    setRefreshing(false);
+  }, [refreshNotifications]);
 
-    return unsubscribe;
-  }, [userId]);
-
-  const handleNotificationPress = async (notification: UserNotification) => {
-    if (!notification.read && userId) {
+  const handleNotificationPress = useCallback(async (notification: UserNotification) => {
+    if (!notification.read) {
       try {
-        await markNotificationRead(notification.id);
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
+        await markAsRead(notification.id);
+      } catch (error: any) {
+        Alert.alert('Error', 'No se pudo marcar la notificación como leída.');
       }
     }
-  };
+  }, [markAsRead]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
@@ -60,12 +51,25 @@ const NotificationsHistoryScreen: React.FC = () => {
           <Pressable onPress={() => navigation.goBack()} className="p-2 -ml-2">
             <Ionicons name="chevron-back" size={24} color={Colors.foreground} />
           </Pressable>
-          <Text className="text-xl font-bold text-foreground">Notificaciones</Text>
+          <View className="flex-1">
+            <Text className="text-xl font-bold text-foreground">Notificaciones</Text>
+            {unreadCount > 0 && (
+              <Text className="text-xs text-primary mt-1">
+                {unreadCount} {unreadCount === 1 ? 'no leída' : 'no leídas'}
+              </Text>
+            )}
+          </View>
         </View>
       </View>
 
       {/* Notifications List */}
-      <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="px-4 py-6"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View className="gap-3">
           {loading ? (
             <View className="items-center py-12">
