@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, Image, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import type { NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -68,7 +69,19 @@ const NotificationsScreen: React.FC = () => {
         <View className="items-center">
           {/* Bell Icon */}
           <View className="relative mb-8">
-            <View className="w-24 h-24 rounded-full bg-primary items-center justify-center">
+            <View className="w-24 h-24 rounded-full items-center justify-center overflow-hidden">
+              <LinearGradient
+                colors={[Colors.primary400, Colors.primary500]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                }}
+              />
               <Ionicons name="notifications" size={48} color="white" />
             </View>
             <View className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-destructive items-center justify-center">
@@ -89,7 +102,7 @@ const NotificationsScreen: React.FC = () => {
           </View>
 
           {/* Features */}
-          <View className="w-full gap-4 mb-8">
+          <View className="w-full gap-4 mb-4">
             <View className="flex-row items-center gap-4 p-4 bg-card rounded-[12px] border border-border overflow-hidden">
               <View className="w-10 h-10 rounded-[6px] bg-primary items-center justify-center">
                 <Ionicons name="time-outline" size={20} color="white" />
@@ -121,7 +134,7 @@ const NotificationsScreen: React.FC = () => {
 
           {/* Example notification */}
           <View className="w-full p-4 bg-muted/50 rounded-[12px] border border-border mb-8 overflow-hidden">
-            <View className="flex-row items-start gap-3">
+            <View className="flex-row items-center gap-3">
               <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
               <View className="flex-1">
                 <View className="flex-row items-center justify-between mb-1">

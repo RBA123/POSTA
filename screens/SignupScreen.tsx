@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, Image, Pressable, Modal } from "react-native";
+import React, { useState, useMemo, useEffect } from "react";
+import { View, Text, ScrollView, Image, Pressable, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Storage } from "../lib/storage";
+import { useAuth } from "../hooks/useAuth";
 import libertaLogo from "../assets/liberta-logo.png";
 import Colors from "../constants/Colors";
 
@@ -39,16 +40,43 @@ const years = Array.from({ length: 100 }, (_, i) => currentYear - 18 - i);
 
 const SignupScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { signUp, user, loading: authLoading, error: authError, clearError } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [day, setDay] = useState<number | null>(null);
   const [month, setMonth] = useState<number | null>(null);
   const [year, setYear] = useState<number | null>(null);
   const [phoneCode, setPhoneCode] = useState(phoneCodes[0]);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [friendCode, setFriendCode] = useState("");
+  const [countryCode, setCountryCode] = useState<string>("AR");
   const [showCodePicker, setShowCodePicker] = useState(false);
   const [ageError, setAgeError] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
+
+  // Load country code from storage or route params
+  useEffect(() => {
+    const loadCountry = async () => {
+      const routeCountry = (route.params as any)?.country;
+      if (routeCountry) {
+        setCountryCode(routeCountry);
+      } else {
+        const savedCountry = await Storage.getItem("liberta_country");
+        if (savedCountry) {
+          setCountryCode(savedCountry);
+        }
+      }
+    };
+    loadCountry();
+  }, [route.params]);
+
+  // No manual navigation needed - AppContent handles routing based on auth state
+  // When user signs up successfully, profileExists will be set to true
+  // and AppContent will automatically show the Main navigator
 
   const isAdult = useMemo(() => {
     if (!day || !month || !year) return true;
@@ -64,36 +92,78 @@ const SignupScreen: React.FC = () => {
     return age >= 18;
   }, [day, month, year]);
 
-  // TEMPORARILY DISABLED - Form validation commented out for easy testing
-  // const isFormValid = useMemo(() => {
-  //   return (
-  //     firstName.trim().length > 0 &&
-  //     lastName.trim().length > 0 &&
-  //     day !== null &&
-  //     month !== null &&
-  //     year !== null &&
-  //     phoneNumber.trim().length >= 8 &&
-  //     isAdult
-  //   );
-  // }, [firstName, lastName, day, month, year, phoneNumber, isAdult]);
+  const isFormValid = useMemo(() => {
+    return (
+      firstName.trim().length > 0 &&
+      lastName.trim().length > 0 &&
+      email.trim().length > 0 &&
+      password.trim().length >= 6 &&
+      password === confirmPassword &&
+      day !== null &&
+      month !== null &&
+      year !== null &&
+      isAdult
+    );
+  }, [firstName, lastName, email, password, confirmPassword, day, month, year, isAdult]);
 
   const handleContinue = async () => {
-    // TEMPORARILY DISABLED - Age check commented out for easy testing
-    // if (!isAdult) {
-    //   setAgeError(true);
-    //   return;
-    // }
+    console.log("📝 [SignupScreen] handleContinue started");
+    clearError();
 
-    // TEMPORARILY DISABLED - Save user data commented out for easy testing
-    // await Storage.setObject("liberta_user", {
-    //   firstName,
-    //   lastName,
-    //   dob: { day, month, year },
-    //   phone: `${phoneCode.code}${phoneNumber}`,
-    //   friendCode: friendCode || null,
-    // });
+    // Validate form
+    if (!isFormValid) {
+      console.log("❌ [SignupScreen] Form validation failed");
+      if (!isAdult && day && month && year) {
+        setAgeError(true);
+        Alert.alert("Error", "Debes ser mayor de 18 años para usar LIBERTA");
+        return;
+      }
+      if (password !== confirmPassword) {
+        Alert.alert("Error", "Las contraseñas no coinciden");
+        return;
+      }
+      if (password.length < 6) {
+        Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+      Alert.alert("Error", "Por favor completa todos los campos requeridos");
+      return;
+    }
 
-    navigation.navigate("Notifications" as never);
+    try {
+      console.log("✅ [SignupScreen] Form valid, starting signup");
+      setSignupLoading(true);
+      setAgeError(false);
+
+      // Create birth date
+      const dateOfBirth = new Date(year!, month! - 1, day!);
+
+      const signupData = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        dateOfBirth,
+        phoneNumber: phoneNumber ? `${phoneCode.code}${phoneNumber}` : undefined,
+        phoneCode: phoneCode.code,
+        countryCode,
+        friendCode: friendCode.trim() || undefined,
+      };
+
+      console.log("📤 [SignupScreen] Calling signUp function");
+      // Sign up with Firebase Auth and create Firestore profile
+      await signUp(email.trim(), password, signupData);
+      console.log("✅ [SignupScreen] signUp completed successfully");
+
+      // Save country code to storage
+      await Storage.setItem("liberta_country", countryCode);
+      console.log("✅ [SignupScreen] Country saved to storage");
+
+      // Navigation will happen automatically via useEffect when user is set
+      console.log("⏳ [SignupScreen] Waiting for auth state to update...");
+    } catch (err: any) {
+      console.error("❌ [SignupScreen] Signup error:", err);
+      setSignupLoading(false);
+      Alert.alert("Error al crear cuenta", err.message || "Por favor intenta de nuevo");
+    }
   };
 
   return (
@@ -123,6 +193,7 @@ const SignupScreen: React.FC = () => {
                   value={firstName}
                   onChangeText={setFirstName}
                   placeholder=""
+                  autoCapitalize="words"
                 />
               </View>
               <View className="flex-1">
@@ -131,9 +202,43 @@ const SignupScreen: React.FC = () => {
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder=""
+                  autoCapitalize="words"
                 />
               </View>
             </View>
+
+            {/* Email */}
+            <Input
+              label="Correo electrónico"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="tu@email.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+
+            {/* Password */}
+            <Input
+              label="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Mínimo 6 caracteres"
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete="password-new"
+            />
+
+            {/* Confirm Password */}
+            <Input
+              label="Confirmar contraseña"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Repite tu contraseña"
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete="password-new"
+            />
 
             {/* Date of Birth */}
             <View>
@@ -278,7 +383,8 @@ const SignupScreen: React.FC = () => {
             variant="default"
             size="lg"
             onPress={handleContinue}
-            disabled={false}
+            disabled={!isFormValid || signupLoading || authLoading}
+            loading={signupLoading || authLoading}
             className="w-full"
           >
             <Text className="text-white font-semibold">Continuar</Text>
