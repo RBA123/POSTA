@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, Image, Pressable, ScrollView, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Button } from "../components/ui/Button";
@@ -9,17 +9,12 @@ import Colors from "../constants/Colors";
 
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, signIn, loading, error, clearError } = useAuth();
+  const { signIn, loading, clearError } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Navigate to main app if user is authenticated
-  useEffect(() => {
-    if (user) {
-      navigation.navigate("Main" as never);
-    }
-  }, [user, navigation]);
+  // No manual navigation needed - AppContent handles routing based on auth state
 
   const handleClaim = () => {
     navigation.navigate("Signup" as never);

@@ -127,12 +127,13 @@ function AppContent() {
         </Stack.Navigator>
       );
     } else if (!profileExists) {
-      // Authenticated but no profile - show signup/profile creation
-      console.log("⚠️ [AppContent] Authenticated but no profile - showing signup");
+      // Authenticated but no profile - show welcome screen so they can login or create profile
+      console.log("⚠️ [AppContent] Authenticated but no profile - showing welcome screen");
       return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="CountrySelection" component={CountrySelection} />
         </Stack.Navigator>
       );
     } else {
