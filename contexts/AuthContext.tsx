@@ -119,11 +119,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userData: Omit<SignUpData, "email" | "password">
     ) => {
       try {
+        console.log("🔐 [AuthContext] handleSignUp started");
         setError(null);
         setLoading(true);
 
         // Create Firebase Auth user
+        console.log("📤 [AuthContext] Creating Firebase Auth user");
         const firebaseUser = await signUpWithEmail(email, password);
+        console.log("✅ [AuthContext] Firebase Auth user created");
 
         // Generate username from first and last name
         const username = `${userData.firstName.toLowerCase().trim()}${userData.lastName.toLowerCase().trim()}`.slice(0, 20);
@@ -148,13 +151,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
 
         // Create Firestore user profile
+        console.log("📤 [AuthContext] Creating Firestore profile");
         await createUserProfile(firebaseUser.uid, profileData);
+        console.log("✅ [AuthContext] Firestore profile created");
         
         // Profile was just created, so it exists
+        // Update both user and profileExists together to prevent intermediate state
+        setUser(firebaseUser);
         setProfileExists(true);
+        console.log("✅ [AuthContext] User and profile state updated");
 
         setLoading(false);
+        console.log("✅ [AuthContext] Signup complete, loading false");
       } catch (err: any) {
+        console.error("❌ [AuthContext] Signup error:", err);
         setError(err);
         setLoading(false);
         throw err;
