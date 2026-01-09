@@ -14,8 +14,8 @@ import { Timestamp } from "firebase/firestore";
 export interface User {
   uid: string; // Document ID (Firebase Auth UID)
   email: string;
-  phoneNumber?: string; // From signup (e.g., "+5491234567")
-  phoneCode?: string; // Country code (e.g., "+54")
+  phoneNumber: string | null; // From signup (e.g., "+5491234567") - null if not provided
+  phoneCode: string | null; // Country code (e.g., "+54") - null if not provided
 
   // Profile
   firstName: string;
@@ -45,7 +45,7 @@ export interface User {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   lastLoginAt?: Timestamp;
-  referredBy?: string; // UID of referrer
+  referredBy: string | null; // UID of referrer - null if not referred
   isAdmin: boolean; // Admin role flag
 }
 
@@ -260,7 +260,6 @@ export interface Transaction {
  */
 export type CreateUserInput = Omit<
   User,
-  | "uid"
   | "createdAt"
   | "updatedAt"
   | "virtualBalance"
@@ -270,7 +269,15 @@ export type CreateUserInput = Omit<
   | "totalWinnings"
   | "totalLosses"
 > & {
-  uid: string; // Still required, but provided by Firebase Auth
+  uid: string; // Required, provided by Firebase Auth
+  virtualBalance: number; // Required for creation
+  totalPositions: number; // Required for creation
+  activePositions: number; // Required for creation
+  winRate: number; // Required for creation
+  totalWinnings: number; // Required for creation
+  totalLosses: number; // Required for creation
+  createdAt: Timestamp; // Required for creation
+  updatedAt: Timestamp; // Required for creation
 };
 
 /**

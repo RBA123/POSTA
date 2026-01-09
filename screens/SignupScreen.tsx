@@ -74,12 +74,9 @@ const SignupScreen: React.FC = () => {
     loadCountry();
   }, [route.params]);
 
-  // Navigate to main app if user is authenticated
-  useEffect(() => {
-    if (user) {
-      navigation.navigate("Notifications" as never);
-    }
-  }, [user, navigation]);
+  // No manual navigation needed - AppContent handles routing based on auth state
+  // When user signs up successfully, profileExists will be set to true
+  // and AppContent will automatically show the Main navigator
 
   const isAdult = useMemo(() => {
     if (!day || !month || !year) return true;
@@ -110,10 +107,12 @@ const SignupScreen: React.FC = () => {
   }, [firstName, lastName, email, password, confirmPassword, day, month, year, isAdult]);
 
   const handleContinue = async () => {
+    console.log("📝 [SignupScreen] handleContinue started");
     clearError();
 
     // Validate form
     if (!isFormValid) {
+      console.log("❌ [SignupScreen] Form validation failed");
       if (!isAdult && day && month && year) {
         setAgeError(true);
         Alert.alert("Error", "Debes ser mayor de 18 años para usar LIBERTA");
@@ -132,14 +131,14 @@ const SignupScreen: React.FC = () => {
     }
 
     try {
+      console.log("✅ [SignupScreen] Form valid, starting signup");
       setSignupLoading(true);
       setAgeError(false);
 
       // Create birth date
       const dateOfBirth = new Date(year!, month! - 1, day!);
 
-      // Sign up with Firebase Auth and create Firestore profile
-      await signUp(email.trim(), password, {
+      const signupData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         dateOfBirth,
@@ -147,13 +146,21 @@ const SignupScreen: React.FC = () => {
         phoneCode: phoneCode.code,
         countryCode,
         friendCode: friendCode.trim() || undefined,
-      });
+      };
+
+      console.log("📤 [SignupScreen] Calling signUp function");
+      // Sign up with Firebase Auth and create Firestore profile
+      await signUp(email.trim(), password, signupData);
+      console.log("✅ [SignupScreen] signUp completed successfully");
 
       // Save country code to storage
       await Storage.setItem("liberta_country", countryCode);
+      console.log("✅ [SignupScreen] Country saved to storage");
 
       // Navigation will happen automatically via useEffect when user is set
+      console.log("⏳ [SignupScreen] Waiting for auth state to update...");
     } catch (err: any) {
+      console.error("❌ [SignupScreen] Signup error:", err);
       setSignupLoading(false);
       Alert.alert("Error al crear cuenta", err.message || "Por favor intenta de nuevo");
     }

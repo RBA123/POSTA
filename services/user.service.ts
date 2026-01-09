@@ -42,18 +42,19 @@ export async function createUserProfile(
     // Calculate initial winRate (0% since no bets yet)
     const winRate = 0;
 
+    // Build user object, excluding undefined values (Firestore doesn't support undefined)
     const newUser: CreateUserInput = {
       uid,
       email: userData.email,
-      phoneNumber: userData.phoneNumber,
-      phoneCode: userData.phoneCode,
+      phoneNumber: userData.phoneNumber || null, // Convert undefined to null
+      phoneCode: userData.phoneCode || null, // Convert undefined to null
       firstName: userData.firstName,
       lastName: userData.lastName,
       username: userData.username.toLowerCase().trim(),
       dateOfBirth: Timestamp.fromDate(userData.dateOfBirth),
       countryCode: userData.countryCode,
       friendCode,
-      virtualBalance: 100, // Initial balance
+      virtualBalance: 100.0, // Initial balance (must be float for Firestore rules)
       totalPositions: 0,
       activePositions: 0,
       winRate,
@@ -67,14 +68,16 @@ export async function createUserProfile(
       },
       createdAt: now,
       updatedAt: now,
-      referredBy: userData.referredBy,
+      referredBy: userData.referredBy || null, // Convert undefined to null
       isAdmin: false,
     };
 
     await setDoc(userRef, newUser);
   } catch (error: any) {
     throw new Error(
-      error.message || "Error al crear el perfil de usuario. Por favor intenta de nuevo."
+      error.code === "permission-denied"
+        ? "Permiso denegado. Por favor verifica las reglas de Firestore."
+        : error.message || "Error al crear el perfil de usuario. Por favor intenta de nuevo."
     );
   }
 }

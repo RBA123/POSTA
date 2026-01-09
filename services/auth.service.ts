@@ -51,14 +51,21 @@ export async function signUpWithEmail(
     );
     return userCredential.user;
   } catch (error: any) {
+    const errorCode = error?.code || "";
+    const errorMessage = error?.message || "";
+    
     throw new Error(
-      error.code === "auth/email-already-in-use"
+      errorCode === "auth/email-already-in-use"
         ? "Este correo electrónico ya está registrado"
-        : error.code === "auth/invalid-email"
+        : errorCode === "auth/invalid-email"
         ? "Correo electrónico inválido"
-        : error.code === "auth/weak-password"
+        : errorCode === "auth/weak-password"
         ? "La contraseña debe tener al menos 6 caracteres"
-        : "Error al crear la cuenta. Por favor intenta de nuevo."
+        : errorCode === "auth/network-request-failed"
+        ? "Error de conexión. Verifica tu conexión a internet."
+        : errorCode === "auth/too-many-requests"
+        ? "Demasiados intentos. Por favor intenta más tarde."
+        : `Error al crear la cuenta: ${errorMessage || "Por favor intenta de nuevo."}`
     );
   }
 }
