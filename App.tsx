@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,8 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoadingScreen } from './components/LoadingScreen';
+import { Storage } from './lib/storage';
+import { TERMS_STORAGE_KEY } from './screens/TermsAcceptanceScreen';
 
 // Screens
+import TermsAcceptanceScreen from './screens/TermsAcceptanceScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 import SignupScreen from './screens/SignupScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
@@ -101,17 +104,47 @@ function TabNavigator() {
 // Main App Content - handles auth state and routing
 function AppContent() {
   const { user, loading, profileExists } = useAuth();
+  const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null);
+  const [checkingTerms, setCheckingTerms] = useState(true);
+
+  // Check if terms have been accepted on app load
+  useEffect(() => {
+    const checkTermsAcceptance = async () => {
+      try {
+        const accepted = await Storage.getItem(TERMS_STORAGE_KEY);
+        setTermsAccepted(accepted === "true");
+      } catch (error) {
+        console.error("Error checking terms acceptance:", error);
+        setTermsAccepted(false);
+      } finally {
+        setCheckingTerms(false);
+      }
+    };
+    checkTermsAcceptance();
+  }, []);
+
+  const handleTermsAccept = () => {
+    setTermsAccepted(true);
+  };
 
   console.log("🎯 [AppContent] Render state:", {
     loading,
     hasUser: !!user,
     profileExists,
+    termsAccepted,
+    checkingTerms,
   });
 
-  // CRITICAL: Show loading until auth state is determined
-  if (loading) {
+  // Show loading while checking terms or auth state
+  if (checkingTerms || loading) {
     console.log("⏳ [AppContent] Showing loading screen");
     return <LoadingScreen loadingText="Cargando..." />;
+  }
+
+  // Show Terms screen if not accepted yet
+  if (termsAccepted === false) {
+    console.log("📜 [AppContent] Showing terms acceptance screen");
+    return <TermsAcceptanceScreen onAccept={handleTermsAccept} />;
   }
 
   // Determine which screen to show based on auth state

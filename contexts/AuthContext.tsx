@@ -147,6 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             marketResults: true,
             promotions: true,
           },
+          termsAccepted: true, // Terms are accepted before reaching signup
           referredBy: userData.friendCode ? undefined : undefined, // TODO: Lookup referrer by friendCode
         };
 

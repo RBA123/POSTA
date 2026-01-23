@@ -41,6 +41,10 @@ export interface User {
     promotions: boolean;
   };
 
+  // Terms & Conditions
+  termsAccepted: boolean;
+  termsAcceptedAt?: Timestamp;
+
   // Metadata
   createdAt: Timestamp;
   updatedAt: Timestamp;
