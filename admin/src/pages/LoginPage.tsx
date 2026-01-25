@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn } from "../services/auth";
 import { Button } from "../components/ui/Button";
@@ -33,19 +33,24 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Liberta Admin</CardTitle>
-          <p className="text-center text-gray-600 mt-2">Inicia sesión para continuar</p>
+          <p className="text-center text-gray-600 mt-2">
+            Sign in to continue
+          </p>
         </CardHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
-          
+
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email Address
             </label>
             <Input
               id="email"
@@ -56,10 +61,13 @@ export function LoginPage() {
               placeholder="admin@liberta.com"
             />
           </div>
-          
+
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Password
             </label>
             <Input
               id="password"
@@ -70,13 +78,9 @@ export function LoginPage() {
               placeholder="••••••••"
             />
           </div>
-          
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
       </Card>

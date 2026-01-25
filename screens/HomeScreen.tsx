@@ -17,6 +17,7 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { useMarkets } from "../hooks/useMarkets";
 import { useBets } from "../hooks/useBets";
 import libertaLogo from "../assets/liberta-logo.png";
+import Colors from "../constants/Colors";
 
 import { Market, Category } from "../types";
 import type { Market as FirestoreMarket } from "../firebase/types/firestore.types";
@@ -104,7 +105,9 @@ const HomeScreen: React.FC = () => {
   const { placeBet: placeBetHook } = useBets(authUser?.uid || null);
 
   const balance = profile?.virtualBalance || 0;
-  const showCountdown = activeCategory === "en_vivo";
+  // Only show countdown if we're in "en_vivo" category AND there's an urgent market with time remaining
+  const urgentMarket = markets.find((m) => m.isUrgent);
+  const showCountdown = activeCategory === "en_vivo" && urgentMarket && urgentMarket.endTime && urgentMarket.endTime > Date.now();
 
   const handleBet = (market: Market, side: "si" | "no") => {
     if (!authUser) {
@@ -172,9 +175,9 @@ const HomeScreen: React.FC = () => {
         }}
       >
         {/* Countdown Banner for EN VIVO */}
-        {showCountdown && (
+        {showCountdown && urgentMarket?.endTime && (
           <CountdownBanner
-            endTime={markets.find((m) => m.isUrgent)?.endTime || Date.now()}
+            endTime={urgentMarket.endTime}
           />
         )}
 
@@ -209,8 +212,8 @@ const HomeScreen: React.FC = () => {
         {/* Market Cards */}
         <View className="gap-4 pb-4 px-4">
           {loading ? (
-            <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#007AFF" />
+            <View className="items-center justify-center flex-1 py-12">
+              <ActivityIndicator size="large" color={Colors.primary500} />
               <Text className="text-muted-foreground mt-4">
                 Cargando mercados...
               </Text>

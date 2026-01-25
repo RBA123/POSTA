@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Card, CardHeader, CardTitle } from "./ui/Card";
 import { Button } from "./ui/Button";
 
@@ -30,23 +30,23 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
-            <CardHeader>
-              <CardTitle>Algo salió mal</CardTitle>
-            </CardHeader>
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                {this.state.error?.message || "Ocurrió un error inesperado"}
-              </p>
-              <Button
-                onClick={() => {
-                  this.setState({ hasError: false, error: null });
-                  window.location.reload();
-                }}
-                className="w-full"
-              >
-                Recargar página
-              </Button>
-            </div>
+        <CardHeader>
+          <CardTitle>Something went wrong</CardTitle>
+        </CardHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              {this.state.error?.message || "An unexpected error occurred"}
+            </p>
+            <Button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+              className="w-full"
+            >
+              Reload page
+            </Button>
+          </div>
           </Card>
         </div>
       );

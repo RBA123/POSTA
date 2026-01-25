@@ -2,7 +2,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser,
+  type User as FirebaseUser,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -15,12 +15,12 @@ export async function signIn(email: string, password: string): Promise<FirebaseU
   } catch (error: any) {
     throw new Error(
       error.code === "auth/user-not-found"
-        ? "Usuario no encontrado"
+        ? "User not found"
         : error.code === "auth/wrong-password"
-        ? "Contraseña incorrecta"
+        ? "Incorrect password"
         : error.code === "auth/invalid-email"
-        ? "Correo electrónico inválido"
-        : "Error al iniciar sesión. Por favor intenta de nuevo."
+        ? "Invalid email address"
+        : "Error signing in. Please try again."
     );
   }
 }
@@ -29,7 +29,7 @@ export async function signOut(): Promise<void> {
   try {
     await firebaseSignOut(auth);
   } catch (error: any) {
-    throw new Error("Error al cerrar sesión. Por favor intenta de nuevo.");
+    throw new Error("Error signing out. Please try again.");
   }
 }
 

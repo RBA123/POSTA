@@ -26,7 +26,7 @@ export async function createMarket(data: CreateMarketData) {
     return result.data as { success: boolean; marketId: string; status: string };
   } catch (error: any) {
     throw new Error(
-      error.message || "Error al crear el mercado. Por favor intenta de nuevo."
+      error.message || "Error creating market. Please try again."
     );
   }
 }
@@ -42,7 +42,7 @@ export async function settleMarket(data: SettleMarketData) {
     };
   } catch (error: any) {
     throw new Error(
-      error.message || "Error al liquidar el mercado. Por favor intenta de nuevo."
+      error.message || "Error settling market. Please try again."
     );
   }
 }

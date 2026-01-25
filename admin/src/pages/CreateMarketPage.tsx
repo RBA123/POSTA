@@ -55,7 +55,7 @@ export function CreateMarketPage() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Crear Nuevo Mercado</CardTitle>
+          <CardTitle>Create New Market</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -67,12 +67,12 @@ export function CreateMarketPage() {
 
           <div>
             <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
-              Pregunta del Mercado <span className="text-red-500">*</span>
+              Market Question <span className="text-red-500">*</span>
             </label>
             <Input
               id="question"
-              {...register("question", { required: "La pregunta es requerida" })}
-              placeholder="¿Ganará Argentina el partido?"
+              {...register("question", { required: "Question is required" })}
+              placeholder="Will Argentina win the match?"
             />
             {errors.question && (
               <p className="mt-1 text-sm text-red-600">{errors.question.message}</p>
@@ -81,35 +81,35 @@ export function CreateMarketPage() {
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción (opcional)
+              Description (optional)
             </label>
             <Textarea
               id="description"
               {...register("description")}
-              placeholder="Descripción adicional del mercado..."
+              placeholder="Additional market description..."
             />
           </div>
 
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría <span className="text-red-500">*</span>
+              Category <span className="text-red-500">*</span>
             </label>
             <select
               id="category"
               {...register("category", { required: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="en_vivo">⚡ EN VIVO</option>
-              <option value="partidos">⚽ Partidos</option>
-              <option value="torneos">🏆 Torneos</option>
-              <option value="fase_grupos">👥 Fase de Grupos</option>
-              <option value="jugadores">👤 Jugadores</option>
+              <option value="en_vivo">⚡ LIVE</option>
+              <option value="partidos">⚽ Matches</option>
+              <option value="torneos">🏆 Tournaments</option>
+              <option value="fase_grupos">👥 Group Stage</option>
+              <option value="jugadores">👤 Players</option>
             </select>
           </div>
 
           <div>
             <label htmlFor="openAt" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha y Hora de Apertura <span className="text-red-500">*</span>
+              Opening Date & Time <span className="text-red-500">*</span>
             </label>
             <Input
               id="openAt"
@@ -117,14 +117,14 @@ export function CreateMarketPage() {
               {...register("openAt", { required: true })}
             />
             <p className="mt-1 text-sm text-gray-500">
-              Si es en el pasado o ahora, el mercado se abrirá automáticamente
+              If in the past or now, the market will open automatically
             </p>
           </div>
 
           {(category === "en_vivo" || isUrgent) && (
             <div>
               <label htmlFor="lockAt" className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha y Hora de Cierre (opcional)
+                Closing Date & Time (optional)
               </label>
               <Input
                 id="lockAt"
@@ -132,7 +132,7 @@ export function CreateMarketPage() {
                 {...register("lockAt")}
               />
               <p className="mt-1 text-sm text-gray-500">
-                El mercado se cerrará automáticamente a esta hora
+                The market will close automatically at this time
               </p>
             </div>
           )}
@@ -145,13 +145,13 @@ export function CreateMarketPage() {
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
             <label htmlFor="isUrgent" className="ml-2 block text-sm text-gray-700">
-              Mercado urgente (EN VIVO)
+              Urgent market (LIVE)
             </label>
           </div>
 
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
-              Etiquetas (opcional, separadas por comas)
+              Tags (optional, comma-separated)
             </label>
             <Input
               id="tags"
@@ -162,7 +162,7 @@ export function CreateMarketPage() {
 
           <div>
             <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-              URL de Imagen (opcional)
+              Image URL (optional)
             </label>
             <Input
               id="imageUrl"
@@ -174,14 +174,14 @@ export function CreateMarketPage() {
 
           <div className="flex gap-4">
             <Button type="submit" disabled={isPending} className="flex-1">
-              {isPending ? "Creando..." : "Crear Mercado"}
+              {isPending ? "Creating..." : "Create Market"}
             </Button>
             <Button
               type="button"
               variant="secondary"
               onClick={() => window.history.back()}
             >
-              Cancelar
+              Cancel
             </Button>
           </div>
         </form>

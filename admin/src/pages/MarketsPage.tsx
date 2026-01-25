@@ -16,7 +16,7 @@ export function MarketsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Cargando mercados...</div>
+        <div className="text-gray-500">Loading markets...</div>
       </div>
     );
   }
@@ -24,9 +24,9 @@ export function MarketsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Mercados</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Markets</h1>
         <Link to="/markets/create">
-          <Button>Crear Mercado</Button>
+          <Button>Create Market</Button>
         </Link>
       </div>
 
@@ -41,9 +41,9 @@ export function MarketsPage() {
 
       {markets.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 text-center">
-          <p className="text-gray-500 mb-4">No se encontraron mercados</p>
+          <p className="text-gray-500 mb-4">No markets found</p>
           <Link to="/markets/create">
-            <Button>Crear Primer Mercado</Button>
+            <Button>Create First Market</Button>
           </Link>
         </div>
       ) : (

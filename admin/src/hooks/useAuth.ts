@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User as FirebaseUser } from "firebase/auth";
+import type { User as FirebaseUser } from "firebase/auth";
 import { onAuthStateChange, checkAdminStatus } from "../services/auth";
 
 interface AuthState {

@@ -10,8 +10,8 @@ export function Sidebar({ onLogout }: SidebarProps) {
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: "📊" },
-    { path: "/markets", label: "Mercados", icon: "📈" },
-    { path: "/markets/create", label: "Crear Mercado", icon: "➕" },
+    { path: "/markets", label: "Markets", icon: "📈" },
+    { path: "/markets/create", label: "Create Market", icon: "➕" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -46,7 +46,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
           onClick={onLogout}
         >
           <span className="mr-2">🚪</span>
-          Cerrar sesión
+          Sign Out
         </Button>
       </div>
     </div>

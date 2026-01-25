@@ -18,11 +18,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  draft: "Borrador",
-  open: "Abierto",
-  locked: "Cerrado",
-  settled: "Liquidado",
-  cancelled: "Cancelado",
+  draft: "Draft",
+  open: "Open",
+  locked: "Locked",
+  settled: "Settled",
+  cancelled: "Cancelled",
 };
 
 const statusVariants: Record<string, "default" | "success" | "warning" | "danger" | "info"> = {
@@ -66,30 +66,30 @@ export function MarketCard({ market }: MarketCardProps) {
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p className="text-sm text-gray-500">Probabilidad Sí</p>
+            <p className="text-sm text-gray-500">Yes Probability</p>
             <p className="text-lg font-semibold text-green-600">{market.siProbability}%</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Probabilidad No</p>
+            <p className="text-sm text-gray-500">No Probability</p>
             <p className="text-lg font-semibold text-red-600">{market.noProbability}%</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div>
-            <p className="text-gray-500">Volumen Total</p>
+            <p className="text-gray-500">Total Volume</p>
             <p className="font-medium">${market.totalVolume.toFixed(2)}</p>
           </div>
           <div>
-            <p className="text-gray-500">Apuestas</p>
+            <p className="text-gray-500">Bets</p>
             <p className="font-medium">{market.totalBets}</p>
           </div>
         </div>
 
         <div className="pt-4 border-t border-gray-200 text-xs text-gray-500">
-          <p>Abre: {formatDate(market.openAt)}</p>
-          {market.lockAt && <p>Cierra: {formatDate(market.lockAt)}</p>}
-          {market.settledAt && <p>Liquidado: {formatDate(market.settledAt)}</p>}
+          <p>Opens: {formatDate(market.openAt)}</p>
+          {market.lockAt && <p>Closes: {formatDate(market.lockAt)}</p>}
+          {market.settledAt && <p>Settled: {formatDate(market.settledAt)}</p>}
         </div>
       </Card>
     </Link>

@@ -30,14 +30,14 @@ export function DashboardPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Resumen de mercados y actividad</p>
+        <p className="text-gray-600 mt-1">Markets and activity overview</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-gray-600">
-              Total Mercados
+              Total Markets
             </CardTitle>
           </CardHeader>
           <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
@@ -46,7 +46,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-gray-600">
-              Mercados Abiertos
+              Open Markets
             </CardTitle>
           </CardHeader>
           <p className="text-3xl font-bold text-green-600">{stats.open}</p>
@@ -55,7 +55,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-gray-600">
-              Pendientes de Liquidar
+              Pending Settlement
             </CardTitle>
           </CardHeader>
           <p className="text-3xl font-bold text-yellow-600">{stats.locked}</p>
@@ -64,7 +64,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-gray-600">
-              Volumen Total
+              Total Volume
             </CardTitle>
           </CardHeader>
           <p className="text-3xl font-bold text-primary-600">
@@ -77,24 +77,24 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Estados de Mercados</CardTitle>
+              <CardTitle>Market Status</CardTitle>
             </div>
           </CardHeader>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Borrador</span>
+              <span className="text-gray-600">Draft</span>
               <Badge>{stats.draft}</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Abierto</span>
+              <span className="text-gray-600">Open</span>
               <Badge variant="success">{stats.open}</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Cerrado</span>
+              <span className="text-gray-600">Locked</span>
               <Badge variant="warning">{stats.locked}</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Liquidado</span>
+              <span className="text-gray-600">Settled</span>
               <Badge variant="info">{stats.settled}</Badge>
             </div>
           </div>
@@ -103,24 +103,24 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Acciones Rápidas</CardTitle>
+              <CardTitle>Quick Actions</CardTitle>
             </div>
           </CardHeader>
           <div className="space-y-3">
             <Link to="/markets/create" className="block">
               <Button className="w-full" variant="primary">
-                ➕ Crear Nuevo Mercado
+                ➕ Create New Market
               </Button>
             </Link>
             <Link to="/markets" className="block">
               <Button className="w-full" variant="secondary">
-                📈 Ver Todos los Mercados
+                📈 View All Markets
               </Button>
             </Link>
             {stats.locked > 0 && (
               <Link to="/markets?status=locked" className="block">
                 <Button className="w-full" variant="danger">
-                  ⚠️ Liquidar Mercados Cerrados ({stats.locked})
+                  ⚠️ Settle Locked Markets ({stats.locked})
                 </Button>
               </Link>
             )}
@@ -131,17 +131,17 @@ export function DashboardPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Mercados Recientes</CardTitle>
+            <CardTitle>Recent Markets</CardTitle>
             <Link to="/markets">
               <Button variant="ghost" size="sm">
-                Ver todos →
+                View all →
               </Button>
             </Link>
           </div>
         </CardHeader>
         {recentMarkets.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No hay mercados aún
+            No markets yet
           </div>
         ) : (
           <div className="space-y-3">
@@ -166,7 +166,7 @@ export function DashboardPage() {
                       ${market.totalVolume.toFixed(2)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {market.totalBets} apuestas
+                      {market.totalBets} bets
                     </p>
                   </div>
                 </div>

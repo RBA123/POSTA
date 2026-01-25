@@ -17,11 +17,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  draft: "Borrador",
-  open: "Abierto",
-  locked: "Cerrado",
-  settled: "Liquidado",
-  cancelled: "Cancelado",
+  draft: "Draft",
+  open: "Open",
+  locked: "Locked",
+  settled: "Settled",
+  cancelled: "Cancelled",
 };
 
 export function MarketDetailPage() {
@@ -42,7 +42,7 @@ export function MarketDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Cargando mercado...</div>
+        <div className="text-gray-500">Loading market...</div>
       </div>
     );
   }
@@ -50,9 +50,9 @@ export function MarketDetailPage() {
   if (error || !market) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">Error al cargar el mercado</p>
+        <p className="text-red-600 mb-4">Error loading market</p>
         <Link to="/markets">
-          <Button>Volver a Mercados</Button>
+          <Button>Back to Markets</Button>
         </Link>
       </div>
     );
@@ -64,7 +64,7 @@ export function MarketDetailPage() {
     <div>
       <div className="mb-6">
         <Link to="/markets" className="text-primary-600 hover:text-primary-700 text-sm mb-4 inline-block">
-          ← Volver a Mercados
+          ← Back to Markets
         </Link>
         <div className="flex items-start justify-between">
           <div>
@@ -72,7 +72,7 @@ export function MarketDetailPage() {
             <div className="flex items-center gap-2">
               <Badge>{categoryLabels[market.category] || market.category}</Badge>
               <Badge>{statusLabels[market.status] || market.status}</Badge>
-              {market.isUrgent && <Badge variant="danger">Urgente</Badge>}
+              {market.isUrgent && <Badge variant="danger">Urgent</Badge>}
             </div>
           </div>
           {canSettle && (
@@ -80,7 +80,7 @@ export function MarketDetailPage() {
               variant="danger"
               onClick={() => setShowSettlementModal(true)}
             >
-              Liquidar Mercado
+              Settle Market
             </Button>
           )}
         </div>
@@ -95,12 +95,12 @@ export function MarketDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
-            <CardTitle>Probabilidades</CardTitle>
+            <CardTitle>Probabilities</CardTitle>
           </CardHeader>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm text-gray-600">Sí</span>
+                <span className="text-sm text-gray-600">Yes</span>
                 <span className="text-lg font-semibold text-green-600">
                   {market.siProbability}%
                 </span>
@@ -131,31 +131,31 @@ export function MarketDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Estadísticas</CardTitle>
+            <CardTitle>Statistics</CardTitle>
           </CardHeader>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-600">Volumen Total</span>
+              <span className="text-gray-600">Total Volume</span>
               <span className="font-semibold">${market.totalVolume.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Volumen Sí</span>
+              <span className="text-gray-600">Yes Volume</span>
               <span className="font-semibold text-green-600">
                 ${market.siVolume.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Volumen No</span>
+              <span className="text-gray-600">No Volume</span>
               <span className="font-semibold text-red-600">
                 ${market.noVolume.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Total de Apuestas</span>
+              <span className="text-gray-600">Total Bets</span>
               <span className="font-semibold">{market.totalBets}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Apostadores Únicos</span>
+              <span className="text-gray-600">Unique Bettors</span>
               <span className="font-semibold">{market.uniqueBettors}</span>
             </div>
           </div>
@@ -164,32 +164,32 @@ export function MarketDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Información del Mercado</CardTitle>
+          <CardTitle>Market Information</CardTitle>
         </CardHeader>
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-gray-600">Creado</span>
+            <span className="text-gray-600">Created</span>
             <span className="font-medium">{formatDate(market.createdAt)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Abre</span>
+            <span className="text-gray-600">Opens</span>
             <span className="font-medium">{formatDate(market.openAt)}</span>
           </div>
           {market.lockAt && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Cierra</span>
+              <span className="text-gray-600">Closes</span>
               <span className="font-medium">{formatDate(market.lockAt)}</span>
             </div>
           )}
           {market.settledAt && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Liquidado</span>
+              <span className="text-gray-600">Settled</span>
               <span className="font-medium">{formatDate(market.settledAt)}</span>
             </div>
           )}
           {market.result && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Resultado</span>
+              <span className="text-gray-600">Result</span>
               <Badge variant="info">{market.result.toUpperCase()}</Badge>
             </div>
           )}

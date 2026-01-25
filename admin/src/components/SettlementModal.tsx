@@ -10,12 +10,12 @@ interface SettlementModalProps {
 }
 
 export function SettlementModal({ market, onClose }: SettlementModalProps) {
-  const [selectedResult, setSelectedResult] = useState<MarketResult | "">("");
+  const [selectedResult, setSelectedResult] = useState<MarketResult | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const { mutate: settleMarket, isPending, error } = useSettleMarket();
 
   const handleSettle = () => {
-    if (!selectedResult || selectedResult === "") return;
+    if (!selectedResult) return;
     
     if (!confirmed) {
       setConfirmed(true);
@@ -43,15 +43,15 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>Mercado ya Liquidado</CardTitle>
+            <CardTitle>Market Already Settled</CardTitle>
           </CardHeader>
           <div className="space-y-4">
             <p className="text-gray-600">
-              Este mercado ya ha sido liquidado con el resultado:{" "}
+              This market has already been settled with result:{" "}
               <span className="font-semibold">{market.result?.toUpperCase()}</span>
             </p>
             <Button onClick={onClose} className="w-full">
-              Cerrar
+              Close
             </Button>
           </div>
         </Card>
@@ -64,14 +64,14 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>No se puede liquidar</CardTitle>
+            <CardTitle>Cannot Settle</CardTitle>
           </CardHeader>
           <div className="space-y-4">
             <p className="text-gray-600">
-              Solo se pueden liquidar mercados que estén abiertos o cerrados.
+              Only open or locked markets can be settled.
             </p>
             <Button onClick={onClose} className="w-full">
-              Cerrar
+              Close
             </Button>
           </div>
         </Card>
@@ -83,7 +83,7 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <Card className="max-w-md w-full">
         <CardHeader>
-          <CardTitle>Liquidar Mercado</CardTitle>
+          <CardTitle>Settle Market</CardTitle>
         </CardHeader>
 
         <div className="space-y-4">
@@ -97,7 +97,7 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
             <>
               <div>
                 <p className="text-sm text-gray-600 mb-3">
-                  Selecciona el resultado del mercado:
+                  Select the market result:
                 </p>
                 <div className="space-y-2">
                   <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -109,7 +109,7 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
                       onChange={(e) => setSelectedResult(e.target.value as MarketResult)}
                       className="mr-3"
                     />
-                    <span className="font-medium">Sí</span>
+                    <span className="font-medium">Yes</span>
                   </label>
                   <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                     <input
@@ -131,34 +131,34 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
                       onChange={(e) => setSelectedResult(e.target.value as MarketResult)}
                       className="mr-3"
                     />
-                    <span className="font-medium">Cancelado (reembolsar todas las apuestas)</span>
+                    <span className="font-medium">Cancelled (refund all bets)</span>
                   </label>
                 </div>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600 mb-2">
-                  <strong>Mercado:</strong> {market.question}
+                  <strong>Market:</strong> {market.question}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Apuestas pendientes:</strong> {market.totalBets}
+                  <strong>Pending bets:</strong> {market.totalBets}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Volumen total:</strong> ${market.totalVolume.toFixed(2)}
+                  <strong>Total volume:</strong> ${market.totalVolume.toFixed(2)}
                 </p>
               </div>
             </>
           ) : (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <p className="text-sm font-semibold text-yellow-800 mb-2">
-                ¿Estás seguro de liquidar este mercado?
+                Are you sure you want to settle this market?
               </p>
               <p className="text-sm text-yellow-700">
-                Resultado seleccionado: <strong>{selectedResult.toUpperCase()}</strong>
+                Selected result: <strong>{selectedResult!.toUpperCase()}</strong>
               </p>
               <p className="text-sm text-yellow-700 mt-2">
-                Esta acción actualizará todas las apuestas pendientes y los balances de los usuarios.
-                No se puede deshacer.
+                This action will update all pending bets and user balances.
+                This cannot be undone.
               </p>
             </div>
           )}
@@ -171,13 +171,13 @@ export function SettlementModal({ market, onClose }: SettlementModalProps) {
               className="flex-1"
             >
               {isPending
-                ? "Liquidando..."
+                ? "Settling..."
                 : confirmed
-                ? "Confirmar Liquidación"
-                : "Continuar"}
+                ? "Confirm Settlement"
+                : "Continue"}
             </Button>
             <Button variant="secondary" onClick={onClose} disabled={isPending}>
-              Cancelar
+              Cancel
             </Button>
           </div>
         </div>

@@ -6,7 +6,6 @@ import {
   where,
   orderBy,
   onSnapshot,
-  Timestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type { Market, MarketCategory, MarketStatus } from "../types";

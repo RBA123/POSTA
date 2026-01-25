@@ -21,15 +21,18 @@ const queryClient = new QueryClient({
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, loading } = useAuth();
 
+  console.log("ProtectedRoute:", { user: !!user, isAdmin, loading });
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Cargando...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-gray-500 text-lg">Loading...</div>
       </div>
     );
   }
 
   if (!user || !isAdmin) {
+    console.log("Redirecting to login");
     return <Navigate to="/login" replace />;
   }
 

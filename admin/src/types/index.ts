@@ -9,4 +9,4 @@ export type {
   BetStatus,
   Transaction,
   CreateMarketInput,
-} from "../../firebase/types/firestore.types";
+} from "../../../firebase/types/firestore.types";
