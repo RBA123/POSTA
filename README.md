@@ -2,6 +2,14 @@
 
 A real-time sports betting mobile application built with React Native, Expo, and Firebase. Liberta enables users to place virtual bets on sports markets with dynamic odds that update in real-time.
 
+# TODO:
+
+- Make sure notifications work and improve the notifications UI
+  – Test multiple users betting, explain how the betting works.
+  – Make the dates be in english in the admin panel
+  – add margin right to the chevrons in the admin panel
+  – make sure posisiones activas works
+
 ## Quick Start
 
 ### Installation
