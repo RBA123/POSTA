@@ -33,6 +33,7 @@ export function CreateMarketPage() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<MarketFormData>({
     defaultValues: {
       // Get current time in user's local timezone for datetime-local input
@@ -45,11 +46,66 @@ export function CreateMarketPage() {
   const category = watch("category");
   const isUrgent = watch("isUrgent");
   const openAtValue = watch("openAt");
+  const lockAtValue = watch("lockAt");
 
   // Helper to show if market will open immediately
   const willOpenImmediately = openAtValue 
     ? new Date(openAtValue).getTime() <= Date.now()
     : true;
+
+  // Calculate event duration
+  const getEventDuration = () => {
+    if (!openAtValue || !lockAtValue) {
+      return null;
+    }
+
+    const openTime = new Date(openAtValue).getTime();
+    const lockTime = new Date(lockAtValue).getTime();
+    const durationMs = lockTime - openTime;
+
+    if (durationMs <= 0) {
+      return null; // Invalid duration (closing before opening)
+    }
+
+    const totalMinutes = Math.floor(durationMs / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+
+    const parts: string[] = [];
+    if (days > 0) {
+      parts.push(`${days} day${days > 1 ? 's' : ''}`);
+    }
+    if (remainingHours > 0) {
+      parts.push(`${remainingHours} hour${remainingHours > 1 ? 's' : ''}`);
+    }
+    if (minutes > 0) {
+      parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+    }
+
+    return parts.length > 0 ? parts.join(', ') : '0 minutes';
+  };
+
+  const eventDuration = getEventDuration();
+
+  // Helper to adjust lockAt time relative to current lockAt value (or now if not set)
+  const adjustLockAtTime = (minutes: number) => {
+    // Get current lockAt value or use now as base
+    const baseTime = lockAtValue 
+      ? new Date(lockAtValue)
+      : new Date();
+    
+    // Adjust the time by adding/subtracting minutes
+    const adjustedTime = new Date(baseTime.getTime() + minutes * 60 * 1000);
+    
+    // Convert to datetime-local format (local time, not UTC)
+    const offset = adjustedTime.getTimezoneOffset() * 60000;
+    const localTime = new Date(adjustedTime.getTime() - offset);
+    const formattedTime = localTime.toISOString().slice(0, 16);
+    
+    setValue("lockAt", formattedTime);
+  };
 
   const onSubmit = (data: MarketFormData) => {
     const tagsArray = data.tags
@@ -159,9 +215,97 @@ export function CreateMarketPage() {
                 type="datetime-local"
                 {...register("lockAt")}
               />
-              <p className="mt-1 text-sm text-gray-500">
-                The market will close automatically at this time
-              </p>
+              <div className="mt-1 text-sm mb-2">
+                <p className="text-gray-500">
+                  The market will close automatically at this time
+                </p>
+                {eventDuration && (
+                  <p className="text-blue-600 font-medium mt-1">
+                    ⏱️ Event duration: {eventDuration}
+                  </p>
+                )}
+                {lockAtValue && openAtValue && !eventDuration && (
+                  <p className="text-red-600 font-medium mt-1">
+                    ⚠️ Closing time must be after opening time
+                  </p>
+                )}
+              </div>
+              
+              {/* Time adjustment buttons */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(-1)}
+                  className="text-xs border border-gray-300"
+                >
+                  -1 min
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(1)}
+                  className="text-xs border border-gray-300"
+                >
+                  +1 min
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(-30)}
+                  className="text-xs border border-gray-300"
+                >
+                  -30 min
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(30)}
+                  className="text-xs border border-gray-300"
+                >
+                  +30 min
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(-60)}
+                  className="text-xs border border-gray-300"
+                >
+                  -1 hour
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(60)}
+                  className="text-xs border border-gray-300"
+                >
+                  +1 hour
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(-24 * 60)}
+                  className="text-xs border border-gray-300"
+                >
+                  -1 day
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => adjustLockAtTime(24 * 60)}
+                  className="text-xs border border-gray-300"
+                >
+                  +1 day
+                </Button>
+              </div>
             </div>
           )}
 

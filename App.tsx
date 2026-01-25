@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Storage } from './lib/storage';
 import { updateUserProfile } from './services/user.service';
+import { getExpoPushToken } from './lib/expoPushToken';
 import { TERMS_STORAGE_KEY } from './screens/TermsAcceptanceScreen';
 
 // Screens
@@ -141,11 +142,21 @@ function AppContent() {
       }
     };
 
-    // Get initial token
-    Notifications.getExpoPushTokenAsync()
+    // Get initial token (only if push notifications are supported)
+    // Skip silently if not supported (e.g., Android Expo Go or without projectId)
+    getExpoPushToken()
       .then(updatePushToken)
       .catch((error) => {
-        console.error("Error getting initial push token:", error);
+        // Only log unexpected errors (not Android Expo Go or missing projectId)
+        const errorMessage = error?.message || String(error);
+        if (
+          !errorMessage.includes('not supported') && 
+          !errorMessage.includes('No valid Expo project ID') &&
+          !errorMessage.includes('Invalid uuid')
+        ) {
+          console.error("Error getting initial push token:", error);
+        }
+        // Silently skip if push notifications aren't supported or projectId is invalid
       });
 
     // Listen for token changes

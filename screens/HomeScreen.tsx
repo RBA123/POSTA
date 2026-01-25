@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Image, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -62,16 +69,23 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { user: authUser } = useAuth();
-  const { profile, loading: profileLoading } = useUserProfile(authUser?.uid || null);
-  const { hasAsked, requestPermission, markAsAsked } = useNotificationPermission(authUser?.uid || null);
+  const { profile, loading: profileLoading } = useUserProfile(
+    authUser?.uid || null,
+  );
+  const { hasAsked, requestPermission, markAsAsked } =
+    useNotificationPermission(authUser?.uid || null);
   const [countryCode, setCountryCode] = useState<string>("AR");
   const countryName = countryNames[countryCode] || "Argentina";
   const [activeCategory, setActiveCategory] = useState<Category>("en_vivo");
-  
+
   // Use markets hook
-  const { markets: firestoreMarkets, loading: marketsLoading, error: marketsError } = useMarkets(
+  const {
+    markets: firestoreMarkets,
+    loading: marketsLoading,
+    error: marketsError,
+  } = useMarkets(
     activeCategory as any,
-    true // real-time updates
+    true, // real-time updates
   );
 
   // Convert Firestore markets to UI format
@@ -80,9 +94,11 @@ const HomeScreen: React.FC = () => {
 
   // Debug: Log markets when they change
   useEffect(() => {
-    console.log(`🏠 HomeScreen: ${markets.length} markets loaded for category "${activeCategory}"`);
+    console.log(
+      `🏠 HomeScreen: ${markets.length} markets loaded for category "${activeCategory}"`,
+    );
     if (markets.length > 0) {
-      console.log('First market:', markets[0].question);
+      console.log("First market:", markets[0].question);
     }
   }, [markets, activeCategory]);
 
@@ -120,7 +136,11 @@ const HomeScreen: React.FC = () => {
   const balance = profile?.virtualBalance || 0;
   // Only show countdown if we're in "en_vivo" category AND there's an urgent market with time remaining
   const urgentMarket = markets.find((m) => m.isUrgent);
-  const showCountdown = activeCategory === "en_vivo" && urgentMarket && urgentMarket.endTime && urgentMarket.endTime > Date.now();
+  const showCountdown =
+    activeCategory === "en_vivo" &&
+    urgentMarket &&
+    urgentMarket.endTime &&
+    urgentMarket.endTime > Date.now();
 
   const handleBet = (market: Market, side: "si" | "no") => {
     if (!authUser) {
@@ -135,10 +155,10 @@ const HomeScreen: React.FC = () => {
 
   const handleConfirmBet = async (amount: number) => {
     if (!selectedMarket || !authUser) {
-      console.error('❌ Cannot place bet:', { 
-        hasMarket: !!selectedMarket, 
+      console.error("❌ Cannot place bet:", {
+        hasMarket: !!selectedMarket,
         hasAuthUser: !!authUser,
-        authUserUid: authUser?.uid 
+        authUserUid: authUser?.uid,
       });
       Alert.alert("Error", "Debes iniciar sesión para apostar");
       return;
@@ -146,22 +166,25 @@ const HomeScreen: React.FC = () => {
 
     try {
       setIsBetting(true);
-      console.log('🎲 Placing bet:', {
+      console.log("🎲 Placing bet:", {
         marketId: selectedMarket.id,
         side: selectedSide,
         amount,
-        userUid: authUser.uid
+        userUid: authUser.uid,
       });
-      
+
       await placeBetHook(selectedMarket.id, selectedSide, amount);
-      
-      console.log('✅ Bet placed successfully');
+
+      console.log("✅ Bet placed successfully");
       setShowBetModal(false);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (error: any) {
-      console.error('❌ Error placing bet:', error);
-      Alert.alert("Error al apostar", error.message || "Por favor intenta de nuevo");
+      console.error("❌ Error placing bet:", error);
+      Alert.alert(
+        "Error al apostar",
+        error.message || "Por favor intenta de nuevo",
+      );
     } finally {
       setIsBetting(false);
     }
@@ -170,7 +193,10 @@ const HomeScreen: React.FC = () => {
   // Show error if markets fail to load
   useEffect(() => {
     if (marketsError) {
-      Alert.alert("Error", "No se pudieron cargar los mercados. Por favor intenta de nuevo.");
+      Alert.alert(
+        "Error",
+        "No se pudieron cargar los mercados. Por favor intenta de nuevo.",
+      );
     }
   }, [marketsError]);
 
@@ -219,12 +245,15 @@ const HomeScreen: React.FC = () => {
                 try {
                   await requestPermission();
                 } catch (error) {
-                  Alert.alert("Error", "No se pudo activar las notificaciones. Por favor intenta de nuevo desde Configuración.");
+                  Alert.alert(
+                    "Error",
+                    "No se pudo activar las notificaciones. Por favor intenta de nuevo desde Configuración.",
+                  );
                 }
               },
             },
           ],
-          { cancelable: true }
+          { cancelable: true },
         );
       }, 1500); // 1.5 second delay after screen loads
 
@@ -268,9 +297,7 @@ const HomeScreen: React.FC = () => {
       >
         {/* Countdown Banner for EN VIVO */}
         {showCountdown && urgentMarket?.endTime && (
-          <CountdownBanner
-            endTime={urgentMarket.endTime}
-          />
+          <CountdownBanner endTime={urgentMarket.endTime} />
         )}
 
         {/* Category Filter */}

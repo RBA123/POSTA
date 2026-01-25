@@ -11,6 +11,7 @@ import * as admin from 'firebase-admin';
  * 
  * Probability calculation:
  * - Uses volume-weighted approach: siProbability = siVolume / totalVolume * 100
+ * - Enforces minimum 1% probability on each side to prevent Infinity errors
  * - Ensures probabilities always sum to 100%
  */
 export const updateMarketOdds = functions.region('us-central1').firestore
@@ -39,12 +40,20 @@ export const updateMarketOdds = functions.region('us-central1').firestore
       const siVolume = marketData.siVolume || 0;
       const totalVolume = marketData.totalVolume || 0;
 
+      // Minimum probability to prevent Infinity errors (allows contrarian bets)
+      const MIN_PROBABILITY = 1; // 1% minimum
+
       // Calculate new probabilities based on volume
       let siProbability = 50; // Default 50/50
       let noProbability = 50;
 
       if (totalVolume > 0) {
-        siProbability = Math.round((siVolume / totalVolume) * 100);
+        const rawSiProb = (siVolume / totalVolume) * 100;
+        // Enforce minimum probability: clamp between MIN_PROBABILITY and (100 - MIN_PROBABILITY)
+        siProbability = Math.max(
+          MIN_PROBABILITY,
+          Math.min(100 - MIN_PROBABILITY, Math.round(rawSiProb))
+        );
         noProbability = 100 - siProbability;
       }
 
@@ -110,12 +119,20 @@ export const recalculateMarketOdds = functions.region('us-central1').https.onCal
 
     const totalVolume = siVolume + noVolume;
 
+    // Minimum probability to prevent Infinity errors (allows contrarian bets)
+    const MIN_PROBABILITY = 1; // 1% minimum
+
     // Calculate probabilities
     let siProbability = 50;
     let noProbability = 50;
 
     if (totalVolume > 0) {
-      siProbability = Math.round((siVolume / totalVolume) * 100);
+      const rawSiProb = (siVolume / totalVolume) * 100;
+      // Enforce minimum probability: clamp between MIN_PROBABILITY and (100 - MIN_PROBABILITY)
+      siProbability = Math.max(
+        MIN_PROBABILITY,
+        Math.min(100 - MIN_PROBABILITY, Math.round(rawSiProb))
+      );
       noProbability = 100 - siProbability;
     }
 

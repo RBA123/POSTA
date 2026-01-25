@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import { updateUserProfile, getUserProfile } from '../services/user.service';
 import { Storage } from '../lib/storage';
+import { getExpoPushToken, isPushNotificationSupported } from '../lib/expoPushToken';
 
 const NOTIFICATION_PERMISSION_ASKED_KEY = 'notification_permission_asked';
 
@@ -46,6 +47,17 @@ export function useNotificationPermission(userId: string | null) {
           return;
         }
 
+        // Check if push notifications are supported
+        // Note: iOS Expo Go supports push notifications, Android Expo Go does not
+        // We still need a valid projectId for push notifications to work
+        if (!isPushNotificationSupported()) {
+          // Push notifications not supported (Android Expo Go or missing projectId)
+          // Mark as asked so we don't prompt, but don't enable notifications
+          await Storage.setItem(NOTIFICATION_PERMISSION_ASKED_KEY, 'true');
+          setHasAsked(true);
+          return;
+        }
+
         // Check current permission status
         const { status } = await Notifications.getPermissionsAsync();
         
@@ -56,13 +68,17 @@ export function useNotificationPermission(userId: string | null) {
           
           // Store token if not already stored
           try {
-            const tokenData = await Notifications.getExpoPushTokenAsync();
+            const tokenData = await getExpoPushToken();
             await updateUserProfile(userId, {
               expoPushToken: tokenData.data,
               notificationsEnabled: true,
             });
           } catch (tokenError) {
-            console.error('Error getting push token:', tokenError);
+            // Silently handle errors (e.g., Expo Go or missing projectId)
+            const errorMessage = tokenError?.message || String(tokenError);
+            if (!errorMessage.includes('not supported') && !errorMessage.includes('No valid Expo project ID')) {
+              console.error('Error getting push token:', tokenError);
+            }
           }
           return;
         }
@@ -88,6 +104,25 @@ export function useNotificationPermission(userId: string | null) {
   const requestPermission = async (): Promise<boolean> => {
     if (!userId) return false;
 
+    // Check if push notifications are supported
+    // Note: We can still request permission even if projectId is missing
+    // (user might add it later), but we can't get tokens without projectId
+    const supported = isPushNotificationSupported();
+    
+    if (!supported) {
+      // Android Expo Go doesn't support push notifications
+      // Still mark as asked so we don't prompt again
+      await Storage.setItem(NOTIFICATION_PERMISSION_ASKED_KEY, 'true');
+      setHasAsked(true);
+      
+      // Update profile to reflect that notifications aren't supported
+      await updateUserProfile(userId, {
+        notificationsEnabled: false,
+      });
+      
+      return false;
+    }
+
     try {
       // Request permission
       const { status } = await Notifications.requestPermissionsAsync();
@@ -100,15 +135,24 @@ export function useNotificationPermission(userId: string | null) {
       if (granted) {
         // Get and store push token
         try {
-          const tokenData = await Notifications.getExpoPushTokenAsync();
+          const tokenData = await getExpoPushToken();
           await updateUserProfile(userId, {
             expoPushToken: tokenData.data,
             notificationsEnabled: true,
           });
           console.log('✅ Notification permission granted and token stored');
         } catch (tokenError) {
-          console.error('Error getting push token:', tokenError);
-          // Still enable notifications even if token fails
+          // Handle errors gracefully (e.g., Android Expo Go, missing projectId, or invalid UUID)
+          const errorMessage = tokenError?.message || String(tokenError);
+          if (
+            !errorMessage.includes('not supported') && 
+            !errorMessage.includes('No valid Expo project ID') &&
+            !errorMessage.includes('Invalid uuid')
+          ) {
+            console.error('Error getting push token:', tokenError);
+          }
+          // Still enable notifications in profile even if token fails
+          // (user can add projectId later and token will be retrieved on next app start)
           await updateUserProfile(userId, {
             notificationsEnabled: true,
           });

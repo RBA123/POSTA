@@ -4,6 +4,11 @@
     "slug": "Liberta",
     "version": "1.0.0",
     "orientation": "portrait",
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,

@@ -10,6 +10,7 @@ import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
 import { useAuth } from "../contexts/AuthContext";
 import { updateUserProfile } from "../services/user.service";
+import { getExpoPushToken, isPushNotificationSupported } from "../lib/expoPushToken";
 import libertaLogo from "../assets/liberta-logo.png";
 import Colors from "../constants/Colors";
 
@@ -33,26 +34,41 @@ const NotificationsScreen: React.FC = () => {
 
       // If permissions granted and user is authenticated, get and store push token
       if (granted && user) {
-        try {
-          // Get Expo push token (projectId will be inferred from app config)
-          const tokenData = await Notifications.getExpoPushTokenAsync();
-          const expoPushToken = tokenData.data;
+        // Check if push notifications are supported before trying to get token
+        if (isPushNotificationSupported()) {
+          try {
+            // Get Expo push token with proper projectId handling
+            const tokenData = await getExpoPushToken();
+            const expoPushToken = tokenData.data;
 
-          // Update user profile with push token and enable notifications
-          await updateUserProfile(user.uid, {
-            expoPushToken,
-            notificationsEnabled: true,
-          });
+            // Update user profile with push token and enable notifications
+            await updateUserProfile(user.uid, {
+              expoPushToken,
+              notificationsEnabled: true,
+            });
 
-          console.log("✅ Push token stored:", expoPushToken);
-        } catch (tokenError) {
-          console.error("Error getting push token:", tokenError);
-          // Still enable notifications even if token fails
-          if (user) {
+            console.log("✅ Push token stored:", expoPushToken);
+          } catch (tokenError) {
+            // Handle errors gracefully (e.g., Android Expo Go, missing projectId, or invalid UUID)
+            const errorMessage = tokenError?.message || String(tokenError);
+            if (
+              !errorMessage.includes('not supported') && 
+              !errorMessage.includes('No valid Expo project ID') &&
+              !errorMessage.includes('Invalid uuid')
+            ) {
+              console.error("Error getting push token:", tokenError);
+            }
+            // Still enable notifications in profile even if token fails
+            // (user can add projectId later and token will be retrieved on next app start)
             await updateUserProfile(user.uid, {
               notificationsEnabled: true,
             });
           }
+        } else {
+          // Push notifications not supported (e.g., Expo Go), just enable in profile
+          await updateUserProfile(user.uid, {
+            notificationsEnabled: true,
+          });
         }
       }
     } catch (error) {
