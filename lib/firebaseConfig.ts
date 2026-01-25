@@ -28,5 +28,12 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "us-central1");
 
+// Log the functions configuration for debugging
+console.log('🔧 Firebase Functions initialized:', {
+  region: 'us-central1',
+  customDomain: functions.customDomain,
+  emulatorOrigin: functions.emulatorOrigin,
+});
+
 export default app;
 

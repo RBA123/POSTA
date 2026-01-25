@@ -130,14 +130,32 @@ const HomeScreen: React.FC = () => {
   };
 
   const handleConfirmBet = async (amount: number) => {
-    if (!selectedMarket || !authUser) return;
+    if (!selectedMarket || !authUser) {
+      console.error('❌ Cannot place bet:', { 
+        hasMarket: !!selectedMarket, 
+        hasAuthUser: !!authUser,
+        authUserUid: authUser?.uid 
+      });
+      Alert.alert("Error", "Debes iniciar sesión para apostar");
+      return;
+    }
 
     try {
+      console.log('🎲 Placing bet:', {
+        marketId: selectedMarket.id,
+        side: selectedSide,
+        amount,
+        userUid: authUser.uid
+      });
+      
       await placeBetHook(selectedMarket.id, selectedSide, amount);
+      
+      console.log('✅ Bet placed successfully');
       setShowBetModal(false);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (error: any) {
+      console.error('❌ Error placing bet:', error);
       Alert.alert("Error al apostar", error.message || "Por favor intenta de nuevo");
     }
   };
