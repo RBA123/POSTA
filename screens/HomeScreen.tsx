@@ -75,6 +75,14 @@ const HomeScreen: React.FC = () => {
   const markets = firestoreMarkets.map(convertMarket);
   const loading = marketsLoading || profileLoading;
 
+  // Debug: Log markets when they change
+  useEffect(() => {
+    console.log(`🏠 HomeScreen: ${markets.length} markets loaded for category "${activeCategory}"`);
+    if (markets.length > 0) {
+      console.log('First market:', markets[0].question);
+    }
+  }, [markets, activeCategory]);
+
   useEffect(() => {
     const loadCountry = async () => {
       const routeCountry = (route.params as any)?.country;

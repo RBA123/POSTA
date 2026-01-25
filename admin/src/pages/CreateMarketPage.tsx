@@ -25,7 +25,7 @@ export function CreateMarketPage() {
     watch,
   } = useForm<MarketFormData>({
     defaultValues: {
-      openAt: new Date().toISOString().slice(0, 16),
+      openAt: new Date().toISOString().slice(0, 16), // Current time
       isUrgent: false,
       category: "en_vivo",
     },
@@ -117,7 +117,7 @@ export function CreateMarketPage() {
               {...register("openAt", { required: true })}
             />
             <p className="mt-1 text-sm text-gray-500">
-              If in the past or now, the market will open automatically
+              ⚠️ If set to future time, market will be in "draft" status until this time. Set to current time for immediate opening.
             </p>
           </div>
 
