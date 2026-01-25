@@ -3,7 +3,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState } from "react";
 import { useMarket } from "../hooks/useMarkets";
+import { useDeleteMarket } from "../hooks/useDeleteMarket";
 import { SettlementModal } from "../components/SettlementModal";
+import { DeleteMarketModal } from "../components/DeleteMarketModal";
 import { Button } from "../components/ui/Button";
 import { Card, CardHeader, CardTitle } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -27,7 +29,9 @@ const statusLabels: Record<string, string> = {
 export function MarketDetailPage() {
   const { marketId } = useParams<{ marketId: string }>();
   const { data: market, isLoading, error } = useMarket(marketId || "");
+  const { mutate: deleteMarket, isPending: isDeleting, error: deleteError } = useDeleteMarket();
   const [showSettlementModal, setShowSettlementModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "N/A";
@@ -60,6 +64,10 @@ export function MarketDetailPage() {
 
   const canSettle = market.status === "open" || market.status === "locked";
 
+  const handleDeleteMarket = (marketId: string) => {
+    deleteMarket({ marketId });
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -75,16 +83,30 @@ export function MarketDetailPage() {
               {market.isUrgent && <Badge variant="danger">Urgent</Badge>}
             </div>
           </div>
-          {canSettle && (
+          <div className="flex gap-2">
+            {canSettle && (
+              <Button
+                variant="success"
+                onClick={() => setShowSettlementModal(true)}
+              >
+                Settle Market
+              </Button>
+            )}
             <Button
               variant="danger"
-              onClick={() => setShowSettlementModal(true)}
+              onClick={() => setShowDeleteModal(true)}
             >
-              Settle Market
+              Delete
             </Button>
-          )}
+          </div>
         </div>
       </div>
+
+      {deleteError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          {(deleteError as Error).message}
+        </div>
+      )}
 
       {market.description && (
         <Card className="mb-6">
@@ -200,6 +222,15 @@ export function MarketDetailPage() {
         <SettlementModal
           market={market}
           onClose={() => setShowSettlementModal(false)}
+        />
+      )}
+
+      {showDeleteModal && market && (
+        <DeleteMarketModal
+          marketId={market.id}
+          marketQuestion={market.question}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteMarket}
         />
       )}
     </div>
