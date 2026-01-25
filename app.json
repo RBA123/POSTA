@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "faef0fb9-aa3d-4665-a07a-cddfc9b49f93"
       }
     },
     "icon": "./assets/icon.png",
@@ -30,11 +30,22 @@
             "buildToolsVersion": "34.0.0"
           }
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff",
+          "sounds": []
+        }
       ]
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gabrielcastillo.Liberta"
+      "bundleIdentifier": "com.gabrielcastillo.Liberta",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,6 +58,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "gabrielcastillo"
   }
 }
