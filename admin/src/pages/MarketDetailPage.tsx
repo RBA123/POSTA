@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useState } from "react";
 import { useMarket } from "../hooks/useMarkets";
 import { useDeleteMarket } from "../hooks/useDeleteMarket";
@@ -29,7 +29,11 @@ const statusLabels: Record<string, string> = {
 export function MarketDetailPage() {
   const { marketId } = useParams<{ marketId: string }>();
   const { data: market, isLoading, error } = useMarket(marketId || "");
-  const { mutate: deleteMarket, isPending: isDeleting, error: deleteError } = useDeleteMarket();
+  const {
+    mutate: deleteMarket,
+    isPending: isDeleting,
+    error: deleteError,
+  } = useDeleteMarket();
   const [showSettlementModal, setShowSettlementModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -37,7 +41,7 @@ export function MarketDetailPage() {
     if (!timestamp) return "N/A";
     try {
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-      return format(date, "dd MMM yyyy, HH:mm", { locale: es });
+      return format(date, "MMM dd yyyy, HH:mm", { locale: enUS });
     } catch {
       return "N/A";
     }
@@ -71,14 +75,21 @@ export function MarketDetailPage() {
   return (
     <div>
       <div className="mb-6">
-        <Link to="/markets" className="text-primary-600 hover:text-primary-700 text-sm mb-4 inline-block">
+        <Link
+          to="/markets"
+          className="text-primary-600 hover:text-primary-700 text-sm mb-4 inline-block"
+        >
           ← Back to Markets
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{market.question}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {market.question}
+            </h1>
             <div className="flex items-center gap-2">
-              <Badge>{categoryLabels[market.category] || market.category}</Badge>
+              <Badge>
+                {categoryLabels[market.category] || market.category}
+              </Badge>
               <Badge>{statusLabels[market.status] || market.status}</Badge>
               {market.isUrgent && <Badge variant="danger">Urgent</Badge>}
             </div>
@@ -92,10 +103,7 @@ export function MarketDetailPage() {
                 Settle Market
               </Button>
             )}
-            <Button
-              variant="danger"
-              onClick={() => setShowDeleteModal(true)}
-            >
+            <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
               Delete
             </Button>
           </div>
@@ -158,7 +166,9 @@ export function MarketDetailPage() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Total Volume</span>
-              <span className="font-semibold">${market.totalVolume.toFixed(2)}</span>
+              <span className="font-semibold">
+                ${market.totalVolume.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Yes Volume</span>
@@ -206,7 +216,9 @@ export function MarketDetailPage() {
           {market.settledAt && (
             <div className="flex justify-between">
               <span className="text-gray-600">Settled</span>
-              <span className="font-medium">{formatDate(market.settledAt)}</span>
+              <span className="font-medium">
+                {formatDate(market.settledAt)}
+              </span>
             </div>
           )}
           {market.result && (

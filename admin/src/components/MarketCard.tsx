@@ -25,7 +25,10 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
-const statusVariants: Record<string, "default" | "success" | "warning" | "danger" | "info"> = {
+const statusVariants: Record<
+  string,
+  "default" | "success" | "warning" | "danger" | "info"
+> = {
   draft: "default",
   open: "success",
   locked: "warning",
@@ -53,13 +56,13 @@ export function MarketCard({ market }: MarketCardProps) {
               {market.question}
             </h3>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="default">{categoryLabels[market.category] || market.category}</Badge>
+              <Badge variant="default">
+                {categoryLabels[market.category] || market.category}
+              </Badge>
               <Badge variant={statusVariants[market.status] || "default"}>
                 {statusLabels[market.status] || market.status}
               </Badge>
-              {market.isUrgent && (
-                <Badge variant="danger">Urgente</Badge>
-              )}
+              {market.isUrgent && <Badge variant="danger">Urgente</Badge>}
             </div>
           </div>
         </div>
@@ -67,11 +70,15 @@ export function MarketCard({ market }: MarketCardProps) {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-sm text-gray-500">Yes Probability</p>
-            <p className="text-lg font-semibold text-green-600">{market.siProbability}%</p>
+            <p className="text-lg font-semibold text-green-600">
+              {market.siProbability}%
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">No Probability</p>
-            <p className="text-lg font-semibold text-red-600">{market.noProbability}%</p>
+            <p className="text-lg font-semibold text-red-600">
+              {market.noProbability}%
+            </p>
           </div>
         </div>
 
