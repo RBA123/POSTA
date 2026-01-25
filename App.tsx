@@ -6,9 +6,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoadingScreen } from './components/LoadingScreen';
 import { Storage } from './lib/storage';
+import { updateUserProfile } from './services/user.service';
 import { TERMS_STORAGE_KEY } from './screens/TermsAcceptanceScreen';
 
 // Screens
@@ -121,6 +123,57 @@ function AppContent() {
       }
     };
     checkTermsAcceptance();
+  }, []);
+
+  // Listen for push token changes and update Firestore
+  useEffect(() => {
+    if (!user) return;
+
+    const updatePushToken = async (tokenData: Notifications.ExpoPushToken) => {
+      try {
+        const expoPushToken = tokenData.data;
+        await updateUserProfile(user.uid, {
+          expoPushToken,
+        });
+        console.log("✅ Push token refreshed:", expoPushToken);
+      } catch (error) {
+        console.error("Error updating push token:", error);
+      }
+    };
+
+    // Get initial token
+    Notifications.getExpoPushTokenAsync()
+      .then(updatePushToken)
+      .catch((error) => {
+        console.error("Error getting initial push token:", error);
+      });
+
+    // Listen for token changes
+    const subscription = Notifications.addPushTokenListener(updatePushToken);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [user]);
+
+  // Handle notification taps (when user taps a push notification)
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      
+      if (data?.type === 'market_live' && data?.marketId) {
+        const marketId = data.marketId;
+        console.log('📱 Notification tapped for market:', marketId);
+        
+        // TODO: Navigate to market detail screen when it's implemented
+        // For now, we'll just log it. When MarketDetailScreen is added to navigation:
+        // navigation.navigate('MarketDetail', { marketId });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const handleTermsAccept = () => {

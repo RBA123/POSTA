@@ -13,10 +13,12 @@ import CountdownBanner from "../components/CountdownBanner";
 import CategoryFilter from "../components/CategoryFilter";
 import { Storage } from "../lib/storage";
 import { formatVolume } from "../lib/firestore";
+import { updateUserProfile } from "../services/user.service";
 import { useAuth } from "../hooks/useAuth";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useMarkets } from "../hooks/useMarkets";
 import { useBets } from "../hooks/useBets";
+import { useNotificationPermission } from "../hooks/useNotificationPermission";
 import libertaLogo from "../assets/liberta-logo.png";
 import Colors from "../constants/Colors";
 
@@ -61,6 +63,7 @@ const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { user: authUser } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile(authUser?.uid || null);
+  const { hasAsked, requestPermission, markAsAsked } = useNotificationPermission(authUser?.uid || null);
   const [countryCode, setCountryCode] = useState<string>("AR");
   const countryName = countryNames[countryCode] || "Argentina";
   const [activeCategory, setActiveCategory] = useState<Category>("en_vivo");
@@ -170,6 +173,64 @@ const HomeScreen: React.FC = () => {
       Alert.alert("Error", "No se pudieron cargar los mercados. Por favor intenta de nuevo.");
     }
   }, [marketsError]);
+
+  // Request notification permission for authenticated users (only once)
+  useEffect(() => {
+    // Only ask if ALL conditions are met:
+    // 1. User is authenticated
+    // 2. Profile is loaded (not loading)
+    // 3. Profile exists
+    // 4. We haven't asked before (hasAsked === false)
+    // 5. User doesn't have notifications enabled yet
+    if (
+      authUser &&
+      !profileLoading &&
+      profile &&
+      hasAsked === false &&
+      profile.notificationsEnabled !== true
+    ) {
+      // Small delay to let the screen render first (better UX)
+      const timer = setTimeout(() => {
+        Alert.alert(
+          "⚡ Activa las notificaciones",
+          "Los mercados EN VIVO de LIBERTA solo están activos por 2 minutos. No te pierdas ningún momento.",
+          [
+            {
+              text: "Ahora no",
+              style: "cancel",
+              onPress: async () => {
+                // Mark as asked so we don't ask again (user chose to skip)
+                try {
+                  await markAsAsked();
+                  // Optionally update profile to reflect user's choice
+                  if (authUser) {
+                    await updateUserProfile(authUser.uid, {
+                      notificationsEnabled: false,
+                    });
+                  }
+                } catch (error) {
+                  // Ignore errors - user chose to skip
+                }
+              },
+            },
+            {
+              text: "Activar",
+              onPress: async () => {
+                try {
+                  await requestPermission();
+                } catch (error) {
+                  Alert.alert("Error", "No se pudo activar las notificaciones. Por favor intenta de nuevo desde Configuración.");
+                }
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+      }, 1500); // 1.5 second delay after screen loads
+
+      return () => clearTimeout(timer);
+    }
+  }, [authUser, profileLoading, profile, hasAsked, requestPermission]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>

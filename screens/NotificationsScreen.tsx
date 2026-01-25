@@ -8,44 +8,68 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
+import { useAuth } from "../contexts/AuthContext";
+import { updateUserProfile } from "../services/user.service";
 import libertaLogo from "../assets/liberta-logo.png";
 import Colors from "../constants/Colors";
 
 const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEnable = async () => {
     setIsLoading(true);
 
     try {
+      // Request notification permissions
       const { status } = await Notifications.requestPermissionsAsync();
+      const granted = status === "granted";
+      
       await Storage.setItem(
         "liberta_notifications",
-        status === "granted" ? "enabled" : "disabled"
+        granted ? "enabled" : "disabled"
       );
+
+      // If permissions granted and user is authenticated, get and store push token
+      if (granted && user) {
+        try {
+          // Get Expo push token (projectId will be inferred from app config)
+          const tokenData = await Notifications.getExpoPushTokenAsync();
+          const expoPushToken = tokenData.data;
+
+          // Update user profile with push token and enable notifications
+          await updateUserProfile(user.uid, {
+            expoPushToken,
+            notificationsEnabled: true,
+          });
+
+          console.log("✅ Push token stored:", expoPushToken);
+        } catch (tokenError) {
+          console.error("Error getting push token:", tokenError);
+          // Still enable notifications even if token fails
+          if (user) {
+            await updateUserProfile(user.uid, {
+              notificationsEnabled: true,
+            });
+          }
+        }
+      }
     } catch (error) {
       console.error("Notification permission error:", error);
       await Storage.setItem("liberta_notifications", "disabled");
     }
 
-    const savedCountry = await Storage.getItem("liberta_country");
-    if (savedCountry) {
-      navigation.navigate("Main");
-    } else {
-      navigation.navigate("CountrySelection");
-    }
+    // Always navigate to Main after handling notification permission
+    // (This screen should only be accessed manually from settings, not during onboarding)
+    navigation.navigate("Main" as never);
   };
 
   const handleSkip = async () => {
     await Storage.setItem("liberta_notifications", "disabled");
 
-    const savedCountry = await Storage.getItem("liberta_country");
-    if (savedCountry) {
-      navigation.navigate("Main");
-    } else {
-      navigation.navigate("CountrySelection");
-    }
+    // Always navigate to Main after skipping
+    navigation.navigate("Main" as never);
   };
 
   return (

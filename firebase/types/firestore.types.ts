@@ -40,6 +40,7 @@ export interface User {
     marketResults: boolean;
     promotions: boolean;
   };
+  expoPushToken?: string; // Expo push notification token
 
   // Terms & Conditions
   termsAccepted: boolean;
