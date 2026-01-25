@@ -101,16 +101,19 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
         betStatus = 'refunded';
         balanceChange = betAmount;
         actualWin = 0;
+        console.log(`💰 Bet ${betDoc.id} REFUNDED - Amount: $${betAmount}`);
       } else if (betSide === result) {
         // User won
         betStatus = 'won';
         actualWin = potentialWin;
         balanceChange = potentialWin; // Net win (potentialWin includes original bet)
+        console.log(`🎉 Bet ${betDoc.id} WON - Payout: $${potentialWin}, User: ${userId}`);
       } else {
         // User lost (bet already deducted, no refund)
         betStatus = 'lost';
         actualWin = 0;
         balanceChange = 0;
+        console.log(`❌ Bet ${betDoc.id} LOST - Amount: $${betAmount}, User: ${userId}`);
       }
 
       // Update bet document
@@ -131,6 +134,13 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
           const currentBalance = userData.virtualBalance || 0;
           const newBalance = currentBalance + balanceChange;
 
+          console.log(`💵 Updating balance for user ${userId}:`, {
+            currentBalance,
+            balanceChange,
+            newBalance,
+            betStatus,
+          });
+
           currentBatch.update(userRef, {
             virtualBalance: newBalance,
             activePositions: Math.max(0, (userData.activePositions || 0) - 1),
@@ -142,6 +152,8 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
               : userData.totalLosses || 0,
             updatedAt: now,
           });
+
+          console.log(`✅ Balance update queued for user ${userId}`);
 
           // Create transaction record
           const transactionRef = db.collection('transactions').doc();
@@ -168,8 +180,12 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
               createdAt: now,
               completedAt: now,
             });
+            
+            console.log(`📝 Transaction created: ${transactionType} - $${balanceChange}`);
           }
         }
+      } else {
+        console.log(`⚠️ No balance change for bet ${betDoc.id} (user lost)`);
       }
 
       batchCount++;
@@ -189,9 +205,11 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
     }
 
     // Execute all batches
+    console.log(`🚀 Committing ${batches.length} batch(es) with ${settledCount} bet(s)`);
     for (const batch of batches) {
       await batch.commit();
     }
+    console.log(`✅ All batches committed successfully`);
 
     // Send notifications to users (async, don't wait)
     userBetsSnapshot.docs.forEach(async (betDoc) => {
@@ -216,6 +234,8 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
       });
     });
 
+    console.log(`✅ Market ${marketId} settled with result: ${result}. Settled ${settledCount} bets.`);
+
     return {
       success: true,
       message: `Market settled successfully`,
@@ -223,7 +243,7 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
       result,
     };
   } catch (error: any) {
-    console.error('Error settling market:', error);
+    console.error('❌ Error settling market:', error);
     
     if (error instanceof functions.https.HttpsError) {
       throw error;

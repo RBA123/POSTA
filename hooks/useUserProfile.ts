@@ -34,11 +34,19 @@ export function useUserProfile(userId: string | null): UseUserProfileReturn {
       return;
     }
 
+    console.log('👤 [useUserProfile] Subscribing to user:', userId);
     setLoading(true);
     setError(null);
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToUser(userId, (user) => {
+      console.log('👤 [useUserProfile] User profile updated:', {
+        hasUser: !!user,
+        balance: user?.virtualBalance,
+        totalPositions: user?.totalPositions,
+        activePositions: user?.activePositions,
+      });
+      
       setProfile(user);
       
       // Calculate stats from profile
