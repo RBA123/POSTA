@@ -187,7 +187,15 @@ export function subscribeToUserBets(
   const q = query(betsRef, ...constraints);
   
   return onSnapshot(q, (snapshot) => {
-    const bets = snapshot.docs.map((doc) => doc.data() as UserBet);
+    const bets = snapshot.docs.map((doc) => {
+      const data = doc.data() as UserBet;
+      // Ensure the document has an id
+      if (!data.id) {
+        data.id = doc.id;
+      }
+      return data;
+    });
+    console.log(`💰 User bets updated: ${bets.length} bets`, bets.map(b => ({ id: b.id, marketId: b.marketId })));
     callback(bets);
   });
 }

@@ -54,6 +54,30 @@ export const placeBet = functions.region('us-central1').https.onCall(async (data
       throw new functions.https.HttpsError('failed-precondition', 'Insufficient balance');
     }
 
+    // RATE LIMITING: Check if user placed a bet in the last 10 seconds
+    const recentBetsSnapshot = await db.collection('userBets')
+      .where('userId', '==', userId)
+      .orderBy('placedAt', 'desc')
+      .limit(1)
+      .get();
+
+    if (!recentBetsSnapshot.empty) {
+      const lastBet = recentBetsSnapshot.docs[0].data();
+      const lastBetTime = lastBet.placedAt.toMillis();
+      const timeSinceLastBet = Date.now() - lastBetTime;
+      
+      if (timeSinceLastBet < 10000) { // 10 seconds in milliseconds
+        const secondsLeft = Math.ceil((10000 - timeSinceLastBet) / 1000);
+        console.log(`⏱️ Rate limit hit for user ${userId}: last bet was ${timeSinceLastBet}ms ago`);
+        throw new functions.https.HttpsError(
+          'resource-exhausted', 
+          `Por favor espera ${secondsLeft} segundo${secondsLeft > 1 ? 's' : ''} antes de apostar de nuevo`
+        );
+      }
+    }
+
+    console.log(`✅ Rate limit passed for user ${userId}`);
+
     // Get market document
     const marketRef = db.collection('markets').doc(marketId);
     const marketDoc = await marketRef.get();

@@ -112,6 +112,11 @@ export async function placeBet(data: PlaceBetInput): Promise<PlaceBetResult> {
       );
     }
 
+    if (error.code === "functions/resource-exhausted") {
+      // Rate limit error - use the server's message
+      throw new Error(error.message || "Por favor espera antes de apostar de nuevo.");
+    }
+
     throw new Error(
       error.message ||
         "Error al realizar la apuesta. Por favor intenta de nuevo.",
