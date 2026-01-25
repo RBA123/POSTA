@@ -36,7 +36,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 export interface ButtonProps extends VariantProps<typeof buttonVariants> {
@@ -61,7 +61,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
       textClassName,
       ...props
     },
-    ref
+    ref,
   ) => {
     const isGradient =
       variant === "default" || variant === "pillActive" || variant === "hero";
@@ -73,6 +73,8 @@ export const Button = React.forwardRef<any, ButtonProps>(
           ? "text-white"
           : variant === "no" || variant === "destructive"
             ? "text-white"
+            : variant === "pillActive"
+              ? "text-white"
             : variant === "secondary" || variant === "pill"
               ? "text-secondary-foreground"
               : "text-primary-foreground";
@@ -104,7 +106,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
                   "font-bold",
                   textSizeClass,
                   textColor,
-                  textClassName
+                  textClassName,
                 )}
               >
                 {children}
@@ -119,7 +121,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
                           "font-bold",
                           textSizeClass,
                           textColor,
-                          textClassName
+                          textClassName,
                         )}
                       >
                         {child}
@@ -134,7 +136,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
                       className: cn(
                         textChild.props.className,
                         textSizeClass,
-                        "font-bold"
+                        "font-bold",
                       ),
                     });
                   }
@@ -155,7 +157,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
         className={cn(
           buttonVariants({ variant, size }),
           disabled && "opacity-50",
-          className
+          className,
         )}
         style={{ borderRadius: isPill ? 9999 : 12 }}
         {...props}
@@ -178,7 +180,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
         {buttonContent}
       </Pressable>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

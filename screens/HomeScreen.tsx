@@ -10,6 +10,7 @@ import BetModal from "../components/BetModal";
 import ConfettiAnimation from "../components/ConfettiAnimation";
 import BottomNav from "../components/BottomNav";
 import CountdownBanner from "../components/CountdownBanner";
+import CategoryFilter from "../components/CategoryFilter";
 import { Storage } from "../lib/storage";
 import { formatVolume } from "../lib/firestore";
 import { useAuth } from "../hooks/useAuth";
@@ -182,32 +183,11 @@ const HomeScreen: React.FC = () => {
         )}
 
         {/* Category Filter */}
-        <View className="py-4">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 0 }}
-          >
-            <View className="flex-row gap-2">
-              {categories.map((category) => {
-                const isActive = activeCategory === category.id;
-                return (
-                  <Button
-                    key={category.id}
-                    variant={isActive ? "pillActive" : "pill"}
-                    size="pill"
-                    onPress={() => {
-                      setActiveCategory(category.id);
-                    }}
-                  >
-                    {category.label}
-                  </Button>
-                );
-              })}
-            </View>
-          </ScrollView>
-        </View>
+        <CategoryFilter
+          options={categories}
+          activeFilter={activeCategory}
+          onFilterChange={setActiveCategory}
+        />
 
         {/* Market Cards */}
         <View className="gap-4 pb-4 px-4">

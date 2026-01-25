@@ -4,8 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNav from "../components/BottomNav";
+import CategoryFilter from "../components/CategoryFilter";
 import { Card } from "../components/ui/Card";
-import { Button } from "../components/ui/Button";
 import { formatRelativeTime } from "../lib/firestore";
 import { useAuth } from "../hooks/useAuth";
 import { useBets } from "../hooks/useBets";
@@ -32,6 +32,14 @@ const ActivityScreen: React.FC = () => {
     await refetch();
     setRefreshing(false);
   };
+
+  const filterOptions = [
+    { id: undefined, label: "Todas" },
+    { id: "pending" as BetStatus, label: "Pendientes" },
+    { id: "won" as BetStatus, label: "Ganadas" },
+    { id: "lost" as BetStatus, label: "Perdidas" },
+  ];
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}
@@ -43,40 +51,11 @@ const ActivityScreen: React.FC = () => {
       </View>
 
       {/* Filter Buttons */}
-      <View className="px-4 py-3 border-b border-border">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row gap-2">
-            <Button
-              variant={filterStatus === undefined ? "pillActive" : "pill"}
-              size="pill"
-              onPress={() => setFilterStatus(undefined)}
-            >
-              <Text>Todas</Text>
-            </Button>
-            <Button
-              variant={filterStatus === "pending" ? "pillActive" : "pill"}
-              size="pill"
-              onPress={() => setFilterStatus("pending")}
-            >
-              <Text>Pendientes</Text>
-            </Button>
-            <Button
-              variant={filterStatus === "won" ? "pillActive" : "pill"}
-              size="pill"
-              onPress={() => setFilterStatus("won")}
-            >
-              <Text>Ganadas</Text>
-            </Button>
-            <Button
-              variant={filterStatus === "lost" ? "pillActive" : "pill"}
-              size="pill"
-              onPress={() => setFilterStatus("lost")}
-            >
-              <Text>Perdidas</Text>
-            </Button>
-          </View>
-        </ScrollView>
-      </View>
+      <CategoryFilter
+        options={filterOptions}
+        activeFilter={filterStatus}
+        onFilterChange={setFilterStatus}
+      />
 
       {/* Activity List */}
       <ScrollView
