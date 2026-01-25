@@ -18,6 +18,16 @@ interface MarketFormData {
 
 export function CreateMarketPage() {
   const { mutate: createMarket, isPending, error } = useCreateMarket();
+  
+  // Helper to get current local datetime in the format datetime-local expects
+  const getCurrentLocalDateTime = () => {
+    const now = new Date();
+    // Subtract timezone offset to get local time
+    const offset = now.getTimezoneOffset() * 60000;
+    const localTime = new Date(now.getTime() - offset);
+    return localTime.toISOString().slice(0, 16);
+  };
+
   const {
     register,
     handleSubmit,
@@ -25,7 +35,8 @@ export function CreateMarketPage() {
     watch,
   } = useForm<MarketFormData>({
     defaultValues: {
-      openAt: new Date().toISOString().slice(0, 16), // Current time
+      // Get current time in user's local timezone for datetime-local input
+      openAt: getCurrentLocalDateTime(),
       isUrgent: false,
       category: "en_vivo",
     },
@@ -33,6 +44,12 @@ export function CreateMarketPage() {
 
   const category = watch("category");
   const isUrgent = watch("isUrgent");
+  const openAtValue = watch("openAt");
+
+  // Helper to show if market will open immediately
+  const willOpenImmediately = openAtValue 
+    ? new Date(openAtValue).getTime() <= Date.now()
+    : true;
 
   const onSubmit = (data: MarketFormData) => {
     const tagsArray = data.tags
@@ -116,9 +133,20 @@ export function CreateMarketPage() {
               type="datetime-local"
               {...register("openAt", { required: true })}
             />
-            <p className="mt-1 text-sm text-gray-500">
-              ⚠️ If set to future time, market will be in "draft" status until this time. Set to current time for immediate opening.
-            </p>
+            <div className="mt-1 text-sm">
+              {willOpenImmediately ? (
+                <p className="text-green-600 font-medium">
+                  ✅ Market will open immediately
+                </p>
+              ) : (
+                <p className="text-amber-600 font-medium">
+                  ⏳ Market will be in "draft" status until this time
+                </p>
+              )}
+              <p className="text-gray-500 mt-1">
+                Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}
+              </p>
+            </div>
           </div>
 
           {(category === "en_vivo" || isUrgent) && (
