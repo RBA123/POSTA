@@ -109,6 +109,7 @@ const HomeScreen: React.FC = () => {
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [selectedSide, setSelectedSide] = useState<"si" | "no">("si");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isBetting, setIsBetting] = useState(false);
 
   // Use bets hook for placing bets
   const { placeBet: placeBetHook } = useBets(authUser?.uid || null);
@@ -141,6 +142,7 @@ const HomeScreen: React.FC = () => {
     }
 
     try {
+      setIsBetting(true);
       console.log('🎲 Placing bet:', {
         marketId: selectedMarket.id,
         side: selectedSide,
@@ -157,6 +159,8 @@ const HomeScreen: React.FC = () => {
     } catch (error: any) {
       console.error('❌ Error placing bet:', error);
       Alert.alert("Error al apostar", error.message || "Por favor intenta de nuevo");
+    } finally {
+      setIsBetting(false);
     }
   };
 
@@ -263,6 +267,7 @@ const HomeScreen: React.FC = () => {
           balance={balance}
           onClose={() => setShowBetModal(false)}
           onConfirm={handleConfirmBet}
+          isLoading={isBetting}
         />
       )}
 

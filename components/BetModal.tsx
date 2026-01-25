@@ -26,6 +26,7 @@ interface BetModalProps {
   balance: number;
   onClose: () => void;
   onConfirm: (amount: number) => void;
+  isLoading?: boolean;
 }
 
 const presetAmounts = [5, 10, 25, 50];
@@ -36,6 +37,7 @@ const BetModal: React.FC<BetModalProps> = ({
   balance,
   onClose,
   onConfirm,
+  isLoading = false,
 }) => {
   const [amount, setAmount] = useState("10");
 
@@ -166,7 +168,8 @@ const BetModal: React.FC<BetModalProps> = ({
               size="lg"
               className="w-full"
               onPress={handleConfirm}
-              disabled={amountNum <= 0 || amountNum > balance}
+              disabled={amountNum <= 0 || amountNum > balance || isLoading}
+              loading={isLoading}
             >
               <Text className="text-white font-semibold">
                 Confirmar apuesta
