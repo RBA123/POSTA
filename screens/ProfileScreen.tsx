@@ -23,7 +23,7 @@ const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user: authUser, signOut } = useAuth();
   const { profile, stats, loading, updateProfile } = useUserProfile(
-    authUser?.uid || null
+    authUser?.uid || null,
   );
 
   // No manual navigation needed - AppContent handles routing based on auth state
@@ -66,14 +66,14 @@ const ProfileScreen: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      await Storage.removeItem("liberta_user");
-      await Storage.removeItem("liberta_country");
-      await Storage.removeItem("liberta_notifications");
+      await Storage.removeItem("posta_user");
+      await Storage.removeItem("posta_country");
+      await Storage.removeItem("posta_notifications");
       // Navigation will happen automatically when auth state changes
     } catch (error: any) {
       Alert.alert(
         "Error",
-        "No se pudo cerrar sesión. Por favor intenta de nuevo."
+        "No se pudo cerrar sesión. Por favor intenta de nuevo.",
       );
     }
   };
@@ -258,7 +258,7 @@ const ProfileScreen: React.FC = () => {
 
           {/* Version */}
           <Text className="text-center text-xs text-muted-foreground mt-8">
-            LIBERTA v1.0.0
+            POSTA v1.0.0
           </Text>
         </ScrollView>
 

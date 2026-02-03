@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
-import libertaLogo from "../assets/liberta-logo.png";
+import postaLogo from "../assets/posta-logo.png";
 import Colors from "../constants/Colors";
 
 const TERMS_STORAGE_KEY = "liberta_terms_accepted";
@@ -40,8 +40,8 @@ const TermsAcceptanceScreen: React.FC<TermsAcceptanceScreenProps> = ({
       <View className="flex-1 bg-background px-6 py-8">
         {/* Header */}
         <View className="flex-row items-center justify-center gap-3 mb-8">
-          <Image source={libertaLogo} className="w-12 h-12 rounded-xl" />
-          <Text className="text-2xl font-bold text-foreground">LIBERTA</Text>
+          <Image source={postaLogo} className="w-12 h-12 rounded-xl" />
+          <Text className="text-2xl font-bold text-foreground">POSTA</Text>
         </View>
 
         {/* Title */}
@@ -75,13 +75,15 @@ const TermsAcceptanceScreen: React.FC<TermsAcceptanceScreenProps> = ({
             </Text>
             {"\n"}
             Los términos y condiciones completos se agregarán aquí. Este es un
-            placeholder temporal para la funcionalidad de aceptación de términos.
+            placeholder temporal para la funcionalidad de aceptación de
+            términos.
             {"\n\n"}
             Al aceptar estos términos, confirmas que has leído y comprendido las
-            condiciones de uso de LIBERTA y aceptas cumplir con todas las políticas
-            y regulaciones aplicables.
+            condiciones de uso de POSTA y aceptas cumplir con todas las
+            políticas y regulaciones aplicables.
             {"\n\n"}
-            Por favor, revisa cuidadosamente todos los términos antes de continuar.
+            Por favor, revisa cuidadosamente todos los términos antes de
+            continuar.
           </Text>
         </ScrollView>
 

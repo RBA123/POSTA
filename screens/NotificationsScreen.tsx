@@ -10,8 +10,11 @@ import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
 import { useAuth } from "../contexts/AuthContext";
 import { updateUserProfile } from "../services/user.service";
-import { getExpoPushToken, isPushNotificationSupported } from "../lib/expoPushToken";
-import libertaLogo from "../assets/liberta-logo.png";
+import {
+  getExpoPushToken,
+  isPushNotificationSupported,
+} from "../lib/expoPushToken";
+import postaLogo from "../assets/posta-logo.png";
 import Colors from "../constants/Colors";
 
 const NotificationsScreen: React.FC = () => {
@@ -26,10 +29,10 @@ const NotificationsScreen: React.FC = () => {
       // Request notification permissions
       const { status } = await Notifications.requestPermissionsAsync();
       const granted = status === "granted";
-      
+
       await Storage.setItem(
-        "liberta_notifications",
-        granted ? "enabled" : "disabled"
+        "posta_notifications",
+        granted ? "enabled" : "disabled",
       );
 
       // If permissions granted and user is authenticated, get and store push token
@@ -52,9 +55,9 @@ const NotificationsScreen: React.FC = () => {
             // Handle errors gracefully (e.g., Android Expo Go, missing projectId, or invalid UUID)
             const errorMessage = tokenError?.message || String(tokenError);
             if (
-              !errorMessage.includes('not supported') && 
-              !errorMessage.includes('No valid Expo project ID') &&
-              !errorMessage.includes('Invalid uuid')
+              !errorMessage.includes("not supported") &&
+              !errorMessage.includes("No valid Expo project ID") &&
+              !errorMessage.includes("Invalid uuid")
             ) {
               console.error("Error getting push token:", tokenError);
             }
@@ -73,7 +76,7 @@ const NotificationsScreen: React.FC = () => {
       }
     } catch (error) {
       console.error("Notification permission error:", error);
-      await Storage.setItem("liberta_notifications", "disabled");
+      await Storage.setItem("posta_notifications", "disabled");
     }
 
     // Always navigate to Main after handling notification permission
@@ -82,7 +85,7 @@ const NotificationsScreen: React.FC = () => {
   };
 
   const handleSkip = async () => {
-    await Storage.setItem("liberta_notifications", "disabled");
+    await Storage.setItem("posta_notifications", "disabled");
 
     // Always navigate to Main after skipping
     navigation.navigate("Main" as never);
@@ -93,8 +96,8 @@ const NotificationsScreen: React.FC = () => {
       {/* Header with skip */}
       <View className="flex-row items-center justify-between mb-8">
         <View className="flex-row items-center gap-3">
-          <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
-          <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
+          <Image source={postaLogo} className="w-10 h-10 rounded-xl" />
+          <Text className="text-xl font-bold text-foreground">POSTA</Text>
         </View>
         <Pressable onPress={handleSkip}>
           <Ionicons name="close" size={24} color={Colors.foregroundMuted} />
@@ -175,16 +178,16 @@ const NotificationsScreen: React.FC = () => {
           {/* Example notification */}
           <View className="w-full p-4 bg-muted/50 rounded-[12px] border border-border mb-8 overflow-hidden">
             <View className="flex-row items-center gap-3">
-              <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
+              <Image source={postaLogo} className="w-10 h-10 rounded-xl" />
               <View className="flex-1">
                 <View className="flex-row items-center justify-between mb-1">
                   <Text className="font-semibold text-foreground text-sm">
-                    LIBERTA
+                    POSTA
                   </Text>
                   <Text className="text-xs text-muted-foreground">ahora</Text>
                 </View>
                 <Text className="text-sm text-foreground">
-                  ¡Momento LIBERTA! ⏱️ 2:00 — ¿Messi mete el penal? (Sí/No)
+                  ¡Momento POSTA! ⏱️ 2:00 — ¿Messi mete el penal? (Sí/No)
                 </Text>
               </View>
             </View>

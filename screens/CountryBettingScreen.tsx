@@ -58,7 +58,7 @@ const CountryBettingScreen: React.FC<Props> = ({ navigation, route }) => {
     setLoadingBet(betKey);
 
     try {
-      const result = await placeBet(market.id, side, amount);
+      const result = await placeBet(market.id, side, amount, country.code);
 
       if (result.success) {
         Alert.alert(

@@ -26,7 +26,7 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { useMarkets } from "../hooks/useMarkets";
 import { useBets } from "../hooks/useBets";
 import { useNotificationPermission } from "../hooks/useNotificationPermission";
-import libertaLogo from "../assets/liberta-logo.png";
+import postaLogo from "../assets/posta-logo.png";
 import Colors from "../constants/Colors";
 
 import { Market, Category } from "../types";
@@ -108,7 +108,7 @@ const HomeScreen: React.FC = () => {
       if (routeCountry) {
         setCountryCode(routeCountry);
       } else {
-        const savedCountry = await Storage.getItem("liberta_country");
+        const savedCountry = await Storage.getItem("posta_country");
         if (savedCountry) {
           setCountryCode(savedCountry);
         }
@@ -228,7 +228,7 @@ const HomeScreen: React.FC = () => {
       const timer = setTimeout(() => {
         Alert.alert(
           "⚡ Activa las notificaciones",
-          "Los mercados EN VIVO de LIBERTA solo están activos por 2 minutos. No te pierdas ningún momento.",
+          "Los mercados EN VIVO de POSTA solo están activos por 2 minutos. No te pierdas ningún momento.",
           [
             {
               text: "Ahora no",
@@ -279,9 +279,9 @@ const HomeScreen: React.FC = () => {
       <View className="bg-background border-b border-border px-6 py-4">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
-            <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
+            <Image source={postaLogo} className="w-10 h-10 rounded-xl" />
             <View>
-              <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
+              <Text className="text-xl font-bold text-foreground">POSTA</Text>
               <Text className="text-xs text-muted-foreground">
                 {countryName}
               </Text>

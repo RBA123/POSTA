@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, Image, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { useAuth } from "../hooks/useAuth";
-import libertaLogo from "../assets/liberta-logo.png";
+import postaLogo from "../assets/posta-logo.png";
 import Colors from "../constants/Colors";
 
 const WelcomeScreen: React.FC = () => {
@@ -31,13 +40,16 @@ const WelcomeScreen: React.FC = () => {
       await signIn(email.trim(), password);
       // Navigation will happen automatically via auth state change
     } catch (err: any) {
-      Alert.alert("Error al iniciar sesión", err.message || "Por favor intenta de nuevo");
+      Alert.alert(
+        "Error al iniciar sesión",
+        err.message || "Por favor intenta de nuevo",
+      );
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      className="flex-1 bg-background" 
+    <KeyboardAvoidingView
+      className="flex-1 bg-background"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
@@ -50,12 +62,12 @@ const WelcomeScreen: React.FC = () => {
           <View className="flex-col items-center w-full max-w-xs">
             {/* Logo */}
             <View className="mb-6">
-              <Image source={libertaLogo} className="w-24 h-24 rounded-3xl" />
+              <Image source={postaLogo} className="w-24 h-24 rounded-3xl" />
             </View>
 
             {/* Brand Name */}
             <Text className="text-5xl font-black tracking-tight text-foreground mb-4">
-              LIBERTA
+              POSTA
             </Text>
 
             {/* Tagline */}
@@ -93,12 +105,16 @@ const WelcomeScreen: React.FC = () => {
                   loading={loading}
                   className="w-full"
                 >
-                  <Text className="text-white font-semibold">Iniciar sesión</Text>
+                  <Text className="text-white font-semibold">
+                    Iniciar sesión
+                  </Text>
                 </Button>
                 <Pressable onPress={() => setShowLogin(false)}>
                   <Text className="text-center text-muted-foreground">
                     ¿No tienes cuenta?{" "}
-                    <Text className="text-primary font-semibold">Crear cuenta</Text>
+                    <Text className="text-primary font-semibold">
+                      Crear cuenta
+                    </Text>
                   </Text>
                 </Pressable>
               </View>
@@ -124,7 +140,9 @@ const WelcomeScreen: React.FC = () => {
                 <Pressable onPress={() => setShowLogin(true)} className="mt-4">
                   <Text className="text-center text-muted-foreground">
                     ¿Ya tienes cuenta?{" "}
-                    <Text className="text-primary font-semibold">Iniciar sesión</Text>
+                    <Text className="text-primary font-semibold">
+                      Iniciar sesión
+                    </Text>
                   </Text>
                 </Pressable>
               </>
