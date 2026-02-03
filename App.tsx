@@ -281,12 +281,15 @@ export default function App() {
       try {
         Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 
-        const apiKey = Platform.OS === "ios" 
-          ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
-          : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
+        const apiKey =
+          Platform.OS === "ios"
+            ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
+            : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
 
         if (!apiKey) {
-          console.error("❌ RevenueCat API key not found in environment variables");
+          console.error(
+            "❌ RevenueCat API key not found in environment variables",
+          );
           return;
         }
 

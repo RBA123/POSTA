@@ -93,7 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await purchaseService.loginUser(authUser.uid);
           console.log("✅ [AuthContext] User logged into RevenueCat");
         } catch (rcError) {
-          console.error("⚠️ [AuthContext] Failed to login to RevenueCat:", rcError);
+          console.error(
+            "⚠️ [AuthContext] Failed to login to RevenueCat:",
+            rcError,
+          );
           // Continue even if RevenueCat login fails
         }
 
@@ -241,16 +244,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setError(null);
       setLoading(true);
-      
+
       // Log out from RevenueCat first
       try {
         await purchaseService.logoutUser();
         console.log("✅ [AuthContext] User logged out from RevenueCat");
       } catch (rcError) {
-        console.error("⚠️ [AuthContext] Failed to logout from RevenueCat:", rcError);
+        console.error(
+          "⚠️ [AuthContext] Failed to logout from RevenueCat:",
+          rcError,
+        );
         // Continue even if RevenueCat logout fails
       }
-      
+
       await signOut();
       setUser(null);
       setProfileExists(false);
