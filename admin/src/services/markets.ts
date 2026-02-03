@@ -1,6 +1,14 @@
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../lib/firebase";
 
+export interface CountryBet {
+  code: string;
+  name: string;
+  flag: string;
+  siProbability: number;
+  noProbability: number;
+}
+
 export interface CreateMarketData {
   question: string;
   description?: string;
@@ -10,6 +18,7 @@ export interface CreateMarketData {
   isUrgent?: boolean;
   tags?: string[];
   imageUrl?: string;
+  countryBets?: CountryBet[];
 }
 
 export interface SettleMarketData {
@@ -28,10 +37,14 @@ const deleteMarketFunction = httpsCallable(functions, "deleteMarket");
 export async function createMarket(data: CreateMarketData) {
   try {
     const result = await createMarketFunction(data);
-    return result.data as { success: boolean; marketId: string; status: string };
+    return result.data as {
+      success: boolean;
+      marketId: string;
+      status: string;
+    };
   } catch (error: any) {
     throw new Error(
-      error.message || "Error creating market. Please try again."
+      error.message || "Error creating market. Please try again.",
     );
   }
 }
@@ -47,7 +60,7 @@ export async function settleMarket(data: SettleMarketData) {
     };
   } catch (error: any) {
     throw new Error(
-      error.message || "Error settling market. Please try again."
+      error.message || "Error settling market. Please try again.",
     );
   }
 }
@@ -61,7 +74,7 @@ export async function deleteMarket(data: DeleteMarketData) {
     };
   } catch (error: any) {
     throw new Error(
-      error.message || "Error deleting market. Please try again."
+      error.message || "Error deleting market. Please try again.",
     );
   }
 }

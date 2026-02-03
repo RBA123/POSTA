@@ -1,16 +1,16 @@
 /**
  * Bet Service
- * 
+ *
  * Betting operations and Cloud Functions calls
  */
 
 import { placeBet as placeBetFunction, PlaceBetResult } from "../lib/functions";
-import {
-  getUserBets,
-  subscribeToUserBets,
-  getMarket,
-} from "../lib/firestore";
-import type { UserBet, BetStatus, PlaceBetInput } from "../firebase/types/firestore.types";
+import { getUserBets, subscribeToUserBets, getMarket } from "../lib/firestore";
+import type {
+  UserBet,
+  BetStatus,
+  PlaceBetInput,
+} from "../firebase/types/firestore.types";
 
 // ============================================================================
 // BET OPERATIONS
@@ -23,7 +23,8 @@ import type { UserBet, BetStatus, PlaceBetInput } from "../firebase/types/firest
 export async function placeBet(
   marketId: string,
   side: "si" | "no",
-  amount: number
+  amount: number,
+  countryCode?: string,
 ): Promise<PlaceBetResult> {
   try {
     // Validate inputs
@@ -59,13 +60,14 @@ export async function placeBet(
       marketId,
       side,
       amount,
+      countryCode,
     });
 
     return result;
   } catch (error: any) {
     throw new Error(
       error.message ||
-        "Error al realizar la apuesta. Por favor intenta de nuevo."
+        "Error al realizar la apuesta. Por favor intenta de nuevo.",
     );
   }
 }
@@ -76,7 +78,7 @@ export async function placeBet(
  */
 export async function getUserBetsList(
   userId: string,
-  status?: BetStatus
+  status?: BetStatus,
 ): Promise<UserBet[]> {
   try {
     return await getUserBets(userId, status);
@@ -92,7 +94,7 @@ export async function getUserBetsList(
 export function subscribeToUserBetsList(
   userId: string,
   status: BetStatus | undefined,
-  callback: (bets: UserBet[]) => void
+  callback: (bets: UserBet[]) => void,
 ) {
   try {
     return subscribeToUserBets(userId, status, callback);
@@ -111,7 +113,7 @@ export async function getBetById(betId: string): Promise<UserBet | null> {
     // For now, we'll need to query - this is a limitation
     // In practice, you'd typically have the userId from context
     throw new Error(
-      "getBetById requires userId. Use getUserBets and filter instead."
+      "getBetById requires userId. Use getUserBets and filter instead.",
     );
   } catch (error: any) {
     throw new Error("Error al obtener la apuesta.");
@@ -134,7 +136,7 @@ export async function getPendingBetsCount(userId: string): Promise<number> {
  * Get user's total potential winnings from pending bets
  */
 export async function getTotalPotentialWinnings(
-  userId: string
+  userId: string,
 ): Promise<number> {
   try {
     const bets = await getUserBets(userId, "pending");
@@ -143,4 +145,3 @@ export async function getTotalPotentialWinnings(
     return 0;
   }
 }
-

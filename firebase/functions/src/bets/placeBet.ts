@@ -24,7 +24,7 @@ export const placeBet = functions
     }
 
     const userId = context.auth.uid;
-    const { marketId, side, amount } = data;
+    const { marketId, side, amount, countryCode } = data;
 
     // Validate input
     if (!marketId || !side || !amount) {
@@ -126,9 +126,28 @@ export const placeBet = functions
       }
 
       // Calculate probability and potential win
-      const probability =
-        side === "si" ? marketData.siProbability : marketData.noProbability;
-      
+      let probability: number;
+
+      if (countryCode && marketData.countryBets) {
+        // Country-specific bet
+        const countryBet = marketData.countryBets.find(
+          (cb: any) => cb.code === countryCode,
+        );
+
+        if (!countryBet) {
+          throw new functions.https.HttpsError(
+            "invalid-argument",
+            `Country code ${countryCode} not found in market`,
+          );
+        }
+
+        probability =
+          side === "si" ? countryBet.siProbability : countryBet.noProbability;
+      } else {
+        // Regular bet
+        probability =
+          side === "si" ? marketData.siProbability : marketData.noProbability;
+      }
       // Note: Probability should never be 0% due to minimum probability enforcement in odds calculation
       // This allows contrarian bets even when market consensus is heavily one-sided
       const potentialWin = amount / (probability / 100);
@@ -153,6 +172,7 @@ export const placeBet = functions
         amount,
         probability,
         potentialWin,
+        countryCode: countryCode || undefined,
         status: "pending",
         placedAt: now,
         createdAt: now,
@@ -167,6 +187,7 @@ export const placeBet = functions
         amount,
         probability,
         potentialWin,
+        countryCode: countryCode || undefined,
         placedAt: now,
       });
 

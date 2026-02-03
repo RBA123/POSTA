@@ -119,6 +119,15 @@ export type MarketStatus =
   | "cancelled";
 export type MarketResult = "si" | "no" | "cancelled";
 
+// Country-specific betting
+export interface CountryBet {
+  code: string;
+  name: string;
+  flag: string;
+  siProbability: number;
+  noProbability: number;
+}
+
 export interface Market {
   id: string; // Auto-generated
 
@@ -130,6 +139,9 @@ export interface Market {
   // Probabilities (updated dynamically)
   siProbability: number; // 0-100
   noProbability: number; // 0-100
+
+  // Country-specific betting (optional)
+  countryBets?: CountryBet[]; // For multi-country markets
 
   // Volume & Stats
   totalVolume: number; // Total USD bet
@@ -176,6 +188,8 @@ export interface MarketBet {
   probability: number; // Snapshot of si/noProbability
   potentialWin: number; // Calculated payout
 
+  countryCode?: string; // For country-specific bets
+
   placedAt: Timestamp;
 }
 
@@ -199,6 +213,7 @@ export interface UserBet {
   amount: number;
   probability: number;
   potentialWin: number;
+  countryCode?: string; // For country-specific bets
 
   // Status
   status: BetStatus;

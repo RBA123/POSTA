@@ -1,9 +1,18 @@
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useCreateMarket } from "../hooks/useCreateMarket";
 import { Button } from "../components/ui/Button";
 import { Input, Textarea } from "../components/ui/Input";
 import { Card, CardHeader, CardTitle } from "../components/ui/Card";
 import type { MarketCategory } from "../types";
+
+interface CountryBet {
+  code: string;
+  name: string;
+  flag: string;
+  siProbability: number;
+  noProbability: number;
+}
 
 interface MarketFormData {
   question: string;
@@ -18,7 +27,16 @@ interface MarketFormData {
 
 export function CreateMarketPage() {
   const { mutate: createMarket, isPending, error } = useCreateMarket();
-  
+  const [hasCountryBets, setHasCountryBets] = useState(false);
+  const [countries, setCountries] = useState<CountryBet[]>([]);
+  const [newCountry, setNewCountry] = useState({
+    code: "",
+    name: "",
+    flag: "",
+    siProbability: 50,
+    noProbability: 50,
+  });
+
   // Helper to get current local datetime in the format datetime-local expects
   const getCurrentLocalDateTime = () => {
     const now = new Date();
@@ -49,7 +67,7 @@ export function CreateMarketPage() {
   const lockAtValue = watch("lockAt");
 
   // Helper to show if market will open immediately
-  const willOpenImmediately = openAtValue 
+  const willOpenImmediately = openAtValue
     ? new Date(openAtValue).getTime() <= Date.now()
     : true;
 
@@ -75,16 +93,16 @@ export function CreateMarketPage() {
 
     const parts: string[] = [];
     if (days > 0) {
-      parts.push(`${days} day${days > 1 ? 's' : ''}`);
+      parts.push(`${days} day${days > 1 ? "s" : ""}`);
     }
     if (remainingHours > 0) {
-      parts.push(`${remainingHours} hour${remainingHours > 1 ? 's' : ''}`);
+      parts.push(`${remainingHours} hour${remainingHours > 1 ? "s" : ""}`);
     }
     if (minutes > 0) {
-      parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+      parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
     }
 
-    return parts.length > 0 ? parts.join(', ') : '0 minutes';
+    return parts.length > 0 ? parts.join(", ") : "0 minutes";
   };
 
   const eventDuration = getEventDuration();
@@ -92,24 +110,25 @@ export function CreateMarketPage() {
   // Helper to adjust lockAt time relative to current lockAt value (or now if not set)
   const adjustLockAtTime = (minutes: number) => {
     // Get current lockAt value or use now as base
-    const baseTime = lockAtValue 
-      ? new Date(lockAtValue)
-      : new Date();
-    
+    const baseTime = lockAtValue ? new Date(lockAtValue) : new Date();
+
     // Adjust the time by adding/subtracting minutes
     const adjustedTime = new Date(baseTime.getTime() + minutes * 60 * 1000);
-    
+
     // Convert to datetime-local format (local time, not UTC)
     const offset = adjustedTime.getTimezoneOffset() * 60000;
     const localTime = new Date(adjustedTime.getTime() - offset);
     const formattedTime = localTime.toISOString().slice(0, 16);
-    
+
     setValue("lockAt", formattedTime);
   };
 
   const onSubmit = (data: MarketFormData) => {
     const tagsArray = data.tags
-      ? data.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+      ? data.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean)
       : [];
 
     createMarket({
@@ -121,7 +140,26 @@ export function CreateMarketPage() {
       isUrgent: data.isUrgent,
       tags: tagsArray.length > 0 ? tagsArray : undefined,
       imageUrl: data.imageUrl || undefined,
+      countryBets:
+        hasCountryBets && countries.length > 0 ? countries : undefined,
     });
+  };
+
+  const addCountry = () => {
+    if (newCountry.code && newCountry.name && newCountry.flag) {
+      setCountries([...countries, { ...newCountry }]);
+      setNewCountry({
+        code: "",
+        name: "",
+        flag: "",
+        siProbability: 50,
+        noProbability: 50,
+      });
+    }
+  };
+
+  const removeCountry = (code: string) => {
+    setCountries(countries.filter((c) => c.code !== code));
   };
 
   return (
@@ -139,7 +177,10 @@ export function CreateMarketPage() {
           )}
 
           <div>
-            <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="question"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Market Question <span className="text-red-500">*</span>
             </label>
             <Input
@@ -148,12 +189,17 @@ export function CreateMarketPage() {
               placeholder="Will Argentina win the match?"
             />
             {errors.question && (
-              <p className="mt-1 text-sm text-red-600">{errors.question.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.question.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Description (optional)
             </label>
             <Textarea
@@ -164,7 +210,10 @@ export function CreateMarketPage() {
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Category <span className="text-red-500">*</span>
             </label>
             <select
@@ -181,7 +230,10 @@ export function CreateMarketPage() {
           </div>
 
           <div>
-            <label htmlFor="openAt" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="openAt"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Opening Date & Time <span className="text-red-500">*</span>
             </label>
             <Input
@@ -207,7 +259,10 @@ export function CreateMarketPage() {
 
           {(category === "en_vivo" || isUrgent) && (
             <div>
-              <label htmlFor="lockAt" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="lockAt"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Closing Date & Time (optional)
               </label>
               <Input
@@ -230,7 +285,7 @@ export function CreateMarketPage() {
                   </p>
                 )}
               </div>
-              
+
               {/* Time adjustment buttons */}
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -316,13 +371,174 @@ export function CreateMarketPage() {
               {...register("isUrgent")}
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor="isUrgent" className="ml-2 block text-sm text-gray-700">
+            <label
+              htmlFor="isUrgent"
+              className="ml-2 block text-sm text-gray-700"
+            >
               Urgent market (LIVE)
             </label>
           </div>
 
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="hasCountryBets"
+              checked={hasCountryBets}
+              onChange={(e) => setHasCountryBets(e.target.checked)}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="hasCountryBets"
+              className="ml-2 block text-sm text-gray-700"
+            >
+              Multi-country market (users bet on specific countries)
+            </label>
+          </div>
+
+          {hasCountryBets && (
+            <div className="border border-gray-300 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-medium text-gray-700">
+                Country Options
+              </h3>
+
+              {/* Country List */}
+              {countries.length > 0 && (
+                <div className="space-y-2">
+                  {countries.map((country) => (
+                    <div
+                      key={country.code}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{country.flag}</span>
+                        <div>
+                          <div className="font-medium">{country.name}</div>
+                          <div className="text-xs text-gray-500">
+                            Sí: {country.siProbability}% | No:{" "}
+                            {country.noProbability}%
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCountry(country.code)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Country Form */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Country Code
+                  </label>
+                  <Input
+                    value={newCountry.code}
+                    onChange={(e) =>
+                      setNewCountry({ ...newCountry, code: e.target.value })
+                    }
+                    placeholder="ARG"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Country Name
+                  </label>
+                  <Input
+                    value={newCountry.name}
+                    onChange={(e) =>
+                      setNewCountry({ ...newCountry, name: e.target.value })
+                    }
+                    placeholder="Argentina"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Flag Emoji
+                  </label>
+                  <Input
+                    value={newCountry.flag}
+                    onChange={(e) =>
+                      setNewCountry({ ...newCountry, flag: e.target.value })
+                    }
+                    placeholder="🇦🇷"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Sí Probability (%)
+                  </label>
+                  <Input
+                    type="number"
+                    value={newCountry.siProbability}
+                    onChange={(e) =>
+                      setNewCountry({
+                        ...newCountry,
+                        siProbability: Number(e.target.value),
+                      })
+                    }
+                    min="0"
+                    max="100"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    No Probability (%)
+                  </label>
+                  <Input
+                    type="number"
+                    value={newCountry.noProbability}
+                    onChange={(e) =>
+                      setNewCountry({
+                        ...newCountry,
+                        noProbability: Number(e.target.value),
+                      })
+                    }
+                    min="0"
+                    max="100"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={addCountry}
+                disabled={
+                  !newCountry.code || !newCountry.name || !newCountry.flag
+                }
+                className="w-full"
+              >
+                + Add Country
+              </Button>
+
+              {countries.length === 0 && (
+                <p className="text-sm text-gray-500 italic">
+                  No countries added yet. Add at least one country to enable
+                  multi-country betting.
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="tags"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Tags (optional, comma-separated)
             </label>
             <Input
@@ -333,7 +549,10 @@ export function CreateMarketPage() {
           </div>
 
           <div>
-            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="imageUrl"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Image URL (optional)
             </label>
             <Input
