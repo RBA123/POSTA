@@ -48,7 +48,7 @@ export async function placeBet(data: PlaceBetInput): Promise<PlaceBetResult> {
 
     // Decode token to see claims (for debugging)
     try {
-      const tokenParts = token.split('.');
+      const tokenParts = token.split(".");
       if (tokenParts.length === 3) {
         const payload = JSON.parse(atob(tokenParts[1]));
         console.log("🔍 Token payload (decoded):", {
@@ -77,13 +77,13 @@ export async function placeBet(data: PlaceBetInput): Promise<PlaceBetResult> {
       "placeBet",
       {
         timeout: 60000, // 60 second timeout
-      }
+      },
     );
 
     console.log("📤 Calling placeBet function with data:", data);
     console.log(
       "📤 Function URL would be:",
-      `https://us-central1-liberta-main.cloudfunctions.net/placeBet`,
+      `https://us-central1-posta-main.cloudfunctions.net/placeBet`,
     );
 
     const result = await placeBetFunction(data);
@@ -114,7 +114,9 @@ export async function placeBet(data: PlaceBetInput): Promise<PlaceBetResult> {
 
     if (error.code === "functions/resource-exhausted") {
       // Rate limit error - use the server's message
-      throw new Error(error.message || "Por favor espera antes de apostar de nuevo.");
+      throw new Error(
+        error.message || "Por favor espera antes de apostar de nuevo.",
+      );
     }
 
     throw new Error(

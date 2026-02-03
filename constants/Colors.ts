@@ -1,5 +1,5 @@
 /**
- * Liberta Color System
+ * Posta Color System
  *
  * A centralized color palette for consistent theming across the app.
  * All colors should be referenced from this file to maintain consistency.
@@ -28,13 +28,13 @@ const Colors = {
   secondary: "#F5F5F5", // Secondary backgrounds (hsl(220, 14%, 96%))
   secondaryForeground: "#404040", // Text on secondary backgrounds
 
-  // Success (Green) - "Sí" bets, wins, positive states
-  success: "#1fab59", // Main green
-  successLight: "#1fab591a", // 10% opacity for backgrounds
+  // Success (Orange) - "Sí" bets, wins, positive states
+  success: "#E7642D", // Main orange
+  successLight: "#E7642D1a", // 10% opacity for backgrounds
 
-  // Destructive (Red) - "No" bets, losses, errors
-  destructive: "#EF4444", // Main red (hsl(0, 84%, 60%))
-  destructiveLight: "#EF44441A", // 10% opacity for backgrounds
+  // Destructive (Dark Blue) - "No" bets, losses, errors
+  destructive: "#1f406e", // Main dark blue
+  destructiveLight: "#1f406e1a", // 10% opacity for backgrounds
 
   // Utility Colors
   white: "#FFFFFF",

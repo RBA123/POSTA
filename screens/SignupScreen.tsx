@@ -1,5 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, Text, ScrollView, Image, Pressable, Modal, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Pressable,
+  Modal,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +17,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Storage } from "../lib/storage";
 import { useAuth } from "../hooks/useAuth";
-import libertaLogo from "../assets/liberta-logo.png";
+import postaLogo from "../assets/posta-logo.png";
 import Colors from "../constants/Colors";
 
 const phoneCodes = [
@@ -41,7 +51,13 @@ const years = Array.from({ length: 100 }, (_, i) => currentYear - 18 - i);
 const SignupScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { signUp, user, loading: authLoading, error: authError, clearError } = useAuth();
+  const {
+    signUp,
+    user,
+    loading: authLoading,
+    error: authError,
+    clearError,
+  } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -65,7 +81,7 @@ const SignupScreen: React.FC = () => {
       if (routeCountry) {
         setCountryCode(routeCountry);
       } else {
-        const savedCountry = await Storage.getItem("liberta_country");
+        const savedCountry = await Storage.getItem("posta_country");
         if (savedCountry) {
           setCountryCode(savedCountry);
         }
@@ -104,7 +120,17 @@ const SignupScreen: React.FC = () => {
       year !== null &&
       isAdult
     );
-  }, [firstName, lastName, email, password, confirmPassword, day, month, year, isAdult]);
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    confirmPassword,
+    day,
+    month,
+    year,
+    isAdult,
+  ]);
 
   const handleContinue = async () => {
     console.log("📝 [SignupScreen] handleContinue started");
@@ -115,7 +141,7 @@ const SignupScreen: React.FC = () => {
       console.log("❌ [SignupScreen] Form validation failed");
       if (!isAdult && day && month && year) {
         setAgeError(true);
-        Alert.alert("Error", "Debes ser mayor de 18 años para usar LIBERTA");
+        Alert.alert("Error", "Debes ser mayor de 18 años para usar POSTA");
         return;
       }
       if (password !== confirmPassword) {
@@ -142,7 +168,9 @@ const SignupScreen: React.FC = () => {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         dateOfBirth,
-        phoneNumber: phoneNumber ? `${phoneCode.code}${phoneNumber}` : undefined,
+        phoneNumber: phoneNumber
+          ? `${phoneCode.code}${phoneNumber}`
+          : undefined,
         phoneCode: phoneCode.code,
         countryCode,
         friendCode: friendCode.trim() || undefined,
@@ -154,7 +182,7 @@ const SignupScreen: React.FC = () => {
       console.log("✅ [SignupScreen] signUp completed successfully");
 
       // Save country code to storage
-      await Storage.setItem("liberta_country", countryCode);
+      await Storage.setItem("posta_country", countryCode);
       console.log("✅ [SignupScreen] Country saved to storage");
 
       // Navigation will happen automatically via useEffect when user is set
@@ -162,26 +190,29 @@ const SignupScreen: React.FC = () => {
     } catch (err: any) {
       console.error("❌ [SignupScreen] Signup error:", err);
       setSignupLoading(false);
-      Alert.alert("Error al crear cuenta", err.message || "Por favor intenta de nuevo");
+      Alert.alert(
+        "Error al crear cuenta",
+        err.message || "Por favor intenta de nuevo",
+      );
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <KeyboardAvoidingView 
-        className="flex-1" 
+      <KeyboardAvoidingView
+        className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={0}
       >
-        <ScrollView 
+        <ScrollView
           className="flex-1 bg-background px-6 py-8"
-          showsVerticalScrollIndicator={false} 
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
           <View className="flex-row items-center gap-3 mb-8">
-            <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
-            <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
+            <Image source={postaLogo} className="w-10 h-10 rounded-xl" />
+            <Text className="text-xl font-bold text-foreground">POSTA</Text>
           </View>
 
           <Text className="text-2xl font-bold text-foreground mb-2">
@@ -329,7 +360,11 @@ const SignupScreen: React.FC = () => {
               {/* Age error */}
               {!isAdult && day && month && year && (
                 <View className="flex-row items-center gap-2 mt-3">
-                  <Ionicons name="alert-circle" size={16} color={Colors.destructive} />
+                  <Ionicons
+                    name="alert-circle"
+                    size={16}
+                    color={Colors.destructive}
+                  />
                   <Text className="text-sm text-destructive">
                     Debes ser mayor de 18 años para usar LIBERTA
                   </Text>
@@ -351,7 +386,11 @@ const SignupScreen: React.FC = () => {
                   <Text className="text-foreground font-medium">
                     {phoneCode.code}
                   </Text>
-                  <Ionicons name="chevron-down" size={16} color={Colors.foregroundMuted} />
+                  <Ionicons
+                    name="chevron-down"
+                    size={16}
+                    color={Colors.foregroundMuted}
+                  />
                 </Pressable>
 
                 <View className="flex-1">

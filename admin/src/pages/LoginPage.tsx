@@ -33,9 +33,7 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Liberta Admin</CardTitle>
-          <p className="text-center text-gray-600 mt-2">
-            Sign in to continue
-          </p>
+          <p className="text-center text-gray-600 mt-2">Sign in to continue</p>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -58,7 +56,7 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="admin@liberta.com"
+              placeholder="admin@posta.com"
             />
           </div>
 

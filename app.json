@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Liberta",
-    "slug": "Liberta",
+    "name": "Posta",
+    "slug": "Posta",
     "version": "1.0.0",
     "orientation": "portrait",
     "extra": {
@@ -43,7 +43,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gabrielach.Liberta",
+      "bundleIdentifier": "com.gabrielach.porta",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -55,7 +55,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.gabrielach.Liberta"
+      "package": "com.gabrielach.porta"
     },
     "web": {
       "favicon": "./assets/favicon.png"
