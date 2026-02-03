@@ -4,9 +4,13 @@ import * as admin from "firebase-admin";
 /**
  * Callable Cloud Function to place a bet
  *
+ * ⚠️ IMPORTANT: All monetary values (amount, balance, potentialWin) are stored
+ * as INTEGER CENTS to avoid floating-point precision errors.
+ * Example: $10.00 = 1000 cents
+ *
  * This function:
  * 1. Validates the bet (market exists, user has balance, market is open)
- * 2. Calculates potential win based on current odds
+ * 2. Calculates potential win based on current odds (using integer arithmetic)
  * 3. Creates bet documents atomically (userBet + marketBet)
  * 4. Updates user balance and stats
  * 5. Updates market volume and odds
@@ -41,10 +45,22 @@ export const placeBet = functions
       );
     }
 
-    if (typeof amount !== "number" || amount <= 0) {
+    if (
+      typeof amount !== "number" ||
+      amount <= 0 ||
+      !Number.isInteger(amount)
+    ) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Amount must be a positive number",
+        "Amount must be a positive integer (in cents)",
+      );
+    }
+
+    // Minimum bet: 100 cents ($1.00)
+    if (amount < 100) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Minimum bet is $1.00 (100 cents)",
       );
     }
 
@@ -150,7 +166,9 @@ export const placeBet = functions
       }
       // Note: Probability should never be 0% due to minimum probability enforcement in odds calculation
       // This allows contrarian bets even when market consensus is heavily one-sided
-      const potentialWin = amount / (probability / 100);
+      // Calculate payout using integer arithmetic to avoid floating-point errors
+      // Formula: (amount * 100) / probability (all values in cents)
+      const potentialWin = Math.floor((amount * 100) / probability);
 
       // Create bet documents
       const betId = db.collection("userBets").doc().id;
@@ -193,6 +211,15 @@ export const placeBet = functions
 
       // Update user balance and stats
       const newBalance = currentBalance - amount;
+
+      // Validate balance won't go negative (should be caught earlier, but double-check)
+      if (newBalance < 0) {
+        throw new functions.https.HttpsError(
+          "failed-precondition",
+          "Insufficient balance for this bet",
+        );
+      }
+
       batch.update(userRef, {
         virtualBalance: newBalance,
         totalPositions: (userData.totalPositions || 0) + 1,

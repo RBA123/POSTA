@@ -15,6 +15,7 @@ import BottomNav from "../components/BottomNav";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Storage } from "../lib/storage";
+import { formatCents } from "../lib/currency";
 import { useAuth } from "../hooks/useAuth";
 import { useUserProfile } from "../hooks/useUserProfile";
 import Colors from "../constants/Colors";
@@ -127,7 +128,7 @@ const ProfileScreen: React.FC = () => {
                     Balance disponible
                   </Text>
                   <Text className="text-3xl font-bold text-foreground">
-                    ${profile.virtualBalance?.toFixed(2) || "0.00"}
+                    {formatCents(profile.virtualBalance || 0)}
                   </Text>
                 </View>
                 <Pressable
@@ -168,7 +169,7 @@ const ProfileScreen: React.FC = () => {
               <View className="flex-row justify-between">
                 <View className="items-center flex-1">
                   <Text className="text-lg font-bold text-success">
-                    +${displayStats.totalWinnings.toFixed(2)}
+                    +{formatCents(displayStats.totalWinnings)}
                   </Text>
                   <Text className="text-xs text-muted-foreground">
                     Ganancias
@@ -176,7 +177,7 @@ const ProfileScreen: React.FC = () => {
                 </View>
                 <View className="items-center flex-1">
                   <Text className="text-lg font-bold text-destructive">
-                    -${displayStats.totalLosses.toFixed(2)}
+                    -{formatCents(displayStats.totalLosses)}
                   </Text>
                   <Text className="text-xs text-muted-foreground">
                     Pérdidas
@@ -190,8 +191,8 @@ const ProfileScreen: React.FC = () => {
                         : "text-destructive"
                     }`}
                   >
-                    {displayStats.overallTotal >= 0 ? "+" : ""}$
-                    {displayStats.overallTotal.toFixed(2)}
+                    {displayStats.overallTotal >= 0 ? "+" : ""}
+                    {formatCents(Math.abs(displayStats.overallTotal))}
                   </Text>
                   <Text className="text-xs text-muted-foreground">Total</Text>
                 </View>

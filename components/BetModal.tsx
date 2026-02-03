@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "./ui/Button";
 import Colors from "../constants/Colors";
+import { formatCents, dollarsToCents, centsToDollars } from "../lib/currency";
 
 interface Market {
   id: string;
@@ -23,9 +24,9 @@ interface Market {
 interface BetModalProps {
   market: Market;
   side: "si" | "no";
-  balance: number;
+  balance: number; // Balance in CENTS
   onClose: () => void;
-  onConfirm: (amount: number) => void;
+  onConfirm: (amountInCents: number) => void; // Amount in CENTS
   isLoading?: boolean;
 }
 
@@ -34,29 +35,39 @@ const presetAmounts = [5, 10, 25, 50];
 const BetModal: React.FC<BetModalProps> = ({
   market,
   side,
-  balance,
+  balance, // in CENTS
   onClose,
   onConfirm,
   isLoading = false,
 }) => {
-  const [amount, setAmount] = useState("10");
+  const [amount, setAmount] = useState("10"); // Display in dollars for UX
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const amountNum = parseFloat(amount) || 0;
+  const amountInCents = dollarsToCents(amountNum);
+  const balanceInDollars = centsToDollars(balance);
   const probability =
     side === "si" ? market.siProbability : market.noProbability;
-  const potentialWin = (amountNum / (probability / 100)).toFixed(2);
+  // Calculate potential win in cents using integer arithmetic
+  const potentialWinCents = Math.floor((amountInCents * 100) / probability);
+  const potentialWin = (potentialWinCents / 100).toFixed(2);
 
   const handleConfirm = async () => {
-    if (amountNum > 0 && amountNum <= balance && !isSubmitting && !isLoading) {
+    if (
+      amountInCents > 0 &&
+      amountInCents <= balance &&
+      !isSubmitting &&
+      !isLoading
+    ) {
       setIsSubmitting(true);
-      console.log('🎯 BetModal: Confirming bet, amount:', amountNum);
-      onConfirm(amountNum);
+      console.log("🎯 BetModal: Confirming bet, amountInCents:", amountInCents);
+      onConfirm(amountInCents); // Pass cents to parent
       // Don't reset isSubmitting - let the parent component close the modal
     }
   };
 
-  const isButtonDisabled = amountNum <= 0 || amountNum > balance || isLoading || isSubmitting;
+  const isButtonDisabled =
+    amountInCents <= 0 || amountInCents > balance || isLoading || isSubmitting;
 
   return (
     <Modal
@@ -109,7 +120,10 @@ const BetModal: React.FC<BetModalProps> = ({
                   value={amount}
                   onChangeText={(text) => {
                     const num = parseFloat(text) || 0;
-                    const clamped = Math.max(0, Math.min(balance, num));
+                    const clamped = Math.max(
+                      0,
+                      Math.min(balanceInDollars, num),
+                    );
                     setAmount(clamped.toString());
                   }}
                   keyboardType="numeric"
@@ -164,7 +178,7 @@ const BetModal: React.FC<BetModalProps> = ({
             <Text className="text-center text-sm text-muted-foreground mb-4">
               Balance disponible:{" "}
               <Text className="font-semibold text-foreground">
-                ${balance.toFixed(2)}
+                {formatCents(balance)}
               </Text>
             </Text>
 

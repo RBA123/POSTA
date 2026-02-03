@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +13,7 @@ import BottomNav from "../components/BottomNav";
 import CategoryFilter from "../components/CategoryFilter";
 import { Card } from "../components/ui/Card";
 import { formatRelativeTime } from "../lib/firestore";
+import { formatCents } from "../lib/currency";
 import { useAuth } from "../hooks/useAuth";
 import { useBets } from "../hooks/useBets";
 import Colors from "../constants/Colors";
@@ -15,8 +22,14 @@ import type { BetStatus } from "../firebase/types/firestore.types";
 const ActivityScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user: authUser } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<BetStatus | undefined>(undefined);
-  const { bets, loading, refetch } = useBets(authUser?.uid || null, filterStatus, true);
+  const [filterStatus, setFilterStatus] = useState<BetStatus | undefined>(
+    undefined,
+  );
+  const { bets, loading, refetch } = useBets(
+    authUser?.uid || null,
+    filterStatus,
+    true,
+  );
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -46,7 +59,14 @@ const ActivityScreen: React.FC = () => {
       <View className="bg-background border-b border-border px-6 py-4">
         <Text className="text-3xl font-bold text-foreground">Actividad</Text>
         <Text className="text-base text-muted-foreground">
-          Tus posiciones {filterStatus === "pending" ? "pendientes" : filterStatus === "won" ? "ganadas" : filterStatus === "lost" ? "perdidas" : "activas"}
+          Tus posiciones{" "}
+          {filterStatus === "pending"
+            ? "pendientes"
+            : filterStatus === "won"
+              ? "ganadas"
+              : filterStatus === "lost"
+                ? "perdidas"
+                : "activas"}
         </Text>
       </View>
 
@@ -104,7 +124,7 @@ const ActivityScreen: React.FC = () => {
                             color={Colors.success}
                           />
                           <Text className="text-base font-bold text-success">
-                            +${bet.actualWin?.toFixed(2) || "0.00"}
+                            +{formatCents(bet.actualWin || 0)}
                           </Text>
                         </View>
                       )}
@@ -154,7 +174,7 @@ const ActivityScreen: React.FC = () => {
                         </Text>
                       </View>
                       <Text className="text-sm text-muted-foreground">
-                        ${bet.amount.toFixed(2)}
+                        {formatCents(bet.amount)}
                       </Text>
                     </View>
                     <Text className="text-sm text-muted-foreground">

@@ -4,6 +4,9 @@ import * as admin from "firebase-admin";
 /**
  * Callable Cloud Function to settle a market and all associated bets
  *
+ * ⚠️ IMPORTANT: All monetary values are stored as INTEGER CENTS.
+ * For logging/display, divide by 100 and format with .toFixed(2)
+ *
  * This function:
  * 1. Validates admin permissions
  * 2. Updates market status and result
@@ -119,14 +122,16 @@ export const settleMarket = functions
           betStatus = "refunded";
           balanceChange = betAmount;
           actualWin = 0;
-          console.log(`💰 Bet ${betDoc.id} REFUNDED - Amount: $${betAmount}`);
+          console.log(
+            `💰 Bet ${betDoc.id} REFUNDED - Amount: $${(betAmount / 100).toFixed(2)}`,
+          );
         } else if (betSide === result) {
           // User won
           betStatus = "won";
           actualWin = potentialWin;
           balanceChange = potentialWin; // Net win (potentialWin includes original bet)
           console.log(
-            `🎉 Bet ${betDoc.id} WON - Payout: $${potentialWin}, User: ${userId}`,
+            `🎉 Bet ${betDoc.id} WON - Payout: $${(potentialWin / 100).toFixed(2)}, User: ${userId}`,
           );
         } else {
           // User lost (bet already deducted, no refund)
@@ -134,7 +139,7 @@ export const settleMarket = functions
           actualWin = 0;
           balanceChange = 0;
           console.log(
-            `❌ Bet ${betDoc.id} LOST - Amount: $${betAmount}, User: ${userId}`,
+            `❌ Bet ${betDoc.id} LOST - Amount: $${(betAmount / 100).toFixed(2)}, User: ${userId}`,
           );
         }
 
@@ -155,6 +160,15 @@ export const settleMarket = functions
             const userData = userDoc.data()!;
             const currentBalance = userData.virtualBalance || 0;
             const newBalance = currentBalance + balanceChange;
+
+            // Validate balance won't go negative
+            if (newBalance < 0) {
+              console.error(
+                `⚠️ Balance would go negative for user ${userId}: ${currentBalance} + ${balanceChange} = ${newBalance}`,
+              );
+              // Skip this update but continue processing other bets
+              continue;
+            }
 
             console.log(`💵 Updating balance for user ${userId}:`, {
               currentBalance,
@@ -198,8 +212,8 @@ export const settleMarket = functions
                 balanceAfter: newBalance,
                 description:
                   betStatus === "won"
-                    ? `Bet won: +$${actualWin.toFixed(2)}`
-                    : `Bet refunded: +$${betAmount.toFixed(2)}`,
+                    ? `Bet won: +$${(actualWin / 100).toFixed(2)}`
+                    : `Bet refunded: +$${(betAmount / 100).toFixed(2)}`,
                 betId: betDoc.id,
                 marketId,
                 status: "completed",
@@ -320,11 +334,11 @@ export const settleMarket = functions
         // Build notification message with amounts
         let notificationMessage: string;
         if (betResult.betStatus === "refunded") {
-          notificationMessage = `Tu apuesta de $${betResult.betAmount.toFixed(2)} en "${marketData.question}" fue reembolsada`;
+          notificationMessage = `Tu apuesta de $${(betResult.betAmount / 100).toFixed(2)} en "${marketData.question}" fue reembolsada`;
         } else if (betResult.betStatus === "won") {
-          notificationMessage = `¡Ganaste $${betResult.actualWin.toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
+          notificationMessage = `¡Ganaste $${(betResult.actualWin / 100).toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
         } else {
-          notificationMessage = `Perdiste $${betResult.betAmount.toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
+          notificationMessage = `Perdiste $${(betResult.betAmount / 100).toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
         }
 
         // Create in-app notification
@@ -372,11 +386,11 @@ export const settleMarket = functions
 
         let notificationBody: string;
         if (betResult.betStatus === "refunded") {
-          notificationBody = `Tu apuesta de $${betResult.betAmount.toFixed(2)} en "${marketData.question}" fue reembolsada`;
+          notificationBody = `Tu apuesta de $${(betResult.betAmount / 100).toFixed(2)} en "${marketData.question}" fue reembolsada`;
         } else if (betResult.betStatus === "won") {
-          notificationBody = `¡Ganaste $${betResult.actualWin.toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
+          notificationBody = `¡Ganaste $${(betResult.actualWin / 100).toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
         } else {
-          notificationBody = `Perdiste $${betResult.betAmount.toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
+          notificationBody = `Perdiste $${(betResult.betAmount / 100).toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
         }
 
         notificationMessages.push({

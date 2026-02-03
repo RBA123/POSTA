@@ -5,6 +5,12 @@ import { Timestamp } from "firebase/firestore";
  *
  * These interfaces define the structure of all documents in Firestore.
  * Use these types when reading/writing to Firestore for type safety.
+ *
+ * ⚠️ IMPORTANT: All monetary values are stored as INTEGER CENTS to avoid
+ * floating-point precision errors. For display purposes, divide by 100 and
+ * format with .toFixed(2). For calculations, always use integer arithmetic.
+ *
+ * Example: $100.00 = 10000 cents, $0.50 = 50 cents
  */
 
 // ============================================================================
@@ -26,12 +32,13 @@ export interface User {
   friendCode: string; // Unique referral code (e.g., "DIEGO323")
 
   // Balance & Stats (denormalized for quick access)
-  virtualBalance: number; // Current virtual balance
+  // ⚠️ All monetary values in CENTS (integer) - divide by 100 for display
+  virtualBalance: number; // Current virtual balance in CENTS (e.g., 10000 = $100.00)
   totalPositions: number; // All-time bets count
   activePositions: number; // Current pending bets
   winRate: number; // Percentage (0-100)
-  totalWinnings: number;
-  totalLosses: number;
+  totalWinnings: number; // Total winnings in CENTS
+  totalLosses: number; // Total losses in CENTS
 
   // Settings
   notificationsEnabled: boolean;
@@ -209,17 +216,18 @@ export interface UserBet {
   marketCategory: string;
 
   // Bet Details
+  // ⚠️ All monetary values in CENTS (integer)
   side: "si" | "no";
-  amount: number;
-  probability: number;
-  potentialWin: number;
+  amount: number; // Bet amount in CENTS (e.g., 1000 = $10.00)
+  probability: number; // Percentage (0-100)
+  potentialWin: number; // Potential payout in CENTS (includes original stake)
   countryCode?: string; // For country-specific bets
 
   // Status
   status: BetStatus;
 
   // Resolution
-  actualWin?: number; // Filled when settled
+  actualWin?: number; // Actual payout in CENTS (filled when settled)
   settledAt?: Timestamp;
 
   // Metadata
@@ -251,9 +259,10 @@ export interface Transaction {
 
   type: TransactionType;
 
-  amount: number; // Positive or negative
-  balanceBefore: number;
-  balanceAfter: number;
+  // ⚠️ All monetary values in CENTS (integer)
+  amount: number; // Positive or negative in CENTS
+  balanceBefore: number; // Balance before transaction in CENTS
+  balanceAfter: number; // Balance after transaction in CENTS
 
   // Context
   description: string;

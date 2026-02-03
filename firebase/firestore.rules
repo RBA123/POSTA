@@ -21,6 +21,7 @@ service cloud.firestore {
     }
     
     // Helper function to validate user data structure
+    // ⚠️ IMPORTANT: All monetary values stored as INTEGER CENTS
     function isValidUserData() {
       let data = request.resource.data;
       return data.keys().hasAll(['email', 'firstName', 'lastName', 'username', 'dateOfBirth', 
@@ -44,10 +45,11 @@ service cloud.firestore {
       allow read: if isOwner(userId);
       
       // Users can create their own profile (during signup)
+      // Initial balance: 10000 cents = $100.00
       allow create: if isOwner(userId) 
         && isValidUserData()
         && request.resource.data.uid == userId
-        && request.resource.data.virtualBalance == 100.0; // Initial balance
+        && request.resource.data.virtualBalance == 10000; // Initial balance in cents
       
       // Users can update their own profile (with restrictions)
       allow update: if isOwner(userId)

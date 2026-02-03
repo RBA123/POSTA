@@ -12,6 +12,7 @@ import { RouteProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../types/navigation";
 import { CountryBet } from "../types";
+import { formatCents } from "../lib/currency";
 import { useBets } from "../hooks/useBets";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useAuth } from "../hooks/useAuth";
@@ -63,7 +64,7 @@ const CountryBettingScreen: React.FC<Props> = ({ navigation, route }) => {
       if (result.success) {
         Alert.alert(
           "¡Apuesta confirmada!",
-          `Has apostado ${amount}¢ en ${country.name} - ${side === "si" ? "Sí" : "No"}`,
+          `Has apostado ${formatCents(amount)} en ${country.name} - ${side === "si" ? "Sí" : "No"}`,
           [
             {
               text: "OK",
@@ -82,14 +83,14 @@ const CountryBettingScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const calculatePotentialWin = (
-    amount: number,
+    amountInCents: number,
     probability: number,
   ): number => {
-    return Math.round(amount / (probability / 100));
+    return Math.floor((amountInCents * 100) / probability);
   };
 
   const renderCountryRow = (country: CountryBet) => {
-    const defaultBetAmount = 10;
+    const defaultBetAmount = 1000; // 1000 cents = $10.00
     const siPotentialWin = calculatePotentialWin(
       defaultBetAmount,
       country.siProbability,
@@ -136,10 +137,10 @@ const CountryBettingScreen: React.FC<Props> = ({ navigation, route }) => {
             ) : (
               <View>
                 <Text className="text-blue-400 font-bold text-center text-sm">
-                  Yes {defaultBetAmount}¢
+                  Yes {formatCents(defaultBetAmount)}
                 </Text>
                 <Text className="text-blue-300 text-center text-xs mt-1">
-                  +{siPotentialWin}¢
+                  +{formatCents(siPotentialWin)}
                 </Text>
               </View>
             )}
@@ -159,10 +160,10 @@ const CountryBettingScreen: React.FC<Props> = ({ navigation, route }) => {
             ) : (
               <View>
                 <Text className="text-purple-400 font-bold text-center text-sm">
-                  No {defaultBetAmount}¢
+                  No {formatCents(defaultBetAmount)}
                 </Text>
                 <Text className="text-purple-300 text-center text-xs mt-1">
-                  +{noPotentialWin}¢
+                  +{formatCents(noPotentialWin)}
                 </Text>
               </View>
             )}

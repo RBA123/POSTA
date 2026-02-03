@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { formatCents } from "../lib/currency";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { BOTTOM_NAV_HEIGHT } from "../constants/Layout";
@@ -290,7 +290,7 @@ const HomeScreen: React.FC = () => {
           <View className="items-end">
             <Text className="text-xs text-muted-foreground">Tu balance</Text>
             <Text className="text-xl font-bold text-primary">
-              ${balance.toFixed(2)}
+              {formatCents(balance)}
             </Text>
           </View>
         </View>

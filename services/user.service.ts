@@ -1,6 +1,6 @@
 /**
  * User Service
- * 
+ *
  * Manages Firestore user documents (CRUD operations)
  */
 
@@ -22,7 +22,7 @@ import type {
  */
 export async function createUserProfile(
   uid: string,
-  userData: Omit<CreateUserInput, "uid">
+  userData: Omit<CreateUserInput, "uid">,
 ): Promise<void> {
   try {
     const userRef = doc(db, "users", uid);
@@ -36,8 +36,7 @@ export async function createUserProfile(
 
     // Generate friend code if not provided
     const friendCode =
-      userData.friendCode ||
-      generateFriendCode(userData.firstName);
+      userData.friendCode || generateFriendCode(userData.firstName);
 
     // Calculate initial winRate (0% since no bets yet)
     const winRate = 0;
@@ -54,7 +53,7 @@ export async function createUserProfile(
       dateOfBirth: Timestamp.fromDate(userData.dateOfBirth),
       countryCode: userData.countryCode,
       friendCode,
-      virtualBalance: 100.0, // Initial balance (must be float for Firestore rules)
+      virtualBalance: 10000, // Initial balance: 10000 cents = $100.00
       totalPositions: 0,
       activePositions: 0,
       winRate,
@@ -79,7 +78,8 @@ export async function createUserProfile(
     throw new Error(
       error.code === "permission-denied"
         ? "Permiso denegado. Por favor verifica las reglas de Firestore."
-        : error.message || "Error al crear el perfil de usuario. Por favor intenta de nuevo."
+        : error.message ||
+            "Error al crear el perfil de usuario. Por favor intenta de nuevo.",
     );
   }
 }
@@ -108,7 +108,7 @@ export async function getUserProfile(uid: string): Promise<User | null> {
  */
 export async function updateUserProfile(
   uid: string,
-  updates: Partial<UpdateUserInput>
+  updates: Partial<UpdateUserInput>,
 ): Promise<void> {
   try {
     const userRef = doc(db, "users", uid);
@@ -124,7 +124,7 @@ export async function updateUserProfile(
     throw new Error(
       error.code === "permission-denied"
         ? "No tienes permiso para actualizar este perfil"
-        : "Error al actualizar el perfil. Por favor intenta de nuevo."
+        : "Error al actualizar el perfil. Por favor intenta de nuevo.",
     );
   }
 }
@@ -147,7 +147,7 @@ export async function updateTermsAcceptance(uid: string): Promise<void> {
     throw new Error(
       error.code === "permission-denied"
         ? "No tienes permiso para actualizar este perfil"
-        : "Error al actualizar la aceptación de términos. Por favor intenta de nuevo."
+        : "Error al actualizar la aceptación de términos. Por favor intenta de nuevo.",
     );
   }
 }
@@ -206,14 +206,14 @@ export function generateFriendCode(firstName: string): string {
  * Returns the user UID if found, null otherwise
  */
 export async function validateFriendCode(
-  friendCode: string
+  friendCode: string,
 ): Promise<string | null> {
   try {
     // Friend codes are stored in user documents
     // We need to query users collection (requires index)
     // For now, we'll check if the format is valid
     // Full validation requires a query which we'll handle in the hook
-    
+
     if (!friendCode || friendCode.length < 4) {
       return null;
     }
@@ -235,7 +235,7 @@ export async function isUsernameAvailable(username: string): Promise<boolean> {
     // This would require a query on users collection
     // For now, we'll do basic validation
     // Full check requires Firestore query with index
-    
+
     if (!username || username.length < 3) {
       return false;
     }
@@ -247,4 +247,3 @@ export async function isUsernameAvailable(username: string): Promise<boolean> {
     return false;
   }
 }
-
