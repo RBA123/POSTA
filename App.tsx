@@ -281,19 +281,17 @@ export default function App() {
       try {
         Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 
-        if (Platform.OS === "ios") {
-          // TODO: Add your RevenueCat iOS API key
-          await Purchases.configure({
-            apiKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY || "",
-          });
-        } else if (Platform.OS === "android") {
-          // TODO: Add your RevenueCat Android API key
-          await Purchases.configure({
-            apiKey: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY || "",
-          });
+        const apiKey = Platform.OS === "ios" 
+          ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
+          : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
+
+        if (!apiKey) {
+          console.error("❌ RevenueCat API key not found in environment variables");
+          return;
         }
 
-        console.log("✅ RevenueCat initialized successfully");
+        await Purchases.configure({ apiKey });
+        console.log("✅ RevenueCat initialized successfully for", Platform.OS);
       } catch (error) {
         console.error("❌ Error initializing RevenueCat:", error);
       }
