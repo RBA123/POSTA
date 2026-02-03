@@ -49,3 +49,8 @@ firestore-debug.log
 ui-debug.log
 firebase-export-*.json
 .firebaserc
+
+# Backup Scripts & Data
+/scripts/
+firestore-backup-*/
+firestore-backup-json/
