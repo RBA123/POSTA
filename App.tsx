@@ -1,31 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as Notifications from 'expo-notifications';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LoadingScreen } from './components/LoadingScreen';
-import { Storage } from './lib/storage';
-import { updateUserProfile } from './services/user.service';
-import { getExpoPushToken } from './lib/expoPushToken';
-import { TERMS_STORAGE_KEY } from './screens/TermsAcceptanceScreen';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as Notifications from "expo-notifications";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LoadingScreen } from "./components/LoadingScreen";
+import { Storage } from "./lib/storage";
+import { updateUserProfile } from "./services/user.service";
+import { getExpoPushToken } from "./lib/expoPushToken";
+import { TERMS_STORAGE_KEY } from "./screens/TermsAcceptanceScreen";
 
 // Screens
-import TermsAcceptanceScreen from './screens/TermsAcceptanceScreen';
-import WelcomeScreen from './screens/WelcomeScreen';
-import SignupScreen from './screens/SignupScreen';
-import NotificationsScreen from './screens/NotificationsScreen';
-import CountrySelection from './screens/CountrySelection';
-import HomeScreen from './screens/HomeScreen';
-import ActivityScreen from './screens/ActivityScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import PaymentMethodsScreen from './screens/PaymentMethodsScreen';
-import NotificationsHistoryScreen from './screens/NotificationsHistoryScreen';
-import Colors from './constants/Colors';
+import TermsAcceptanceScreen from "./screens/TermsAcceptanceScreen";
+import WelcomeScreen from "./screens/WelcomeScreen";
+import SignupScreen from "./screens/SignupScreen";
+import NotificationsScreen from "./screens/NotificationsScreen";
+import CountrySelection from "./screens/CountrySelection";
+import HomeScreen from "./screens/HomeScreen";
+import ActivityScreen from "./screens/ActivityScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import PaymentMethodsScreen from "./screens/PaymentMethodsScreen";
+import NotificationsHistoryScreen from "./screens/NotificationsHistoryScreen";
+import CountryBettingScreen from "./screens/CountryBettingScreen";
+import Colors from "./constants/Colors";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -66,7 +67,7 @@ function TabNavigator() {
         tabBarActiveTintColor: Colors.primary500,
         tabBarInactiveTintColor: Colors.foregroundMuted,
         tabBarStyle: {
-          display: 'none', // Hide default tab bar since we use custom BottomNav
+          display: "none", // Hide default tab bar since we use custom BottomNav
         },
       }}
     >
@@ -74,7 +75,7 @@ function TabNavigator() {
         name="HomeTab"
         component={HomeScreen}
         options={{
-          tabBarLabel: 'Mercados',
+          tabBarLabel: "Mercados",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -84,7 +85,7 @@ function TabNavigator() {
         name="ActivityTab"
         component={ActivityScreen}
         options={{
-          tabBarLabel: 'Actividad',
+          tabBarLabel: "Actividad",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart" size={size} color={color} />
           ),
@@ -94,7 +95,7 @@ function TabNavigator() {
         name="ProfileTab"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Perfil',
+          tabBarLabel: "Perfil",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
@@ -150,9 +151,9 @@ function AppContent() {
         // Only log unexpected errors (not Android Expo Go or missing projectId)
         const errorMessage = error?.message || String(error);
         if (
-          !errorMessage.includes('not supported') && 
-          !errorMessage.includes('No valid Expo project ID') &&
-          !errorMessage.includes('Invalid uuid')
+          !errorMessage.includes("not supported") &&
+          !errorMessage.includes("No valid Expo project ID") &&
+          !errorMessage.includes("Invalid uuid")
         ) {
           console.error("Error getting initial push token:", error);
         }
@@ -169,18 +170,20 @@ function AppContent() {
 
   // Handle notification taps (when user taps a push notification)
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data;
-      
-      if (data?.type === 'market_live' && data?.marketId) {
-        const marketId = data.marketId;
-        console.log('📱 Notification tapped for market:', marketId);
-        
-        // TODO: Navigate to market detail screen when it's implemented
-        // For now, we'll just log it. When MarketDetailScreen is added to navigation:
-        // navigation.navigate('MarketDetail', { marketId });
-      }
-    });
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+
+        if (data?.type === "market_live" && data?.marketId) {
+          const marketId = data.marketId;
+          console.log("📱 Notification tapped for market:", marketId);
+
+          // TODO: Navigate to market detail screen when it's implemented
+          // For now, we'll just log it. When MarketDetailScreen is added to navigation:
+          // navigation.navigate('MarketDetail', { marketId });
+        }
+      },
+    );
 
     return () => {
       subscription.remove();
@@ -225,7 +228,9 @@ function AppContent() {
       );
     } else if (!profileExists) {
       // Authenticated but no profile - show welcome screen so they can login or create profile
-      console.log("⚠️ [AppContent] Authenticated but no profile - showing welcome screen");
+      console.log(
+        "⚠️ [AppContent] Authenticated but no profile - showing welcome screen",
+      );
       return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -235,13 +240,25 @@ function AppContent() {
       );
     } else {
       // Authenticated with profile - show main app
-      console.log("✅ [AppContent] Authenticated with profile - showing main app");
+      console.log(
+        "✅ [AppContent] Authenticated with profile - showing main app",
+      );
       return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Main" component={TabNavigator} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
-          <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
-          <Stack.Screen name="NotificationsHistory" component={NotificationsHistoryScreen} />
+          <Stack.Screen
+            name="PaymentMethods"
+            component={PaymentMethodsScreen}
+          />
+          <Stack.Screen
+            name="NotificationsHistory"
+            component={NotificationsHistoryScreen}
+          />
+          <Stack.Screen
+            name="CountryBetting"
+            component={CountryBettingScreen}
+          />
         </Stack.Navigator>
       );
     }

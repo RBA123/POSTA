@@ -153,6 +153,15 @@ const HomeScreen: React.FC = () => {
     setShowBetModal(true);
   };
 
+  const handleCountryBet = (market: Market) => {
+    if (!authUser) {
+      Alert.alert("Error", "Debes iniciar sesión para apostar");
+      navigation.navigate("Welcome" as never);
+      return;
+    }
+    navigation.navigate("CountryBetting" as never, { market } as never);
+  };
+
   const handleConfirmBet = async (amount: number) => {
     if (!selectedMarket || !authUser) {
       console.error("❌ Cannot place bet:", {
@@ -319,7 +328,12 @@ const HomeScreen: React.FC = () => {
           ) : (
             <>
               {markets.map((market) => (
-                <MarketCard key={market.id} market={market} onBet={handleBet} />
+                <MarketCard
+                  key={market.id}
+                  market={market}
+                  onBet={handleBet}
+                  onCountryBet={handleCountryBet}
+                />
               ))}
 
               {markets.length === 0 && !loading && (
