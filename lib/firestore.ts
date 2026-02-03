@@ -111,10 +111,25 @@ export function subscribeToMarkets(
 
   const q = query(marketsRef, ...constraints);
   
-  return onSnapshot(q, (snapshot) => {
-    const markets = snapshot.docs.map((doc) => doc.data() as Market);
-    callback(markets);
-  });
+  return onSnapshot(q, 
+    (snapshot) => {
+      const markets = snapshot.docs.map((doc) => {
+        const data = doc.data() as Market;
+        // Ensure the document has an id
+        if (!data.id) {
+          data.id = doc.id;
+        }
+        return data;
+      });
+      console.log(`📊 Markets updated: ${markets.length} markets in category "${category || 'all'}"`);
+      callback(markets);
+    },
+    (error) => {
+      console.error('Error in subscribeToMarkets:', error);
+      // Call callback with empty array on error
+      callback([]);
+    }
+  );
 }
 
 export function subscribeToMarket(
@@ -172,7 +187,15 @@ export function subscribeToUserBets(
   const q = query(betsRef, ...constraints);
   
   return onSnapshot(q, (snapshot) => {
-    const bets = snapshot.docs.map((doc) => doc.data() as UserBet);
+    const bets = snapshot.docs.map((doc) => {
+      const data = doc.data() as UserBet;
+      // Ensure the document has an id
+      if (!data.id) {
+        data.id = doc.id;
+      }
+      return data;
+    });
+    console.log(`💰 User bets updated: ${bets.length} bets`, bets.map(b => ({ id: b.id, marketId: b.marketId })));
     callback(bets);
   });
 }

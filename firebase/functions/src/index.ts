@@ -10,6 +10,7 @@ export { settleMarket } from './bets/settleBets';
 // Export market functions
 export { updateMarketOdds, recalculateMarketOdds } from './markets/updateOdds';
 export { scheduledMarketStatus, createMarket } from './markets/marketScheduler';
+export { deleteMarket } from './markets/deleteMarket';
 
 // Export notification functions
 export { 

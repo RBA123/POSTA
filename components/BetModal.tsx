@@ -26,6 +26,7 @@ interface BetModalProps {
   balance: number;
   onClose: () => void;
   onConfirm: (amount: number) => void;
+  isLoading?: boolean;
 }
 
 const presetAmounts = [5, 10, 25, 50];
@@ -36,19 +37,26 @@ const BetModal: React.FC<BetModalProps> = ({
   balance,
   onClose,
   onConfirm,
+  isLoading = false,
 }) => {
   const [amount, setAmount] = useState("10");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const amountNum = parseFloat(amount) || 0;
   const probability =
     side === "si" ? market.siProbability : market.noProbability;
   const potentialWin = (amountNum / (probability / 100)).toFixed(2);
 
-  const handleConfirm = () => {
-    if (amountNum > 0 && amountNum <= balance) {
+  const handleConfirm = async () => {
+    if (amountNum > 0 && amountNum <= balance && !isSubmitting && !isLoading) {
+      setIsSubmitting(true);
+      console.log('🎯 BetModal: Confirming bet, amount:', amountNum);
       onConfirm(amountNum);
+      // Don't reset isSubmitting - let the parent component close the modal
     }
   };
+
+  const isButtonDisabled = amountNum <= 0 || amountNum > balance || isLoading || isSubmitting;
 
   return (
     <Modal
@@ -166,7 +174,8 @@ const BetModal: React.FC<BetModalProps> = ({
               size="lg"
               className="w-full"
               onPress={handleConfirm}
-              disabled={amountNum <= 0 || amountNum > balance}
+              disabled={isButtonDisabled}
+              loading={isLoading || isSubmitting}
             >
               <Text className="text-white font-semibold">
                 Confirmar apuesta

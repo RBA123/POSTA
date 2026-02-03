@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Image, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -10,13 +17,17 @@ import BetModal from "../components/BetModal";
 import ConfettiAnimation from "../components/ConfettiAnimation";
 import BottomNav from "../components/BottomNav";
 import CountdownBanner from "../components/CountdownBanner";
+import CategoryFilter from "../components/CategoryFilter";
 import { Storage } from "../lib/storage";
 import { formatVolume } from "../lib/firestore";
+import { updateUserProfile } from "../services/user.service";
 import { useAuth } from "../hooks/useAuth";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useMarkets } from "../hooks/useMarkets";
 import { useBets } from "../hooks/useBets";
+import { useNotificationPermission } from "../hooks/useNotificationPermission";
 import libertaLogo from "../assets/liberta-logo.png";
+import Colors from "../constants/Colors";
 
 import { Market, Category } from "../types";
 import type { Market as FirestoreMarket } from "../firebase/types/firestore.types";
@@ -58,20 +69,38 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { user: authUser } = useAuth();
-  const { profile, loading: profileLoading } = useUserProfile(authUser?.uid || null);
+  const { profile, loading: profileLoading } = useUserProfile(
+    authUser?.uid || null,
+  );
+  const { hasAsked, requestPermission, markAsAsked } =
+    useNotificationPermission(authUser?.uid || null);
   const [countryCode, setCountryCode] = useState<string>("AR");
   const countryName = countryNames[countryCode] || "Argentina";
   const [activeCategory, setActiveCategory] = useState<Category>("en_vivo");
-  
+
   // Use markets hook
-  const { markets: firestoreMarkets, loading: marketsLoading, error: marketsError } = useMarkets(
+  const {
+    markets: firestoreMarkets,
+    loading: marketsLoading,
+    error: marketsError,
+  } = useMarkets(
     activeCategory as any,
-    true // real-time updates
+    true, // real-time updates
   );
 
   // Convert Firestore markets to UI format
   const markets = firestoreMarkets.map(convertMarket);
   const loading = marketsLoading || profileLoading;
+
+  // Debug: Log markets when they change
+  useEffect(() => {
+    console.log(
+      `🏠 HomeScreen: ${markets.length} markets loaded for category "${activeCategory}"`,
+    );
+    if (markets.length > 0) {
+      console.log("First market:", markets[0].question);
+    }
+  }, [markets, activeCategory]);
 
   useEffect(() => {
     const loadCountry = async () => {
@@ -99,12 +128,19 @@ const HomeScreen: React.FC = () => {
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [selectedSide, setSelectedSide] = useState<"si" | "no">("si");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isBetting, setIsBetting] = useState(false);
 
   // Use bets hook for placing bets
   const { placeBet: placeBetHook } = useBets(authUser?.uid || null);
 
   const balance = profile?.virtualBalance || 0;
-  const showCountdown = activeCategory === "en_vivo";
+  // Only show countdown if we're in "en_vivo" category AND there's an urgent market with time remaining
+  const urgentMarket = markets.find((m) => m.isUrgent);
+  const showCountdown =
+    activeCategory === "en_vivo" &&
+    urgentMarket &&
+    urgentMarket.endTime &&
+    urgentMarket.endTime > Date.now();
 
   const handleBet = (market: Market, side: "si" | "no") => {
     if (!authUser) {
@@ -117,25 +153,122 @@ const HomeScreen: React.FC = () => {
     setShowBetModal(true);
   };
 
+  const handleCountryBet = (market: Market) => {
+    if (!authUser) {
+      Alert.alert("Error", "Debes iniciar sesión para apostar");
+      navigation.navigate("Welcome" as never);
+      return;
+    }
+    navigation.navigate("CountryBetting" as never, { market } as never);
+  };
+
   const handleConfirmBet = async (amount: number) => {
-    if (!selectedMarket || !authUser) return;
+    if (!selectedMarket || !authUser) {
+      console.error("❌ Cannot place bet:", {
+        hasMarket: !!selectedMarket,
+        hasAuthUser: !!authUser,
+        authUserUid: authUser?.uid,
+      });
+      Alert.alert("Error", "Debes iniciar sesión para apostar");
+      return;
+    }
 
     try {
+      setIsBetting(true);
+      console.log("🎲 Placing bet:", {
+        marketId: selectedMarket.id,
+        side: selectedSide,
+        amount,
+        userUid: authUser.uid,
+      });
+
       await placeBetHook(selectedMarket.id, selectedSide, amount);
+
+      console.log("✅ Bet placed successfully");
       setShowBetModal(false);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (error: any) {
-      Alert.alert("Error al apostar", error.message || "Por favor intenta de nuevo");
+      console.error("❌ Error placing bet:", error);
+      Alert.alert(
+        "Error al apostar",
+        error.message || "Por favor intenta de nuevo",
+      );
+    } finally {
+      setIsBetting(false);
     }
   };
 
   // Show error if markets fail to load
   useEffect(() => {
     if (marketsError) {
-      Alert.alert("Error", "No se pudieron cargar los mercados. Por favor intenta de nuevo.");
+      Alert.alert(
+        "Error",
+        "No se pudieron cargar los mercados. Por favor intenta de nuevo.",
+      );
     }
   }, [marketsError]);
+
+  // Request notification permission for authenticated users (only once)
+  useEffect(() => {
+    // Only ask if ALL conditions are met:
+    // 1. User is authenticated
+    // 2. Profile is loaded (not loading)
+    // 3. Profile exists
+    // 4. We haven't asked before (hasAsked === false)
+    // 5. User doesn't have notifications enabled yet
+    if (
+      authUser &&
+      !profileLoading &&
+      profile &&
+      hasAsked === false &&
+      profile.notificationsEnabled !== true
+    ) {
+      // Small delay to let the screen render first (better UX)
+      const timer = setTimeout(() => {
+        Alert.alert(
+          "⚡ Activa las notificaciones",
+          "Los mercados EN VIVO de LIBERTA solo están activos por 2 minutos. No te pierdas ningún momento.",
+          [
+            {
+              text: "Ahora no",
+              style: "cancel",
+              onPress: async () => {
+                // Mark as asked so we don't ask again (user chose to skip)
+                try {
+                  await markAsAsked();
+                  // Optionally update profile to reflect user's choice
+                  if (authUser) {
+                    await updateUserProfile(authUser.uid, {
+                      notificationsEnabled: false,
+                    });
+                  }
+                } catch (error) {
+                  // Ignore errors - user chose to skip
+                }
+              },
+            },
+            {
+              text: "Activar",
+              onPress: async () => {
+                try {
+                  await requestPermission();
+                } catch (error) {
+                  Alert.alert(
+                    "Error",
+                    "No se pudo activar las notificaciones. Por favor intenta de nuevo desde Configuración.",
+                  );
+                }
+              },
+            },
+          ],
+          { cancelable: true },
+        );
+      }, 1500); // 1.5 second delay after screen loads
+
+      return () => clearTimeout(timer);
+    }
+  }, [authUser, profileLoading, profile, hasAsked, requestPermission]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -172,45 +305,22 @@ const HomeScreen: React.FC = () => {
         }}
       >
         {/* Countdown Banner for EN VIVO */}
-        {showCountdown && (
-          <CountdownBanner
-            endTime={markets.find((m) => m.isUrgent)?.endTime || Date.now()}
-          />
+        {showCountdown && urgentMarket?.endTime && (
+          <CountdownBanner endTime={urgentMarket.endTime} />
         )}
 
         {/* Category Filter */}
-        <View className="py-4">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 0 }}
-          >
-            <View className="flex-row gap-2">
-              {categories.map((category) => {
-                const isActive = activeCategory === category.id;
-                return (
-                  <Button
-                    key={category.id}
-                    variant={isActive ? "pillActive" : "pill"}
-                    size="pill"
-                    onPress={() => {
-                      setActiveCategory(category.id);
-                    }}
-                  >
-                    {category.label}
-                  </Button>
-                );
-              })}
-            </View>
-          </ScrollView>
-        </View>
+        <CategoryFilter
+          options={categories}
+          activeFilter={activeCategory}
+          onFilterChange={setActiveCategory}
+        />
 
         {/* Market Cards */}
         <View className="gap-4 pb-4 px-4">
           {loading ? (
-            <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#007AFF" />
+            <View className="items-center justify-center flex-1 py-12">
+              <ActivityIndicator size="large" color={Colors.primary500} />
               <Text className="text-muted-foreground mt-4">
                 Cargando mercados...
               </Text>
@@ -218,7 +328,12 @@ const HomeScreen: React.FC = () => {
           ) : (
             <>
               {markets.map((market) => (
-                <MarketCard key={market.id} market={market} onBet={handleBet} />
+                <MarketCard
+                  key={market.id}
+                  market={market}
+                  onBet={handleBet}
+                  onCountryBet={handleCountryBet}
+                />
               ))}
 
               {markets.length === 0 && !loading && (
@@ -254,6 +369,7 @@ const HomeScreen: React.FC = () => {
           balance={balance}
           onClose={() => setShowBetModal(false)}
           onConfirm={handleConfirmBet}
+          isLoading={isBetting}
         />
       )}
 

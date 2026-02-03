@@ -101,16 +101,19 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
         betStatus = 'refunded';
         balanceChange = betAmount;
         actualWin = 0;
+        console.log(`💰 Bet ${betDoc.id} REFUNDED - Amount: $${betAmount}`);
       } else if (betSide === result) {
         // User won
         betStatus = 'won';
         actualWin = potentialWin;
         balanceChange = potentialWin; // Net win (potentialWin includes original bet)
+        console.log(`🎉 Bet ${betDoc.id} WON - Payout: $${potentialWin}, User: ${userId}`);
       } else {
         // User lost (bet already deducted, no refund)
         betStatus = 'lost';
         actualWin = 0;
         balanceChange = 0;
+        console.log(`❌ Bet ${betDoc.id} LOST - Amount: $${betAmount}, User: ${userId}`);
       }
 
       // Update bet document
@@ -131,6 +134,13 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
           const currentBalance = userData.virtualBalance || 0;
           const newBalance = currentBalance + balanceChange;
 
+          console.log(`💵 Updating balance for user ${userId}:`, {
+            currentBalance,
+            balanceChange,
+            newBalance,
+            betStatus,
+          });
+
           currentBatch.update(userRef, {
             virtualBalance: newBalance,
             activePositions: Math.max(0, (userData.activePositions || 0) - 1),
@@ -142,6 +152,8 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
               : userData.totalLosses || 0,
             updatedAt: now,
           });
+
+          console.log(`✅ Balance update queued for user ${userId}`);
 
           // Create transaction record
           const transactionRef = db.collection('transactions').doc();
@@ -168,8 +180,12 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
               createdAt: now,
               completedAt: now,
             });
+            
+            console.log(`📝 Transaction created: ${transactionType} - $${balanceChange}`);
           }
         }
+      } else {
+        console.log(`⚠️ No balance change for bet ${betDoc.id} (user lost)`);
       }
 
       batchCount++;
@@ -189,32 +205,194 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
     }
 
     // Execute all batches
+    console.log(`🚀 Committing ${batches.length} batch(es) with ${settledCount} bet(s)`);
     for (const batch of batches) {
       await batch.commit();
     }
+    console.log(`✅ All batches committed successfully`);
 
-    // Send notifications to users (async, don't wait)
-    userBetsSnapshot.docs.forEach(async (betDoc) => {
+    // Collect bet data with settlement results for notifications
+    const betResults = new Map<string, {
+      userId: string;
+      betSide: string;
+      betAmount: number;
+      actualWin: number;
+      betStatus: 'won' | 'lost' | 'refunded';
+    }>();
+
+    // Re-process bets to collect settlement data
+    for (const betDoc of userBetsSnapshot.docs) {
       const betData = betDoc.data();
       const userId = betData.userId;
+      const betSide = betData.side;
+      const betAmount = betData.amount;
+      const potentialWin = betData.potentialWin;
+
+      let betStatus: 'won' | 'lost' | 'refunded';
+      let actualWin = 0;
+
+      if (result === 'cancelled') {
+        betStatus = 'refunded';
+        actualWin = 0;
+      } else if (betSide === result) {
+        betStatus = 'won';
+        actualWin = potentialWin;
+      } else {
+        betStatus = 'lost';
+        actualWin = 0;
+      }
+
+      betResults.set(betDoc.id, {
+        userId,
+        betSide,
+        betAmount,
+        actualWin,
+        betStatus,
+      });
+    }
+
+    // Get unique user IDs
+    const userIds = Array.from(new Set(Array.from(betResults.values()).map(b => b.userId)));
+
+    // Fetch user documents to check preferences and get push tokens
+    const userDocs = await Promise.all(
+      userIds.map(userId => db.collection('users').doc(userId).get())
+    );
+
+    const userDataMap = new Map<string, any>();
+    userDocs.forEach(doc => {
+      if (doc.exists) {
+        userDataMap.set(doc.id, doc.data());
+      }
+    });
+
+    // Create in-app notifications
+    const notificationBatch = db.batch();
+    let notificationCount = 0;
+
+    for (const [betId, betResult] of betResults.entries()) {
+      const userData = userDataMap.get(betResult.userId);
       
-      // Create notification
-      const notificationRef = db.collection('users').doc(userId).collection('notifications').doc();
-      await notificationRef.set({
+      // Check if user wants market result notifications
+      if (!userData || userData.notificationsEnabled !== true) {
+        continue;
+      }
+
+      if (userData.notificationPreferences?.marketResults === false) {
+        continue;
+      }
+
+      // Build notification message with amounts
+      let notificationMessage: string;
+      if (betResult.betStatus === 'refunded') {
+        notificationMessage = `Tu apuesta de $${betResult.betAmount.toFixed(2)} en "${marketData.question}" fue reembolsada`;
+      } else if (betResult.betStatus === 'won') {
+        notificationMessage = `¡Ganaste $${betResult.actualWin.toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
+      } else {
+        notificationMessage = `Perdiste $${betResult.betAmount.toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
+      }
+
+      // Create in-app notification
+      const notificationRef = db.collection('users').doc(betResult.userId).collection('notifications').doc();
+      notificationBatch.set(notificationRef, {
         id: notificationRef.id,
         type: 'bet_result',
         title: 'Resultado de tu apuesta',
-        message: result === 'cancelled'
-          ? `Tu apuesta en "${marketData.question}" fue reembolsada`
-          : betData.side === result
-          ? `¡Ganaste! Tu apuesta en "${marketData.question}" fue correcta`
-          : `Tu apuesta en "${marketData.question}" no fue correcta`,
+        message: notificationMessage,
         read: false,
         marketId,
-        betId: betDoc.id,
+        betId,
         createdAt: now,
       });
-    });
+
+      notificationCount++;
+    }
+
+    // Commit notification batch
+    if (notificationCount > 0) {
+      await notificationBatch.commit();
+      console.log(`📬 Created ${notificationCount} in-app notifications for market settlement`);
+    }
+
+    // Build notification messages for push notifications
+    const notificationTitle = 'Resultado de tu apuesta';
+    const notificationMessages: Array<{
+      userId: string;
+      message: string;
+      token: string;
+    }> = [];
+
+    for (const [betId, betResult] of betResults.entries()) {
+      const userData = userDataMap.get(betResult.userId);
+      
+      if (!userData || !userData.expoPushToken) continue;
+      if (userData.notificationsEnabled !== true) continue;
+      if (userData.notificationPreferences?.marketResults === false) continue;
+
+      let notificationBody: string;
+      if (betResult.betStatus === 'refunded') {
+        notificationBody = `Tu apuesta de $${betResult.betAmount.toFixed(2)} en "${marketData.question}" fue reembolsada`;
+      } else if (betResult.betStatus === 'won') {
+        notificationBody = `¡Ganaste $${betResult.actualWin.toFixed(2)}! Tu apuesta en "${marketData.question}" fue correcta`;
+      } else {
+        notificationBody = `Perdiste $${betResult.betAmount.toFixed(2)}. Tu apuesta en "${marketData.question}" no fue correcta`;
+      }
+
+      notificationMessages.push({
+        userId: betResult.userId,
+        message: notificationBody,
+        token: userData.expoPushToken,
+      });
+    }
+
+    // Send push notifications via Expo Push Notification service
+    if (notificationMessages.length > 0) {
+      // Expo allows up to 100 tokens per request, so we need to batch if needed
+      const batchSize = 100;
+      for (let i = 0; i < notificationMessages.length; i += batchSize) {
+        const messageBatch = notificationMessages.slice(i, i + batchSize);
+        
+        const expoMessages = messageBatch.map(({ token, message }) => ({
+          to: token,
+          sound: 'default',
+          title: notificationTitle,
+          body: message,
+          data: {
+            type: 'bet_result',
+            marketId,
+          },
+          priority: 'high',
+        }));
+
+        try {
+          const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Accept-Encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(expoMessages),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Error sending push notifications (batch ${i / batchSize + 1}):`, errorText);
+          } else {
+            const result = await response.json();
+            console.log(`✅ Sent push notifications to ${messageBatch.length} devices (batch ${i / batchSize + 1})`, result);
+          }
+        } catch (fetchError) {
+          console.error(`Error fetching Expo push service (batch ${i / batchSize + 1}):`, fetchError);
+        }
+      }
+
+      console.log(`📤 Sent push notifications to ${notificationMessages.length} users for market settlement ${marketId}`);
+    } else {
+      console.log(`No push tokens available for market settlement ${marketId}`);
+    }
+
+    console.log(`✅ Market ${marketId} settled with result: ${result}. Settled ${settledCount} bets.`);
 
     return {
       success: true,
@@ -223,7 +401,7 @@ export const settleMarket = functions.region('us-central1').https.onCall(async (
       result,
     };
   } catch (error: any) {
-    console.error('Error settling market:', error);
+    console.error('❌ Error settling market:', error);
     
     if (error instanceof functions.https.HttpsError) {
       throw error;

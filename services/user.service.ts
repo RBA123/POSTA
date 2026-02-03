@@ -66,6 +66,8 @@ export async function createUserProfile(
         marketResults: userData.notificationPreferences?.marketResults ?? true,
         promotions: userData.notificationPreferences?.promotions ?? true,
       },
+      termsAccepted: userData.termsAccepted ?? true, // Default to true if not specified
+      termsAcceptedAt: userData.termsAcceptedAt || now,
       createdAt: now,
       updatedAt: now,
       referredBy: userData.referredBy || null, // Convert undefined to null
@@ -123,6 +125,29 @@ export async function updateUserProfile(
       error.code === "permission-denied"
         ? "No tienes permiso para actualizar este perfil"
         : "Error al actualizar el perfil. Por favor intenta de nuevo."
+    );
+  }
+}
+
+/**
+ * Update terms acceptance status
+ * Called when user accepts terms (syncs from AsyncStorage to Firestore)
+ */
+export async function updateTermsAcceptance(uid: string): Promise<void> {
+  try {
+    const userRef = doc(db, "users", uid);
+    const now = Timestamp.now();
+
+    await updateDoc(userRef, {
+      termsAccepted: true,
+      termsAcceptedAt: now,
+      updatedAt: now,
+    });
+  } catch (error: any) {
+    throw new Error(
+      error.code === "permission-denied"
+        ? "No tienes permiso para actualizar este perfil"
+        : "Error al actualizar la aceptación de términos. Por favor intenta de nuevo."
     );
   }
 }

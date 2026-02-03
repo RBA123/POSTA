@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, Text, ScrollView, Image, Pressable, Modal, Alert } from "react-native";
+import { View, Text, ScrollView, Image, Pressable, Modal, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -168,14 +168,22 @@ const SignupScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <View className="flex-1 bg-background px-6 py-8">
-        {/* Header */}
-        <View className="flex-row items-center gap-3 mb-8">
-          <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
-          <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
-        </View>
+      <KeyboardAvoidingView 
+        className="flex-1" 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView 
+          className="flex-1 bg-background px-6 py-8"
+          showsVerticalScrollIndicator={false} 
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View className="flex-row items-center gap-3 mb-8">
+            <Image source={libertaLogo} className="w-10 h-10 rounded-xl" />
+            <Text className="text-xl font-bold text-foreground">LIBERTA</Text>
+          </View>
 
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <Text className="text-2xl font-bold text-foreground mb-2">
             Crear cuenta
           </Text>
@@ -346,15 +354,16 @@ const SignupScreen: React.FC = () => {
                   <Ionicons name="chevron-down" size={16} color={Colors.foregroundMuted} />
                 </Pressable>
 
-                <Input
-                  value={phoneNumber}
-                  onChangeText={(text) =>
-                    setPhoneNumber(text.replace(/\D/g, ""))
-                  }
-                  placeholder=""
-                  keyboardType="phone-pad"
-                  className="flex-1"
-                />
+                <View className="flex-1">
+                  <Input
+                    value={phoneNumber}
+                    onChangeText={(text) =>
+                      setPhoneNumber(text.replace(/\D/g, ""))
+                    }
+                    placeholder=""
+                    keyboardType="phone-pad"
+                  />
+                </View>
               </View>
             </View>
 
@@ -375,27 +384,27 @@ const SignupScreen: React.FC = () => {
               />
             </View>
           </View>
+
+          {/* Continue Button - Now inside ScrollView */}
+          <View className="mt-8 mb-4">
+            <Button
+              variant="default"
+              size="lg"
+              onPress={handleContinue}
+              disabled={!isFormValid || signupLoading || authLoading}
+              loading={signupLoading || authLoading}
+              className="w-full"
+            >
+              <Text className="text-white font-semibold">Continuar</Text>
+              <Ionicons name="chevron-forward" size={20} color="white" />
+            </Button>
+
+            <Text className="text-xs text-muted-foreground text-center mt-4">
+              Al continuar, aceptas nuestros Términos de Servicio y Política de
+              Privacidad
+            </Text>
+          </View>
         </ScrollView>
-
-        {/* Continue Button */}
-        <View className="mt-8">
-          <Button
-            variant="default"
-            size="lg"
-            onPress={handleContinue}
-            disabled={!isFormValid || signupLoading || authLoading}
-            loading={signupLoading || authLoading}
-            className="w-full"
-          >
-            <Text className="text-white font-semibold">Continuar</Text>
-            <Ionicons name="chevron-forward" size={20} color="white" />
-          </Button>
-
-          <Text className="text-xs text-muted-foreground text-center mt-4">
-            Al continuar, aceptas nuestros Términos de Servicio y Política de
-            Privacidad
-          </Text>
-        </View>
 
         {/* Country Code Picker Modal */}
         <Modal
@@ -428,7 +437,7 @@ const SignupScreen: React.FC = () => {
             </View>
           </Pressable>
         </Modal>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

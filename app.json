@@ -4,7 +4,12 @@
     "slug": "Liberta",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "extra": {
+      "eas": {
+        "projectId": "faef0fb9-aa3d-4665-a07a-cddfc9b49f93"
+      }
+    },
+    "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -25,23 +30,36 @@
             "buildToolsVersion": "34.0.0"
           }
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/app-icon.png",
+          "color": "#ffffff",
+          "sounds": []
+        }
+      ],
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gabrielcastillo.Liberta"
+      "bundleIdentifier": "com.gabrielach.Liberta",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.gabrielcastillo.Liberta"
+      "package": "com.gabrielach.Liberta"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "gabrielcastillo"
   }
 }

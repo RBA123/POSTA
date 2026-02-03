@@ -8,44 +8,84 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { Button } from "../components/ui/Button";
 import { Storage } from "../lib/storage";
+import { useAuth } from "../contexts/AuthContext";
+import { updateUserProfile } from "../services/user.service";
+import { getExpoPushToken, isPushNotificationSupported } from "../lib/expoPushToken";
 import libertaLogo from "../assets/liberta-logo.png";
 import Colors from "../constants/Colors";
 
 const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEnable = async () => {
     setIsLoading(true);
 
     try {
+      // Request notification permissions
       const { status } = await Notifications.requestPermissionsAsync();
+      const granted = status === "granted";
+      
       await Storage.setItem(
         "liberta_notifications",
-        status === "granted" ? "enabled" : "disabled"
+        granted ? "enabled" : "disabled"
       );
+
+      // If permissions granted and user is authenticated, get and store push token
+      if (granted && user) {
+        // Check if push notifications are supported before trying to get token
+        if (isPushNotificationSupported()) {
+          try {
+            // Get Expo push token with proper projectId handling
+            const tokenData = await getExpoPushToken();
+            const expoPushToken = tokenData.data;
+
+            // Update user profile with push token and enable notifications
+            await updateUserProfile(user.uid, {
+              expoPushToken,
+              notificationsEnabled: true,
+            });
+
+            console.log("✅ Push token stored:", expoPushToken);
+          } catch (tokenError) {
+            // Handle errors gracefully (e.g., Android Expo Go, missing projectId, or invalid UUID)
+            const errorMessage = tokenError?.message || String(tokenError);
+            if (
+              !errorMessage.includes('not supported') && 
+              !errorMessage.includes('No valid Expo project ID') &&
+              !errorMessage.includes('Invalid uuid')
+            ) {
+              console.error("Error getting push token:", tokenError);
+            }
+            // Still enable notifications in profile even if token fails
+            // (user can add projectId later and token will be retrieved on next app start)
+            await updateUserProfile(user.uid, {
+              notificationsEnabled: true,
+            });
+          }
+        } else {
+          // Push notifications not supported (e.g., Expo Go), just enable in profile
+          await updateUserProfile(user.uid, {
+            notificationsEnabled: true,
+          });
+        }
+      }
     } catch (error) {
       console.error("Notification permission error:", error);
       await Storage.setItem("liberta_notifications", "disabled");
     }
 
-    const savedCountry = await Storage.getItem("liberta_country");
-    if (savedCountry) {
-      navigation.navigate("Main");
-    } else {
-      navigation.navigate("CountrySelection");
-    }
+    // Always navigate to Main after handling notification permission
+    // (This screen should only be accessed manually from settings, not during onboarding)
+    navigation.navigate("Main" as never);
   };
 
   const handleSkip = async () => {
     await Storage.setItem("liberta_notifications", "disabled");
 
-    const savedCountry = await Storage.getItem("liberta_country");
-    if (savedCountry) {
-      navigation.navigate("Main");
-    } else {
-      navigation.navigate("CountrySelection");
-    }
+    // Always navigate to Main after skipping
+    navigation.navigate("Main" as never);
   };
 
   return (

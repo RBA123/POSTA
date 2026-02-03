@@ -6,9 +6,10 @@ import * as admin from 'firebase-admin';
  * 
  * This function:
  * 1. Triggers when a market status changes to 'open'
- * 2. Finds all users with notifications enabled
- * 3. Creates in-app notifications
- * 4. Sends push notifications via FCM (if tokens available)
+ * 2. Only sends notifications for urgent (EN VIVO) markets
+ * 3. Finds all users with notifications enabled
+ * 4. Creates in-app notifications
+ * 5. Sends push notifications via Expo Push Notification service
  */
 export const sendMarketOpenNotification = functions.region('us-central1').firestore
   .document('markets/{marketId}')
@@ -17,8 +18,8 @@ export const sendMarketOpenNotification = functions.region('us-central1').firest
     const after = change.after.data();
     const marketId = context.params.marketId;
 
-    // Only trigger when market status changes to 'open'
-    if (before.status !== 'open' && after.status === 'open') {
+    // Only trigger when market status changes to 'open' AND market is urgent
+    if (before.status !== 'open' && after.status === 'open' && after.isUrgent === true) {
       const db = admin.firestore();
 
       try {
@@ -36,8 +37,9 @@ export const sendMarketOpenNotification = functions.region('us-central1').firest
 
         const now = admin.firestore.Timestamp.now();
         const batch = db.batch();
+        const pushTokens: string[] = [];
 
-        // Create in-app notifications for all users
+        // Create in-app notifications and collect push tokens
         usersSnapshot.docs.forEach((userDoc) => {
           const userId = userDoc.id;
           const userData = userDoc.data();
@@ -49,41 +51,73 @@ export const sendMarketOpenNotification = functions.region('us-central1').firest
             batch.set(notificationRef, {
               id: notificationRef.id,
               type: 'market_live',
-              title: marketData.isUrgent ? '⚡ Mercado EN VIVO' : 'Nuevo mercado disponible',
-              message: marketData.isUrgent
-                ? `¡Momento LIBERTA! ⏱️ ${marketData.lockAt ? '2:00' : 'Ahora'} — ${marketData.question}`
-                : `Nuevo mercado: ${marketData.question}`,
+              title: '⚡ Mercado EN VIVO',
+              message: `¡Momento LIBERTA! ⏱️ ${marketData.lockAt ? '2:00' : 'Ahora'} — ${marketData.question}`,
               read: false,
               marketId,
               createdAt: now,
             });
+
+            // Collect push token if available
+            if (userData.expoPushToken) {
+              pushTokens.push(userData.expoPushToken);
+            }
           }
         });
 
         await batch.commit();
         console.log(`Created notifications for ${usersSnapshot.size} users for market ${marketId}`);
 
-        // TODO: Send push notifications via FCM
-        // This requires storing FCM tokens in user documents
-        // Example implementation:
-        // const messaging = admin.messaging();
-        // const tokens = usersSnapshot.docs
-        //   .map(doc => doc.data().fcmToken)
-        //   .filter(token => token);
-        // 
-        // if (tokens.length > 0) {
-        //   await messaging.sendMulticast({
-        //     tokens,
-        //     notification: {
-        //       title: marketData.isUrgent ? '⚡ Mercado EN VIVO' : 'Nuevo mercado',
-        //       body: marketData.question,
-        //     },
-        //     data: {
-        //       type: 'market_live',
-        //       marketId,
-        //     },
-        //   });
-        // }
+        // Send push notifications via Expo Push Notification service
+        if (pushTokens.length > 0) {
+          const lockTimeText = marketData.lockAt ? '2:00' : 'Ahora';
+          const notificationTitle = '⚡ Mercado EN VIVO';
+          const notificationBody = `¡Momento LIBERTA! ⏱️ ${lockTimeText} — ${marketData.question}`;
+
+          // Expo allows up to 100 tokens per request, so we need to batch if needed
+          const batchSize = 100;
+          for (let i = 0; i < pushTokens.length; i += batchSize) {
+            const tokenBatch = pushTokens.slice(i, i + batchSize);
+            
+            const messages = tokenBatch.map(token => ({
+              to: token,
+              sound: 'default',
+              title: notificationTitle,
+              body: notificationBody,
+              data: {
+                type: 'market_live',
+                marketId,
+              },
+              priority: 'high',
+            }));
+
+            try {
+              const response = await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Accept-Encoding': 'gzip, deflate',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(messages),
+              });
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Error sending push notifications (batch ${i / batchSize + 1}):`, errorText);
+              } else {
+                const result = await response.json();
+                console.log(`✅ Sent push notifications to ${tokenBatch.length} devices (batch ${i / batchSize + 1})`, result);
+              }
+            } catch (fetchError) {
+              console.error(`Error fetching Expo push service (batch ${i / batchSize + 1}):`, fetchError);
+            }
+          }
+
+          console.log(`📤 Sent push notifications to ${pushTokens.length} users for urgent market ${marketId}`);
+        } else {
+          console.log(`No push tokens available for market ${marketId}`);
+        }
       } catch (error) {
         console.error(`Error sending notifications for market ${marketId}:`, error);
         // Don't throw - this is a background function
