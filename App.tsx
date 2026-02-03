@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -7,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { Storage } from "./lib/storage";
@@ -273,6 +275,34 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Initialize RevenueCat
+    const initializeRevenueCat = async () => {
+      try {
+        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+
+        const apiKey =
+          Platform.OS === "ios"
+            ? process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY
+            : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
+
+        if (!apiKey) {
+          console.error(
+            "❌ RevenueCat API key not found in environment variables",
+          );
+          return;
+        }
+
+        await Purchases.configure({ apiKey });
+        console.log("✅ RevenueCat initialized successfully for", Platform.OS);
+      } catch (error) {
+        console.error("❌ Error initializing RevenueCat:", error);
+      }
+    };
+
+    initializeRevenueCat();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
