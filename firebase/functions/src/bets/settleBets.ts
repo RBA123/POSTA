@@ -161,12 +161,22 @@ export const settleMarket = functions
             const currentBalance = userData.virtualBalance || 0;
             const newBalance = currentBalance + balanceChange;
 
-            // Validate balance won't go negative
-            if (newBalance < 0) {
+            // Validate balance won't go negative (based on snapshot)
+            // Note: With concurrent bets, this check is best-effort. 
+            // Since we use increment(), the actual write is safe, but we might increment into negative if they bet everything in parallel?
+            // No, because settle adds money (win/refund) or does nothing (loss, money already taken).
+            // So settle never reduces balance, it only increases or stays same.
+            // Exception: if we implement "loss" as deduction, but here "loss" just means no payout.
+            // Logic: 
+            //   Won: +win
+            //   Refund: +bet
+            //   Lost: +0
+            // So balanceChange is always >= 0. No risk of negative balance here.
+            
+             if (balanceChange < 0) {
               console.error(
-                `⚠️ Balance would go negative for user ${userId}: ${currentBalance} + ${balanceChange} = ${newBalance}`,
+                `⚠️ Unexpected negative balance change for user ${userId}: ${balanceChange}`,
               );
-              // Skip this update but continue processing other bets
               continue;
             }
 
@@ -178,16 +188,16 @@ export const settleMarket = functions
             });
 
             currentBatch.update(userRef, {
-              virtualBalance: newBalance,
-              activePositions: Math.max(0, (userData.activePositions || 0) - 1),
+              virtualBalance: admin.firestore.FieldValue.increment(balanceChange),
+              activePositions: admin.firestore.FieldValue.increment(-1),
               totalWinnings:
                 betStatus === "won"
-                  ? (userData.totalWinnings || 0) + actualWin
-                  : userData.totalWinnings || 0,
+                  ? admin.firestore.FieldValue.increment(actualWin)
+                  : admin.firestore.FieldValue.increment(0),
               totalLosses:
                 betStatus === "lost"
-                  ? (userData.totalLosses || 0) + betAmount
-                  : userData.totalLosses || 0,
+                  ? admin.firestore.FieldValue.increment(betAmount)
+                  : admin.firestore.FieldValue.increment(0),
               updatedAt: now,
             });
 
