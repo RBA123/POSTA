@@ -119,6 +119,27 @@ const ProfileScreen: React.FC = () => {
         {/* Stats Card */}
         <View className="px-4 -mt-8">
           <Card>
+            {/* Balance Section with Buy Credits Button */}
+            <View className="border-b border-border pb-4 mb-4">
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Text className="text-sm text-muted-foreground mb-1">
+                    Balance disponible
+                  </Text>
+                  <Text className="text-3xl font-bold text-foreground">
+                    ${profile.virtualBalance?.toFixed(2) || "0.00"}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => navigation.navigate("PaymentMethods" as never)}
+                  className="bg-primary500 px-5 py-3 rounded-full flex-row items-center gap-2"
+                >
+                  <Ionicons name="add-circle" size={20} color="white" />
+                  <Text className="text-white font-bold">Comprar</Text>
+                </Pressable>
+              </View>
+            </View>
+
             <View className="flex-row justify-between mb-4">
               <View className="items-center flex-1">
                 <Text className="text-2xl font-bold text-foreground">
