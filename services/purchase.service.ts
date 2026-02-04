@@ -23,8 +23,19 @@ class PurchaseService {
     try {
       await Purchases.logIn(userId);
       console.log("✅ User logged into RevenueCat:", userId);
-    } catch (error) {
-      console.error("❌ Error logging in user to RevenueCat:", error);
+    } catch (error: any) {
+      // Gracefully handle native module not available
+      if (
+        error?.message?.includes("singleton instance") ||
+        error?.message?.includes("Native module")
+      ) {
+        console.log("ℹ️ RevenueCat not available (requires development build)");
+      } else {
+        console.error(
+          "❌ Error logging in user to RevenueCat:",
+          error?.message || error,
+        );
+      }
       throw error;
     }
   }
@@ -36,8 +47,19 @@ class PurchaseService {
     try {
       await Purchases.logOut();
       console.log("✅ User logged out from RevenueCat");
-    } catch (error) {
-      console.error("❌ Error logging out user from RevenueCat:", error);
+    } catch (error: any) {
+      // Gracefully handle native module not available
+      if (
+        error?.message?.includes("singleton instance") ||
+        error?.message?.includes("Native module")
+      ) {
+        console.log("ℹ️ RevenueCat not available (requires development build)");
+      } else {
+        console.error(
+          "❌ Error logging out user from RevenueCat:",
+          error?.message || error,
+        );
+      }
       throw error;
     }
   }

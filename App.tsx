@@ -295,8 +295,21 @@ export default function App() {
 
         await Purchases.configure({ apiKey });
         console.log("✅ RevenueCat initialized successfully for", Platform.OS);
-      } catch (error) {
-        console.error("❌ Error initializing RevenueCat:", error);
+      } catch (error: any) {
+        // RevenueCat native modules are not available in Expo Go/simulators
+        if (
+          error?.message?.includes("Native module") ||
+          error?.message?.includes("RNPurchases")
+        ) {
+          console.log(
+            "ℹ️ RevenueCat only works on actual development builds, not in Expo Go or simulators",
+          );
+        } else {
+          console.error(
+            "❌ Error initializing RevenueCat:",
+            error.message || error,
+          );
+        }
       }
     };
 
