@@ -8,7 +8,10 @@ import {
   Alert,
 } from "react-native";
 import { formatCents } from "../lib/currency";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { BOTTOM_NAV_HEIGHT } from "../constants/Layout";
 import { Button } from "../components/ui/Button";
