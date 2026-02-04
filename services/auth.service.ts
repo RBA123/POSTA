@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * 
+ *
  * Abstracts all Firebase Authentication operations
  */
 
@@ -41,31 +41,31 @@ export interface SignUpData {
  */
 export async function signUpWithEmail(
   email: string,
-  password: string
+  password: string,
 ): Promise<FirebaseUser> {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
-      password
+      password,
     );
     return userCredential.user;
   } catch (error: any) {
     const errorCode = error?.code || "";
     const errorMessage = error?.message || "";
-    
+
     throw new Error(
       errorCode === "auth/email-already-in-use"
         ? "Este correo electrónico ya está registrado"
         : errorCode === "auth/invalid-email"
-        ? "Correo electrónico inválido"
-        : errorCode === "auth/weak-password"
-        ? "La contraseña debe tener al menos 6 caracteres"
-        : errorCode === "auth/network-request-failed"
-        ? "Error de conexión. Verifica tu conexión a internet."
-        : errorCode === "auth/too-many-requests"
-        ? "Demasiados intentos. Por favor intenta más tarde."
-        : `Error al crear la cuenta: ${errorMessage || "Por favor intenta de nuevo."}`
+          ? "Correo electrónico inválido"
+          : errorCode === "auth/weak-password"
+            ? "La contraseña debe tener al menos 6 caracteres"
+            : errorCode === "auth/network-request-failed"
+              ? "Error de conexión. Verifica tu conexión a internet."
+              : errorCode === "auth/too-many-requests"
+                ? "Demasiados intentos. Por favor intenta más tarde."
+                : `Error al crear la cuenta: ${errorMessage || "Por favor intenta de nuevo."}`,
     );
   }
 }
@@ -76,26 +76,43 @@ export async function signUpWithEmail(
  */
 export async function signInWithEmail(
   email: string,
-  password: string
+  password: string,
 ): Promise<FirebaseUser> {
+  console.log("🔑 [auth.service] signInWithEmail called", { email });
+
   try {
+    console.log(
+      "📤 [auth.service] Calling Firebase signInWithEmailAndPassword",
+    );
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
-      password
+      password,
     );
+    console.log("✅ [auth.service] Firebase sign in successful", {
+      uid: userCredential.user.uid,
+      email: userCredential.user.email,
+    });
     return userCredential.user;
   } catch (error: any) {
+    console.error("❌ [auth.service] Firebase sign in failed:", {
+      code: error.code,
+      message: error.message,
+      fullError: JSON.stringify(error, null, 2),
+    });
+
     throw new Error(
       error.code === "auth/user-not-found"
         ? "Usuario no encontrado"
         : error.code === "auth/wrong-password"
-        ? "Contraseña incorrecta"
-        : error.code === "auth/invalid-email"
-        ? "Correo electrónico inválido"
-        : error.code === "auth/user-disabled"
-        ? "Esta cuenta ha sido deshabilitada"
-        : "Error al iniciar sesión. Por favor intenta de nuevo."
+          ? "Contraseña incorrecta"
+          : error.code === "auth/invalid-email"
+            ? "Correo electrónico inválido"
+            : error.code === "auth/user-disabled"
+              ? "Esta cuenta ha sido deshabilitada"
+              : error.code === "auth/invalid-credential"
+                ? "Credenciales inválidas. Verifica tu email y contraseña."
+                : `Error al iniciar sesión (${error.code || "unknown"}). Por favor intenta de nuevo.`,
     );
   }
 }
@@ -124,7 +141,7 @@ export function getCurrentUser(): FirebaseUser | null {
  * Returns an unsubscribe function
  */
 export function onAuthStateChanged(
-  callback: (user: FirebaseUser | null) => void
+  callback: (user: FirebaseUser | null) => void,
 ): Unsubscribe {
   return firebaseOnAuthStateChanged(auth, callback);
 }
@@ -140,9 +157,8 @@ export async function resetPassword(email: string): Promise<void> {
       error.code === "auth/user-not-found"
         ? "No existe una cuenta con este correo electrónico"
         : error.code === "auth/invalid-email"
-        ? "Correo electrónico inválido"
-        : "Error al enviar el correo de recuperación. Por favor intenta de nuevo."
+          ? "Correo electrónico inválido"
+          : "Error al enviar el correo de recuperación. Por favor intenta de nuevo.",
     );
   }
 }
-

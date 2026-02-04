@@ -7,18 +7,21 @@ Liberta uses Firebase as its complete backend infrastructure, providing authenti
 ## Firebase Services
 
 ### Firebase Authentication
+
 - **Provider**: Email/Password
 - **User Management**: Automatic user creation and session management
 - **Security**: Firebase handles password hashing and secure token generation
 - **Integration**: Used via Firebase Auth SDK in the mobile app
 
 ### Cloud Firestore
+
 - **Type**: NoSQL document database
 - **Region**: us-central1
 - **Database**: (default)
 - **Features**: Real-time listeners, offline persistence, automatic scaling
 
 ### Cloud Functions
+
 - **Runtime**: Node.js 20
 - **Region**: us-central1
 - **Type**: 1st Generation Functions
@@ -26,12 +29,21 @@ Liberta uses Firebase as its complete backend infrastructure, providing authenti
 
 ## Firestore Data Model
 
+**IMPORTANT: All monetary values are stored as INTEGER CENTS to avoid floating-point precision errors.**
+
+- Example: $100.00 = 10000 cents
+- Example: $1.50 = 150 cents
+- Minimum bet: 100 cents ($1.00)
+- Initial user balance: 10000 cents ($100.00)
+
 ### Root Collections
 
 #### 1. `users` Collection
+
 Stores user profiles and account information.
 
 **Document Structure:**
+
 ```typescript
 {
   uid: string;                    // Firebase Auth UID (document ID)
@@ -43,13 +55,13 @@ Stores user profiles and account information.
   username: string;               // Unique, lowercase
   dateOfBirth: Timestamp;
   countryCode: string;           // ISO 2-letter (e.g., "AR")
-  friendCode: string;            // Unique referral code
-  virtualBalance: number;        // Current balance
+  friendCode: string;            // Unique referral code (e.g., "DIEGO323")
+  virtualBalance: number;        // Current balance in CENTS (e.g., 10000 = $100.00)
   totalPositions: number;        // All-time bets count
   activePositions: number;       // Current pending bets
   winRate: number;               // Percentage (0-100)
-  totalWinnings: number;
-  totalLosses: number;
+  totalWinnings: number;         // Total winnings in CENTS
+  totalLosses: number;           // Total losses in CENTS
   notificationsEnabled: boolean;
   notificationPreferences: {
     liveMarkets: boolean;
@@ -67,14 +79,17 @@ Stores user profiles and account information.
 ```
 
 **Subcollections:**
+
 - `users/{userId}/notifications` - User notifications
 - `users/{userId}/paymentMethods` - Saved payment methods
 - `users/{userId}/settings` - User preferences
 
 #### 2. `markets` Collection
+
 Stores betting markets/questions.
 
 **Document Structure:**
+
 ```typescript
 {
   id: string;                    // Auto-generated (document ID)
@@ -83,11 +98,11 @@ Stores betting markets/questions.
   category: MarketCategory;      // "en_vivo" | "partidos" | "torneos" | "fase_grupos" | "jugadores"
   siProbability: number;         // 0-100
   noProbability: number;         // 0-100
-  totalVolume: number;           // Total USD bet
+  totalVolume: number;           // Total amount bet in CENTS
   totalBets: number;             // Number of bets placed
   uniqueBettors: number;         // Count of unique users
-  siVolume: number;              // Volume on "Sí" side
-  noVolume: number;              // Volume on "No" side
+  siVolume: number;              // Volume on "Sí" side in CENTS
+  noVolume: number;              // Volume on "No" side in CENTS
   status: MarketStatus;          // "draft" | "open" | "locked" | "settled" | "cancelled"
   isUrgent: boolean;             // For EN VIVO markets
   openAt: Timestamp;             // When market opens
@@ -104,12 +119,15 @@ Stores betting markets/questions.
 ```
 
 **Subcollections:**
+
 - `markets/{marketId}/bets` - Market-level bet aggregation (for leaderboards)
 
 #### 3. `userBets` Collection
+
 User-centric bet records (for Activity screen).
 
 **Document Structure:**
+
 ```typescript
 {
   id: string;                    // Auto-generated (document ID)
@@ -118,11 +136,11 @@ User-centric bet records (for Activity screen).
   marketQuestion: string;        // Denormalized for display
   marketCategory: string;        // Denormalized for display
   side: "si" | "no";
-  amount: number;
+  amount: number;                // Bet amount in CENTS
   probability: number;           // Snapshot at bet time
-  potentialWin: number;          // Calculated payout
+  potentialWin: number;          // Calculated payout in CENTS
   status: BetStatus;             // "pending" | "won" | "lost" | "refunded"
-  actualWin?: number;            // Filled when settled
+  actualWin?: number;            // Filled when settled in CENTS
   settledAt?: Timestamp;
   placedAt: Timestamp;
   createdAt: Timestamp;
@@ -130,17 +148,19 @@ User-centric bet records (for Activity screen).
 ```
 
 #### 4. `transactions` Collection
+
 Financial transaction history.
 
 **Document Structure:**
+
 ```typescript
 {
   id: string;                    // Auto-generated (document ID)
   userId: string;
   type: TransactionType;         // "deposit" | "withdrawal" | "bet_placed" | "bet_won" | "bet_refund" | "referral_bonus"
-  amount: number;                // Positive or negative
-  balanceBefore: number;
-  balanceAfter: number;
+  amount: number;                // Positive or negative in CENTS
+  balanceBefore: number;         // Balance before transaction in CENTS
+  balanceAfter: number;          // Balance after transaction in CENTS
   description: string;
   betId?: string;                 // Reference if bet-related
   marketId?: string;
@@ -156,9 +176,11 @@ Financial transaction history.
 ### Subcollections
 
 #### `users/{userId}/notifications`
+
 User notifications.
 
 **Document Structure:**
+
 ```typescript
 {
   id: string;                    // Auto-generated (document ID)
@@ -174,9 +196,11 @@ User notifications.
 ```
 
 #### `users/{userId}/paymentMethods`
+
 Saved payment methods (future feature).
 
 **Document Structure:**
+
 ```typescript
 {
   id: string;
@@ -194,12 +218,14 @@ Saved payment methods (future feature).
 ```
 
 #### `users/{userId}/settings`
+
 User preferences.
 
 **Document Structure:**
+
 ```typescript
 {
-  id: "preferences";             // Fixed document ID
+  id: "preferences"; // Fixed document ID
   theme: "light" | "dark" | "auto";
   language: "es" | "en" | "pt";
   currency: string;
@@ -208,17 +234,19 @@ User preferences.
 ```
 
 #### `markets/{marketId}/bets`
+
 Market-level bet aggregation (for leaderboards).
 
 **Document Structure:**
+
 ```typescript
 {
-  id: string;                    // Bet ID
+  id: string; // Bet ID
   userId: string;
-  username: string;              // Denormalized for leaderboards
+  username: string; // Denormalized for leaderboards
   side: "si" | "no";
   amount: number;
-  probability: number;           // Snapshot at bet time
+  probability: number; // Snapshot at bet time
   potentialWin: number;
   placedAt: Timestamp;
 }
@@ -288,10 +316,12 @@ firebase/functions/
 ### Bet Functions
 
 #### `placeBet` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Place a bet on a market
 
 **Process:**
+
 1. Validates authentication
 2. Validates input (marketId, side, amount)
 3. Checks user has sufficient balance
@@ -306,6 +336,7 @@ firebase/functions/
 10. Returns bet ID and new balance
 
 **Error Cases:**
+
 - Unauthenticated user
 - Invalid input
 - Insufficient balance
@@ -313,10 +344,12 @@ firebase/functions/
 - Market locked (past lockAt time)
 
 #### `settleMarket` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Settle a market and resolve all bets (admin only)
 
 **Process:**
+
 1. Validates admin authentication
 2. Validates market exists
 3. Sets market status to "settled"
@@ -331,6 +364,7 @@ firebase/functions/
 9. Updates market document with settlement info
 
 **Error Cases:**
+
 - Non-admin user
 - Market not found
 - Market already settled
@@ -339,10 +373,12 @@ firebase/functions/
 ### Market Functions
 
 #### `updateMarketOdds` (Firestore Trigger)
+
 **Trigger**: Firestore Document Create (`markets/{marketId}/bets/{betId}`)  
 **Purpose**: Automatically update market odds when bets are placed
 
 **Process:**
+
 1. Triggers when a bet is added to `markets/{marketId}/bets`
 2. Gets current market data
 3. Skips if market is not open
@@ -355,10 +391,12 @@ firebase/functions/
 **Note**: This is a background function, errors are logged but don't throw.
 
 #### `recalculateMarketOdds` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Manually recalculate odds for a specific market
 
 **Process:**
+
 1. Validates authentication
 2. Gets market document
 3. Aggregates all bets in `markets/{marketId}/bets` subcollection
@@ -369,10 +407,12 @@ firebase/functions/
 **Use Case**: Can be called if odds get out of sync or for manual correction.
 
 #### `scheduledMarketStatus` (Scheduled)
+
 **Trigger**: Pub/Sub Schedule (every 1 minute)  
 **Purpose**: Automatically lock EN VIVO markets that have passed their lockAt time
 
 **Process:**
+
 1. Runs every minute
 2. Finds all open markets with `isUrgent == true`
 3. Checks if `lockAt` timestamp has passed
@@ -382,10 +422,12 @@ firebase/functions/
 **Note**: This ensures EN VIVO markets automatically close at their scheduled time.
 
 #### `createMarket` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Create a new market (admin only)
 
 **Process:**
+
 1. Validates admin authentication
 2. Validates input (question, category required)
 3. Determines initial status:
@@ -399,6 +441,7 @@ firebase/functions/
 5. Returns market ID and status
 
 **Error Cases:**
+
 - Non-admin user
 - Missing required fields
 - Invalid category
@@ -406,10 +449,12 @@ firebase/functions/
 ### Notification Functions
 
 #### `sendMarketOpenNotification` (Firestore Trigger)
+
 **Trigger**: Firestore Document Update (`markets/{marketId}`)  
 **Purpose**: Send notifications when a market opens
 
 **Process:**
+
 1. Triggers when market status changes to "open"
 2. Finds all users with `notificationsEnabled == true`
 3. Checks user notification preferences (`liveMarkets` flag)
@@ -420,10 +465,12 @@ firebase/functions/
 **Note**: This is a background function, errors are logged but don't throw.
 
 #### `sendCustomNotification` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Send a custom notification to a user
 
 **Process:**
+
 1. Validates authentication
 2. Validates input (userId, type, title, message)
 3. Checks permissions:
@@ -436,10 +483,12 @@ firebase/functions/
 **Use Cases**: Promotions, system messages, bet result notifications
 
 #### `markNotificationRead` (Callable)
+
 **Trigger**: HTTPS Callable  
 **Purpose**: Mark a notification as read
 
 **Process:**
+
 1. Validates authentication
 2. Finds notification in user's subcollection
 3. Updates notification with `read: true` and `readAt` timestamp
@@ -473,21 +522,25 @@ Firestore composite indexes are defined in `firebase/firestore.indexes.json`.
 The frontend uses Firestore `onSnapshot` listeners for real-time updates:
 
 ### Market Updates
+
 - Listeners on `markets` collection queries
 - Update when odds change (via `updateMarketOdds` trigger)
 - Update when market status changes
 
 ### Bet Updates
+
 - Listeners on `userBets` collection queries
 - Update when bet status changes (via `settleMarket`)
 - Update immediately after bet placement
 
 ### Balance Updates
+
 - User profile listeners
 - Update immediately after bet placement
 - Update when bets are settled
 
 ### Notification Updates
+
 - Listeners on `users/{userId}/notifications` subcollection
 - Update when new notifications are created
 - Update when notifications are marked as read
@@ -532,16 +585,19 @@ All balance updates happen atomically using Firestore batches:
 ## Deployment
 
 ### Firestore Rules
+
 ```bash
 firebase deploy --only firestore:rules
 ```
 
 ### Firestore Indexes
+
 ```bash
 firebase deploy --only firestore:indexes
 ```
 
 ### Cloud Functions
+
 ```bash
 cd firebase/functions
 npm run build
@@ -549,6 +605,7 @@ firebase deploy --only functions
 ```
 
 ### Deploy Everything
+
 ```bash
 firebase deploy
 ```
@@ -556,6 +613,7 @@ firebase deploy
 ## Monitoring & Logging
 
 ### Function Logs
+
 ```bash
 # View all function logs
 firebase functions:log
@@ -565,11 +623,13 @@ firebase functions:log --only placeBet
 ```
 
 ### Firestore Usage
+
 - Monitor in Firebase Console > Firestore > Usage
 - Track read/write operations
 - Monitor index usage
 
 ### Function Performance
+
 - View execution times in Firebase Console
 - Monitor error rates
 - Track invocation counts
@@ -577,11 +637,13 @@ firebase functions:log --only placeBet
 ## Error Handling
 
 ### Function Errors
+
 - Use `functions.https.HttpsError` for callable functions
 - Error codes: `unauthenticated`, `permission-denied`, `invalid-argument`, `not-found`, `failed-precondition`, `internal`
 - Background functions log errors but don't throw (to prevent retries)
 
 ### Validation
+
 - Input validation in all callable functions
 - Type checking for all parameters
 - Business rule validation (balance checks, market status, etc.)

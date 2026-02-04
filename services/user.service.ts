@@ -89,15 +89,33 @@ export async function createUserProfile(
  */
 export async function getUserProfile(uid: string): Promise<User | null> {
   try {
+    console.log("📥 [user.service] getUserProfile called", { uid });
     const userRef = doc(db, "users", uid);
+    console.log("📤 [user.service] Fetching document from Firestore...");
     const userSnap = await getDoc(userRef);
 
+    console.log("📥 [user.service] Document fetch result", {
+      exists: userSnap.exists(),
+      id: userSnap.id,
+    });
+
     if (!userSnap.exists()) {
+      console.log("❌ [user.service] Document does not exist");
       return null;
     }
 
-    return userSnap.data() as User;
+    const userData = userSnap.data() as User;
+    console.log("✅ [user.service] Profile fetched successfully", {
+      email: userData.email,
+      firstName: userData.firstName,
+    });
+    return userData;
   } catch (error: any) {
+    console.error("❌ [user.service] Error fetching profile:", {
+      code: error.code,
+      message: error.message,
+      fullError: error,
+    });
     throw new Error("Error al obtener el perfil de usuario.");
   }
 }

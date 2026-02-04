@@ -1,39 +1,32 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Firebase configuration
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBsqijOYbdAehqW282VjthfOR3CejkVH7A",
-  authDomain: "liberta-main.firebaseapp.com",
-  projectId: "liberta-main",
-  storageBucket: "liberta-main.firebasestorage.app",
-  messagingSenderId: "446575654136",
-  appId: "1:446575654136:ios:2a1e270a388d6c1add370d",
+  apiKey: "AIzaSyCPRgZpboRyueW8cplGASUezTdZdL1Fx4c",
+  authDomain: "porta-main.firebaseapp.com",
+  projectId: "porta-main",
+  storageBucket: "porta-main.firebasestorage.app",
+  messagingSenderId: "354126583899",
+  appId: "1:354126583899:web:29ade165020f9ff3e3877e",
+  measurementId: "G-ZNGXYNQBPC",
 };
 
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth with AsyncStorage persistence
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+// Initialize Auth - Firebase v11+ handles React Native persistence automatically
+export const auth = getAuth(app);
 
 // Initialize services
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "us-central1");
 
-// Log the functions configuration for debugging
-console.log('🔧 Firebase Functions initialized:', {
-  region: 'us-central1',
-  customDomain: functions.customDomain,
-  emulatorOrigin: functions.emulatorOrigin,
-});
+console.log("🔧 Firebase initialized successfully");
 
 export default app;
-

@@ -219,23 +219,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Sign in with email
   const handleSignIn = useCallback(async (email: string, password: string) => {
     try {
+      console.log("🔐 [AuthContext] handleSignIn started", {
+        email,
+        passwordLength: password.length,
+        hasPassword: !!password,
+      });
       setError(null);
       setLoading(true);
+
+      // Sign in - this will trigger onAuthStateChanged listener
+      console.log("📤 [AuthContext] Calling signInWithEmail");
       const firebaseUser = await signInWithEmail(email, password);
+      console.log("✅ [AuthContext] signInWithEmail successful", {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+      });
 
-      // Check if profile exists after sign in
-      try {
-        const profile = await getUserProfile(firebaseUser.uid);
-        setProfileExists(!!profile);
-      } catch (err) {
-        setProfileExists(false);
-      }
-
-      setLoading(false);
+      // Don't set loading to false here - let onAuthStateChanged handle it
+      // Don't set user or profileExists - let onAuthStateChanged handle it
+      // This prevents race conditions
+      console.log("⏳ [AuthContext] Waiting for onAuthStateChanged to fire...");
     } catch (err: any) {
-      setError(err);
-      setLoading(false);
-      throw err;
+      console.error("❌ [AuthContext] Sign in error:", {
+        message: err.message,
+        stack: err.stack,
+        error: err,
+      });
     }
   }, []);
 
