@@ -45,17 +45,18 @@ function TabNavigator() {
   });
 
   // Safety checks - don't render tabs if not authenticated or no profile
-  if (loading) {
+  // (skipped when DEBUG_SKIP_AUTH is active)
+  if (!DEBUG_SKIP_AUTH && loading) {
     console.log("⏳ [TabNavigator] Loading - showing loading screen");
     return <LoadingScreen loadingText="Cargando..." />;
   }
 
-  if (!user) {
+  if (!DEBUG_SKIP_AUTH && !user) {
     console.log("❌ [TabNavigator] No user - returning null");
     return null; // Don't render tabs if not authenticated
   }
 
-  if (!profileExists) {
+  if (!DEBUG_SKIP_AUTH && !profileExists) {
     console.log("❌ [TabNavigator] No profile - returning null");
     return null; // Don't render tabs if profile doesn't exist
   }
@@ -106,6 +107,13 @@ function TabNavigator() {
     </Tab.Navigator>
   );
 }
+
+// ─── DEBUG FLAG ───────────────────────────────────────────────────────────────
+// Set the right-hand side to true to skip terms + auth and go straight to the
+// main app. __DEV__ ensures this is always false in production builds no matter
+// what, so it's safe to forget to revert before shipping.
+const DEBUG_SKIP_AUTH = __DEV__ && false;
+// ──────────────────────────────────────────────────────────────────────────────
 
 // Main App Content - handles auth state and routing
 function AppContent() {
@@ -205,19 +213,33 @@ function AppContent() {
   });
 
   // Show loading while checking terms or auth state
-  if (checkingTerms || loading) {
+  if (!DEBUG_SKIP_AUTH && (checkingTerms || loading)) {
     console.log("⏳ [AppContent] Showing loading screen");
     return <LoadingScreen loadingText="Cargando..." />;
   }
 
   // Show Terms screen if not accepted yet
-  if (termsAccepted === false) {
+  if (!DEBUG_SKIP_AUTH && termsAccepted === false) {
     console.log("📜 [AppContent] Showing terms acceptance screen");
     return <TermsAcceptanceScreen onAccept={handleTermsAccept} />;
   }
 
   // Determine which screen to show based on auth state
   const renderCurrentScreen = () => {
+    // Debug bypass: skip straight to main app (DEBUG_SKIP_AUTH must be true)
+    if (DEBUG_SKIP_AUTH) {
+      console.log("🛠️ [AppContent] DEBUG_SKIP_AUTH active - showing main app");
+      return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
+          <Stack.Screen name="NotificationsHistory" component={NotificationsHistoryScreen} />
+          <Stack.Screen name="CountryBetting" component={CountryBettingScreen} />
+        </Stack.Navigator>
+      );
+    }
+
     if (!user) {
       // Not authenticated - show auth screens
       console.log("🔓 [AppContent] Not authenticated - showing auth screens");

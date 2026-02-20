@@ -1,4 +1,4 @@
-# Liberta
+# Posta
 
 A real-time sports betting mobile application built with React Native, Expo, and Firebase. Liberta enables users to place virtual bets on sports markets with dynamic odds that update in real-time.
 
