@@ -24,16 +24,18 @@ service cloud.firestore {
     // ⚠️ IMPORTANT: All monetary values stored as INTEGER CENTS
     function isValidUserData() {
       let data = request.resource.data;
-      return data.keys().hasAll(['email', 'firstName', 'lastName', 'username', 'dateOfBirth', 
+      return data.keys().hasAll(['email', 'firstName', 'lastName', 'username', 'dateOfBirth',
                                   'countryCode', 'friendCode', 'virtualBalance', 'totalPositions',
                                   'activePositions', 'winRate', 'totalWinnings', 'totalLosses',
                                   'notificationsEnabled', 'notificationPreferences', 'createdAt',
-                                  'updatedAt', 'isAdmin'])
+                                  'updatedAt', 'isAdmin', 'kycStatus', 'realBalance'])
         && data.email is string
         && data.firstName is string
         && data.lastName is string
         && data.username is string
         && data.virtualBalance is number
+        && data.realBalance is number
+        && data.kycStatus is string
         && data.isAdmin is bool;
     }
     
@@ -46,17 +48,21 @@ service cloud.firestore {
       
       // Users can create their own profile (during signup)
       // Initial balance: 10000 cents = $100.00
-      allow create: if isOwner(userId) 
+      allow create: if isOwner(userId)
         && isValidUserData()
         && request.resource.data.uid == userId
-        && request.resource.data.virtualBalance == 10000; // Initial balance in cents
+        && request.resource.data.virtualBalance == 10000 // Initial balance in cents
+        && request.resource.data.kycStatus == 'not_started'
+        && request.resource.data.realBalance == 0;
       
       // Users can update their own profile (with restrictions)
       allow update: if isOwner(userId)
         && !request.resource.data.diff(resource.data).affectedKeys()
-           .hasAny(['uid', 'isAdmin', 'virtualBalance', 'totalPositions', 
-                    'activePositions', 'winRate', 'totalWinnings', 'totalLosses', 
-                    'createdAt', 'referredBy']);
+           .hasAny(['uid', 'isAdmin', 'virtualBalance', 'totalPositions',
+                    'activePositions', 'winRate', 'totalWinnings', 'totalLosses',
+                    'createdAt', 'referredBy', 'kycStatus', 'kycDocumentType',
+                    'kycDocumentNumber', 'kycFullName', 'kycAddress', 'kycCompletedAt',
+                    'realBalance']);
       
       // Admins can read any user
       allow read: if isAdmin();
@@ -179,6 +185,30 @@ service cloud.firestore {
       allow delete: if false;
     }
     
+    // ========================================================================
+    // DEPOSIT REQUESTS COLLECTION (dLocal)
+    // ========================================================================
+    match /depositRequests/{depositId} {
+      // Users can read their own deposit requests
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+
+      // Only Cloud Functions can write
+      allow create, update, delete: if false;
+    }
+
+    // ========================================================================
+    // WITHDRAWAL REQUESTS COLLECTION (dLocal)
+    // ========================================================================
+    match /withdrawalRequests/{withdrawalId} {
+      // Users can read their own withdrawal requests
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+
+      // Only Cloud Functions can write
+      allow create, update, delete: if false;
+    }
+
     // ========================================================================
     // DEFAULT DENY
     // ========================================================================

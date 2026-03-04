@@ -28,6 +28,10 @@ import ProfileScreen from "./screens/ProfileScreen";
 import PaymentMethodsScreen from "./screens/PaymentMethodsScreen";
 import NotificationsHistoryScreen from "./screens/NotificationsHistoryScreen";
 import CountryBettingScreen from "./screens/CountryBettingScreen";
+import KycScreen from "./screens/KycScreen";
+import DepositScreen from "./screens/DepositScreen";
+import WithdrawScreen from "./screens/WithdrawScreen";
+import TransactionHistoryScreen from "./screens/TransactionHistoryScreen";
 import Colors from "./constants/Colors";
 
 const Stack = createNativeStackNavigator();
@@ -236,6 +240,10 @@ function AppContent() {
           <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
           <Stack.Screen name="NotificationsHistory" component={NotificationsHistoryScreen} />
           <Stack.Screen name="CountryBetting" component={CountryBettingScreen} />
+          <Stack.Screen name="KYC" component={KycScreen} />
+          <Stack.Screen name="Deposit" component={DepositScreen} />
+          <Stack.Screen name="Withdraw" component={WithdrawScreen} />
+          <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
         </Stack.Navigator>
       );
     }
@@ -283,6 +291,10 @@ function AppContent() {
             name="CountryBetting"
             component={CountryBettingScreen}
           />
+          <Stack.Screen name="KYC" component={KycScreen} />
+          <Stack.Screen name="Deposit" component={DepositScreen} />
+          <Stack.Screen name="Withdraw" component={WithdrawScreen} />
+          <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
         </Stack.Navigator>
       );
     }

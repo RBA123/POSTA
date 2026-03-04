@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 /**
- * Firestore TypeScript Interfaces for Liberta Betting Platform
+ * Firestore TypeScript Interfaces for Posta Betting Platform
  *
  * These interfaces define the structure of all documents in Firestore.
  * Use these types when reading/writing to Firestore for type safety.
@@ -52,6 +52,18 @@ export interface User {
   // Terms & Conditions
   termsAccepted: boolean;
   termsAcceptedAt?: Timestamp;
+
+  // KYC (dLocal payments)
+  kycStatus: 'not_started' | 'pending' | 'verified' | 'rejected';
+  kycDocumentType?: 'CI' | 'RUC' | 'PASS' | 'CE';
+  kycDocumentNumber?: string;
+  kycFullName?: string;
+  kycAddress?: string;
+  kycCompletedAt?: Timestamp;
+
+  // Real money balance (separate from virtualBalance)
+  // ⚠️ USD cents (integer) — only for Ecuador dLocal payments
+  realBalance: number;
 
   // Metadata
   createdAt: Timestamp;
@@ -245,7 +257,10 @@ export type TransactionType =
   | "bet_placed"
   | "bet_won"
   | "bet_refund"
-  | "referral_bonus";
+  | "referral_bonus"
+  | "dlocal_deposit"
+  | "dlocal_withdrawal"
+  | "dlocal_withdrawal_refund";
 
 export type TransactionStatus =
   | "pending"
@@ -281,6 +296,59 @@ export interface Transaction {
 }
 
 // ============================================================================
+// DEPOSIT REQUESTS COLLECTION (dLocal)
+// ============================================================================
+
+export type DepositRequestStatus =
+  | "pending"
+  | "completed"
+  | "failed"
+  | "cancelled";
+
+export interface DepositRequest {
+  id: string;
+  userId: string;
+  amountCents: number; // Gross amount in USD cents
+  feeCents: number; // Fee in USD cents
+  netAmountCents: number; // Amount credited to user (amountCents - feeCents)
+  status: DepositRequestStatus;
+  dLocalPaymentId?: string; // dLocal payment_id
+  dLocalStatus?: string; // Raw dLocal status
+  transactionId?: string; // Reference to transactions collection
+  createdAt: Timestamp;
+  completedAt?: Timestamp;
+}
+
+// ============================================================================
+// WITHDRAWAL REQUESTS COLLECTION (dLocal)
+// ============================================================================
+
+export type WithdrawalRequestStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "refunded";
+
+export interface WithdrawalRequest {
+  id: string;
+  userId: string;
+  amountCents: number; // Amount debited from user in USD cents
+  feeCents: number; // Fee in USD cents
+  netAmountCents: number; // Amount sent to bank (amountCents - feeCents)
+  bankCode: string;
+  bankAccountNumber: string;
+  bankAccountType: "checking" | "savings";
+  beneficiaryName: string;
+  status: WithdrawalRequestStatus;
+  dLocalPayoutId?: string; // dLocal payout_id
+  dLocalStatus?: string; // Raw dLocal status
+  transactionId?: string; // Reference to transactions collection
+  createdAt: Timestamp;
+  completedAt?: Timestamp;
+}
+
+// ============================================================================
 // HELPER TYPES
 // ============================================================================
 
@@ -297,6 +365,8 @@ export type CreateUserInput = Omit<
   | "winRate"
   | "totalWinnings"
   | "totalLosses"
+  | "kycStatus"
+  | "realBalance"
 > & {
   uid: string; // Required, provided by Firebase Auth
   virtualBalance: number; // Required for creation
@@ -305,6 +375,8 @@ export type CreateUserInput = Omit<
   winRate: number; // Required for creation
   totalWinnings: number; // Required for creation
   totalLosses: number; // Required for creation
+  kycStatus: 'not_started'; // Always not_started on creation
+  realBalance: number; // Required for creation (0)
   createdAt: Timestamp; // Required for creation
   updatedAt: Timestamp; // Required for creation
 };

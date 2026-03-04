@@ -59,6 +59,8 @@ export async function createUserProfile(
       winRate,
       totalWinnings: 0,
       totalLosses: 0,
+      kycStatus: "not_started",
+      realBalance: 0,
       notificationsEnabled: userData.notificationsEnabled ?? true,
       notificationPreferences: {
         liveMarkets: userData.notificationPreferences?.liveMarkets ?? true,

@@ -265,7 +265,8 @@ const SignupScreen: React.FC = () => {
               placeholder="Mínimo 6 caracteres"
               secureTextEntry
               autoCapitalize="none"
-              autoComplete="password-new"
+              autoComplete="off"
+              textContentType="oneTimeCode"
             />
 
             {/* Confirm Password */}
@@ -276,7 +277,8 @@ const SignupScreen: React.FC = () => {
               placeholder="Repite tu contraseña"
               secureTextEntry
               autoCapitalize="none"
-              autoComplete="password-new"
+              autoComplete="off"
+              textContentType="oneTimeCode"
             />
 
             {/* Date of Birth */}

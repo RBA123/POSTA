@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getFunctions } from "firebase/functions";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -27,6 +27,16 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "us-central1");
 
-console.log("🔧 Firebase initialized successfully");
+// Set to true to use local Firebase emulators
+const USE_EMULATORS = __DEV__ && false; // flip to true when running emulators
+
+if (USE_EMULATORS) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  console.log("🔧 Firebase connected to LOCAL EMULATORS");
+} else {
+  console.log("🔧 Firebase initialized (production)");
+}
 
 export default app;

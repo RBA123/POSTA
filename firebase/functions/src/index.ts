@@ -21,3 +21,8 @@ export {
 
 // Export payment functions
 export { revenueCatWebhook } from "./payments/revenuecatWebhook";
+export { submitKyc } from "./payments/submitKyc";
+export { createDeposit } from "./payments/createDeposit";
+export { createWithdrawal } from "./payments/createWithdrawal";
+export { dLocalWebhook } from "./payments/dLocalWebhook";
+export { getFeeEstimate } from "./payments/getFeeEstimate";

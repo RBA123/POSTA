@@ -120,12 +120,12 @@ const ProfileScreen: React.FC = () => {
         {/* Stats Card */}
         <View className="px-4 -mt-8">
           <Card>
-            {/* Balance Section with Buy Credits Button */}
+            {/* Virtual Balance Section */}
             <View className="border-b border-border pb-4 mb-4">
               <View className="flex-row items-center justify-between">
                 <View>
                   <Text className="text-sm text-muted-foreground mb-1">
-                    Balance disponible
+                    Balance virtual
                   </Text>
                   <Text className="text-3xl font-bold text-foreground">
                     {formatCents(profile.virtualBalance || 0)}
@@ -137,6 +137,36 @@ const ProfileScreen: React.FC = () => {
                 >
                   <Ionicons name="add-circle" size={20} color="white" />
                   <Text className="text-white font-bold">Comprar</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Real Balance Section */}
+            <View className="border-b border-border pb-4 mb-4">
+              <View className="mb-2">
+                <Text className="text-sm text-muted-foreground mb-1">
+                  Saldo real (USD)
+                </Text>
+                <Text className="text-2xl font-bold text-foreground">
+                  {formatCents(profile.realBalance || 0)}
+                </Text>
+              </View>
+              <View className="flex-row gap-3 mt-2">
+                <Pressable
+                  onPress={() => navigation.navigate("Deposit" as never)}
+                  className="flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2"
+                  style={{ backgroundColor: Colors.success }}
+                >
+                  <Ionicons name="arrow-down-circle" size={18} color="white" />
+                  <Text className="text-white font-bold">Depositar</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate("Withdraw" as never)}
+                  className="flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2 border-2"
+                  style={{ borderColor: Colors.foregroundMuted }}
+                >
+                  <Ionicons name="arrow-up-circle" size={18} color={Colors.foreground} />
+                  <Text className="text-foreground font-bold">Retirar</Text>
                 </Pressable>
               </View>
             </View>
@@ -215,6 +245,27 @@ const ProfileScreen: React.FC = () => {
               />
               <Text className="flex-1 font-medium text-foreground">
                 Métodos de pago
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={Colors.foregroundMuted}
+              />
+            </Pressable>
+
+            <Pressable
+              onPress={() =>
+                navigation.navigate("TransactionHistory" as never)
+              }
+              className="flex-row items-center gap-4 p-4 bg-card rounded-[12px]"
+            >
+              <Ionicons
+                name="receipt-outline"
+                size={20}
+                color={Colors.foregroundMuted}
+              />
+              <Text className="flex-1 font-medium text-foreground">
+                Historial de transacciones
               </Text>
               <Ionicons
                 name="chevron-forward"

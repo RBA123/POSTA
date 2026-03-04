@@ -3,6 +3,8 @@
 # dependencies
 node_modules/
 
+.vscode
+
 # Expo
 .expo/
 dist/
@@ -42,6 +44,7 @@ yarn-error.*
 /android
 
 # Firebase
+.secret.local
 GoogleService-Info.plist
 google-services.json
 .firebase/
@@ -55,3 +58,7 @@ firebase-export-*.json
 /scripts/
 firestore-backup-*/
 firestore-backup-json/
+
+#google-service
+google-service.json
+CLAUDE.md

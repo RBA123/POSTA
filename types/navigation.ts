@@ -14,6 +14,12 @@ export type RootStackParamList = {
   PaymentMethods: undefined;
   NotificationsHistory: undefined;
   CountryBetting: { market: Market };
+
+  // dLocal Payment Screens
+  KYC: undefined;
+  Deposit: undefined;
+  Withdraw: undefined;
+  TransactionHistory: undefined;
 };
 
 export type TabParamList = {
