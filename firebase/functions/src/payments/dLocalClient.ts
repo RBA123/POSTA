@@ -47,8 +47,7 @@ function buildHeaders(body: string) {
     "X-Login": xLogin,
     "X-Trans-Key": xTransKey,
     "X-Version": "2.1",
-    "Authorization":
-      `V2-HMAC-SHA256, login:${xLogin}, date:${xDate}, authorization:${signature}`,
+    "Authorization": `V2-HMAC-SHA256, Signature: ${signature}`,
   };
 }
 
@@ -105,33 +104,31 @@ export async function dLocalGet<T = unknown>(path: string): Promise<T> {
  * dLocal sends: Authorization: V2-HMAC-SHA256, login:{xLogin}, date:{xDate}, authorization:{signature}
  * We verify:    HMAC-SHA256(xLogin + xDate + body, secretKey) === signature
  */
+/**
+ * Verify dLocal webhook signature.
+ *
+ * dLocal sends:
+ *   Authorization: V2-HMAC-SHA256, Signature: {signature}
+ *   X-Date: {ISO date}
+ *   X-Login: {login}
+ * We verify: HMAC-SHA256(xLogin + xDate + body, secretKey) === signature
+ */
 export function verifyDLocalWebhookSignature(
   body: string,
   authHeader: string | undefined,
+  xDateHeader: string | undefined,
 ): boolean {
-  if (!authHeader) return false;
+  if (!authHeader || !xDateHeader) return false;
 
   try {
     const { xLogin, secretKey } = getConfig();
 
-    // Parse "V2-HMAC-SHA256, login:X, date:Y, authorization:Z"
-    const parts: Record<string, string> = {};
-    const segments = authHeader.split(",").map((s) => s.trim());
-    for (const seg of segments) {
-      const colonIdx = seg.indexOf(":");
-      if (colonIdx > -1) {
-        const key = seg.substring(0, colonIdx).trim();
-        const value = seg.substring(colonIdx + 1).trim();
-        parts[key] = value;
-      }
-    }
+    // Parse "V2-HMAC-SHA256, Signature: {hex}"
+    const signatureMatch = authHeader.match(/Signature:\s*(\S+)/);
+    if (!signatureMatch) return false;
 
-    const dateFromHeader = parts["date"];
-    const signatureFromHeader = parts["authorization"];
-
-    if (!dateFromHeader || !signatureFromHeader) return false;
-
-    const expected = buildSignature(xLogin, dateFromHeader, body, secretKey);
+    const signatureFromHeader = signatureMatch[1];
+    const expected = buildSignature(xLogin, xDateHeader, body, secretKey);
 
     return crypto.timingSafeEqual(
       Buffer.from(signatureFromHeader),

@@ -30,8 +30,9 @@ export const dLocalWebhook = functions
       // Verify HMAC signature
       const rawBody = JSON.stringify(req.body);
       const authHeader = req.headers["authorization"] as string | undefined;
+      const xDateHeader = req.headers["x-date"] as string | undefined;
 
-      if (!verifyDLocalWebhookSignature(rawBody, authHeader)) {
+      if (!verifyDLocalWebhookSignature(rawBody, authHeader, xDateHeader)) {
         console.error("❌ Invalid dLocal webhook signature");
         res.status(401).send({ error: "Invalid signature" });
         return;
