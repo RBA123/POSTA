@@ -28,13 +28,29 @@ export async function submitKyc(data: KycSubmitInput): Promise<KycSubmitResult> 
 }
 
 export async function createDeposit(data: DepositInput): Promise<DepositResult> {
-  const fn = httpsCallable<DepositInput, DepositResult>(
-    functions,
-    "createDeposit",
-    { timeout: 60000 },
-  );
-  const result = await fn(data);
-  return result.data;
+  console.log("💳 [dlocal] createDeposit called:", {
+    amountCents: data.amountCents,
+    cardLast4: data.cardNumber.slice(-4),
+    expiry: data.cardExpiry,
+    holder: data.cardHolderName,
+  });
+  try {
+    const fn = httpsCallable<DepositInput, DepositResult>(
+      functions,
+      "createDeposit",
+      { timeout: 60000 },
+    );
+    const result = await fn(data);
+    console.log("✅ [dlocal] createDeposit result:", result.data);
+    return result.data;
+  } catch (error: any) {
+    console.error("❌ [dlocal] createDeposit error:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    });
+    throw error;
+  }
 }
 
 export async function createWithdrawal(

@@ -104,6 +104,14 @@ export const createDeposit = functions
     });
 
     try {
+      console.log("📤 Calling dLocal /secure_payments:", {
+        amount: amountDollars,
+        currency: "USD",
+        country: "EC",
+        userId,
+        orderId: depositRef.id,
+      });
+
       // Call dLocal Secure Payments
       const dLocalResponse = await dLocalPost<DLocalPaymentResponse>(
         "/secure_payments",
@@ -198,7 +206,12 @@ export const createDeposit = functions
         dLocalStatus: error.message,
       });
 
-      console.error("❌ Deposit failed:", { userId, error: error.message });
+      console.error("❌ Deposit failed:", {
+        userId,
+        error: error.message,
+        stack: error.stack,
+        fullError: JSON.stringify(error),
+      });
 
       throw new functions.https.HttpsError(
         "internal",
