@@ -2,7 +2,7 @@
 
 ## Overview
 
-Liberta uses Firebase as its complete backend infrastructure, providing authentication, database, serverless functions, and real-time capabilities. All backend logic is implemented using Firebase services.
+Posta uses Firebase as its complete backend infrastructure, providing authentication, database, serverless functions, and real-time capabilities. All backend logic is implemented using Firebase services.
 
 ## Firebase Services
 

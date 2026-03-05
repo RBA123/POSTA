@@ -6,12 +6,12 @@
 
 ## 1. Project Overview
 
-**Posta** is a mobile sports betting application targeting Latin American users (primary market: Argentina). Users bet virtual currency on sports market outcomes ("Sí" / "No" binary questions) using a virtual balance—there is no real-money wagering. Users start with $100.00 of virtual currency (stored as `10000` cents) and can purchase more credits via in-app purchase through RevenueCat.
+**Posta** is a mobile sports betting application targeting Latin American users (primary market: Argentina). Users bet virtual currency on sports market outcomes ("Sí" / "No" binary questions) using a virtual balance—there is no real-money wagering. Users start with $100.00 of virtual currency (stored as `10000` cents).
 
 - **Platform:** iOS and Android (React Native / Expo)
 - **Language:** Spanish throughout all UI copy and error messages
 - **Core loop:** Browse markets → Place bet → Await settlement → Win/lose credits
-- **Revenue model:** In-app purchase of virtual credit packages via RevenueCat
+- **Revenue model:** Payments via dLocal (deposits/withdrawals)
 
 ---
 
@@ -29,7 +29,6 @@
 | React Navigation (Native Stack) | ^7.9.0 | Screen navigation |
 | React Navigation (Bottom Tabs) | ^7.9.0 | Tab bar navigation |
 | TanStack Query | ^5.83.0 | Server state caching |
-| `react-native-purchases` | ^9.0.0 | RevenueCat IAP SDK |
 | `expo-notifications` | ~0.32.16 | Push notifications |
 | `@react-native-async-storage/async-storage` | ^2.1.0 | Local persistence |
 | `react-native-reanimated` | ~4.1.1 | Animations |
@@ -53,7 +52,7 @@
 ### External Services
 | Service | Role |
 |---|---|
-| RevenueCat | In-app purchase management and webhook delivery |
+| dLocal | Payment processing (deposits/withdrawals) |
 | Expo Push Notification Service | Push notification delivery |
 
 ---
@@ -64,7 +63,7 @@
 
 ```
 /Users/gabemeredith/Code/Posta/Posta/
-├── App.tsx                    # Root component: providers, navigation shell, RevenueCat init
+├── App.tsx                    # Root component: providers, navigation shell
 ├── app.json                   # Expo config (bundle ID, permissions, etc.)
 ├── package.json               # Client dependencies
 ├── tailwind.config.js         # Tailwind / NativeWind config
@@ -81,7 +80,7 @@
 │   ├── ProfileScreen.tsx       # User profile (profile tab)
 │   ├── NotificationsScreen.tsx # Push notification permission flow
 │   ├── NotificationsHistoryScreen.tsx  # In-app notification list
-│   ├── PaymentMethodsScreen.tsx  # Payment methods (UI exists, not functional)
+│   ├── PaymentMethodsScreen.tsx  # Payment methods (placeholder)
 │   └── CountryBettingScreen.tsx  # Country-specific market variant
 │
 ├── components/                # Shared reusable UI components
@@ -93,7 +92,7 @@
 │   └── ui/                   # Primitive UI components (Button, Input, Card, etc.)
 │
 ├── contexts/
-│   └── AuthContext.tsx        # Global auth state + RevenueCat integration
+│   └── AuthContext.tsx        # Global auth state
 │
 ├── hooks/
 │   ├── useAuth.ts             # Thin wrapper over AuthContext
@@ -106,7 +105,6 @@
 │   ├── auth.service.ts        # Firebase Auth wrappers (Spanish error messages)
 │   ├── user.service.ts        # Firestore user CRUD
 │   ├── bet.service.ts         # Bet placement + queries via Cloud Functions
-│   ├── purchase.service.ts    # RevenueCat singleton
 │   ├── notification.service.ts
 │   └── index.ts              # Central re-export
 │
@@ -121,7 +119,6 @@
 │
 ├── types/
 │   ├── index.ts               # Category, Market, CountryBet types
-│   └── purchase.ts            # CreditPackageId enum, PurchaseResult, OfferingsResult
 │
 ├── constants/
 │   ├── Colors.ts              # Full color palette (see Section 7)
@@ -146,8 +143,7 @@
             │   └── deleteMarket.ts     # deleteMarket (admin only)
             ├── notifications/
             │   └── sendPushNotification.ts  # sendMarketOpenNotification, sendCustomNotification, markNotificationRead
-            └── payments/
-                └── revenuecatWebhook.ts     # HTTPS webhook handler for RevenueCat purchases
+            └── payments/                     # dLocal payment handlers
 ```
 
 ---
@@ -285,7 +281,7 @@ interface Transaction {
   description: string;
   betId?: string;
   marketId?: string;
-  paymentProvider?: string;     // "revenuecat" for IAP deposits
+  paymentProvider?: string;     // e.g. "dlocal"
   providerId?: string;
   productId?: string;
   status: TransactionStatus;
@@ -310,18 +306,6 @@ interface UserNotification {
 }
 ```
 
-### Credit Package IDs (IAP)
-
-```typescript
-// types/purchase.ts
-enum CreditPackageId {
-  CREDITS_100 = "credits_100",   // 10,000 cents
-  CREDITS_500 = "credits_500",   // 50,000 cents
-  CREDITS_1000 = "credits_1000", // 100,000 cents
-  CREDITS_2500 = "credits_2500", // 250,000 cents
-}
-```
-
 ---
 
 ## 5. API / Interface Layer
@@ -342,7 +326,6 @@ These are the only authorized write paths for sensitive data. All are callable v
 | `sendMarketOpenNotification` | `onCall` | Yes | Yes | Push notification for market open |
 | `sendCustomNotification` | `onCall` | Yes | Yes | Custom push + in-app notification |
 | `markNotificationRead` | `onCall` | Yes | No | Mark a notification as read |
-| `revenueCatWebhook` | `onRequest` (HTTPS POST) | HMAC sig | — | Credit user balance on IAP |
 
 ### Client-Side Service Layer
 
@@ -369,15 +352,6 @@ These are the only authorized write paths for sensitive data. All are callable v
 - `signOut()` → `void`
 - `resetPassword(email)` → `void`
 - `onAuthStateChanged(callback)` → unsubscribe function
-
-**`services/purchase.service.ts`** — RevenueCat singleton (`purchaseService`):
-- `loginUser(uid)` — called on every auth state change
-- `logoutUser()` — called on sign out
-- `getOfferings()` → `OfferingsResult`
-- `purchasePackage(package)` → `PurchaseResult`
-- `restorePurchases()` → `PurchaseResult`
-- `getCustomerInfo()` → RevenueCat `CustomerInfo`
-- `hasActiveEntitlement(entitlementId)` → `boolean`
 
 ---
 
@@ -425,21 +399,6 @@ Admin-only. Processes all pending bets in a market.
    - users/{uid}: FieldValue.increment(balanceChange), update stats
    - transactions/{txId}: type="bet_won" or "bet_refund"
 5. Send in-app notifications (Firestore) + push notifications (Expo batch, ≤100 tokens/request)
-```
-
-### RevenueCat Webhook (`firebase/functions/src/payments/revenuecatWebhook.ts`)
-
-Handles IAP → credit conversion. Security-critical.
-
-```
-1. Reject non-POST
-2. Verify X-Revenuecat-Signature header (HMAC-SHA256, timing-safe compare)
-   - Secret stored in Firebase Secret Manager as REVENUECAT_WEBHOOK_SECRET
-3. Only process "INITIAL_PURCHASE" and "NON_RENEWING_PURCHASE" events
-4. Idempotency: check users/{uid}/transactions/{transactionId} exists → skip if duplicate
-5. CREDIT_AMOUNTS map: { credits_100: 10000, credits_500: 50000, credits_1000: 100000, credits_2500: 250000 }
-6. Atomic transaction: update virtualBalance + write transaction record
-7. Balance cap: 1,000,000,000 cents ($10,000,000.00)
 ```
 
 ### Market Auto-Lock (`firebase/functions/src/markets/marketScheduler.ts`)
@@ -542,7 +501,6 @@ Colors.overlay       // "#00000066"
 The `AuthContext.tsx` auth flow has deliberate constraints:
 - `handleSignIn` does NOT set loading=false or update user state — it lets `onAuthStateChanged` handle all state changes to prevent race conditions
 - `handleSignUp` DOES set state directly (since `onAuthStateChanged` would also fire, creating duplicate processing)
-- RevenueCat login/logout is always wrapped in try-catch and never blocks auth flow
 
 ### Logging Style
 
@@ -584,25 +542,21 @@ All security-sensitive writes are blocked at the rules level and must go through
 
 3. **Do not add a second `onAuthStateChanged` listener.** There is one in `AuthContext.tsx`. Adding another will cause duplicate processing, infinite loops, or race conditions. All auth state flows through `AuthContext`.
 
-4. **Do not call `RevenueCat.configure()` more than once.** It is initialized once in `App.tsx`'s root `useEffect` and managed as a singleton via `purchase.service.ts`.
+4. **Do not use the Firebase client SDK to read admin-only data.** `isAdmin` status is checked server-side in Cloud Functions; client code cannot be trusted for authorization.
 
-5. **Do not use the Firebase client SDK to read admin-only data.** `isAdmin` status is checked server-side in Cloud Functions; client code cannot be trusted for authorization.
+5. **Do not navigate inside `App.tsx`'s notification listener** until `MarketDetailScreen` is built and added to the navigator. The TODO comment at `App.tsx:183` marks this intentionally deferred.
 
-6. **Do not add RevenueCat-dependent code paths that run in Expo Go.** RevenueCat native modules are unavailable in Expo Go and the code silently suppresses the resulting errors. Any purchase flow must go through a development build.
+6. **Do not divide by 100 before storing.** Only divide for display. Store raw cents.
 
-7. **Do not navigate inside `App.tsx`'s notification listener** until `MarketDetailScreen` is built and added to the navigator. The TODO comment at `App.tsx:183` marks this intentionally deferred.
+7. **Do not create additional Firebase app initializations.** `lib/firebaseConfig.ts` calls `initializeApp()` once and exports `auth`, `db`, `storage`, `functions`.
 
-8. **Do not divide by 100 before storing.** Only divide for display. Store raw cents.
-
-9. **Do not create additional Firebase app initializations.** `lib/firebaseConfig.ts` calls `initializeApp()` once and exports `auth`, `db`, `storage`, `functions`.
-
-10. **Do not implement the referral/friend-code redemption logic on the client.** The `referredBy` field in `createUserProfile()` is intentionally set to `undefined` with a TODO comment. Server-side lookup must be implemented in a Cloud Function.
+8. **Do not implement the referral/friend-code redemption logic on the client.** The `referredBy` field in `createUserProfile()` is intentionally set to `undefined` with a TODO comment. Server-side lookup must be implemented in a Cloud Function.
 
 ### Known Tech Debt
 
-- `AuthContext.tsx:193` — `referredBy: userData.friendCode ? undefined : undefined` — referral lookup not implemented
+- `AuthContext.tsx` — `referredBy` referral lookup not implemented
 - `App.tsx:183` — Notification tap → `MarketDetailScreen` navigation is stubbed with a TODO
-- `PaymentMethodsScreen.tsx` — UI exists but the screen is not functional
+- `PaymentMethodsScreen.tsx` — placeholder screen
 - Admin panel date localization: dates display in Spanish (should be English)
 - Multiple users betting simultaneously (concurrency under heavy load) has not been stress-tested
 - Push notification reliability under high settlement volume needs end-to-end testing
@@ -610,25 +564,6 @@ All security-sensitive writes are blocked at the rules level and must go through
 ---
 
 ## 9. Environment & Config
-
-### Environment Variables
-
-Create a `.env` file at the root (`.env.example` is committed):
-
-```bash
-EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=appl_xxxxxxxxxx
-EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_xxxxxxxxxx
-```
-
-The `EXPO_PUBLIC_` prefix is required for Expo to expose variables to the client bundle.
-
-### Firebase Secret (Cloud Functions)
-
-```bash
-firebase functions:secrets:set REVENUECAT_WEBHOOK_SECRET
-```
-
-This secret is used to verify RevenueCat webhook HMAC signatures in `revenuecatWebhook.ts`.
 
 ### Firebase Project
 
@@ -665,7 +600,6 @@ npm run deploy  # = firebase deploy --only functions
 npm run logs
 ```
 
-> **Note:** RevenueCat only works on real development builds, not Expo Go or simulators. All other functionality works in Expo Go except IAP.
 
 ### Firestore Indexes
 
@@ -693,8 +627,7 @@ Deploy indexes: `firebase deploy --only firestore:indexes`
 - Virtual balance tracking (all integer cents)
 - In-app notifications (Firestore-based)
 - Push notifications via Expo Push Service (sent on market open and bet settlement)
-- RevenueCat IAP integration (credit packages: 100, 500, 1000, 2500)
-- RevenueCat webhook → balance top-up (idempotent, HMAC-verified)
+- dLocal payment integration (deposits/withdrawals)
 - Country-specific market variant (`CountryBettingScreen`)
 - Scheduled auto-lock for EN VIVO markets (every 1 minute)
 - User profile with stats (win rate, active positions, total winnings)
@@ -703,7 +636,7 @@ Deploy indexes: `firebase deploy --only firestore:indexes`
 
 - **`MarketDetailScreen`** — not implemented; notification taps to market detail are a no-op (see `App.tsx:183`)
 - **Referral system** — `friendCode` is collected but `referredBy` is never set; no referral bonus logic exists
-- **`PaymentMethodsScreen`** — UI shell exists, not functional
+- **`PaymentMethodsScreen`** — placeholder screen
 - **Admin panel date localization** — dates show in Spanish
 
 ### Known Issues / TODOs from README
@@ -716,7 +649,6 @@ Deploy indexes: `firebase deploy --only firestore:indexes`
 
 ### Recent Git Activity (as of Feb 2026)
 
-- `5d8b599` — Enhance RevenueCat error handling for login and initialization
 - `91e05d4` — Add SafeAreaView import to HomeScreen
 - `07e867b` — Improve authentication and user profile handling with logging
 - `223ef5c` — Improve bet placement and settlement atomicity (Firestore transactions + FieldValue.increment)

@@ -23,7 +23,7 @@ import {
   resetPassword,
 } from "../services/auth.service";
 import { createUserProfile, getUserProfile } from "../services/user.service";
-import { purchaseService } from "../services/purchase.service";
+import { validateFriendCode } from "../lib/functions";
 import type { SignUpData } from "../services/auth.service";
 
 interface AuthContextType {
@@ -87,18 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // User is authenticated - check if profile exists in Firestore
         console.log("✅ [AuthContext] User authenticated, checking profile...");
         setUser(authUser);
-
-        // Log user into RevenueCat
-        try {
-          await purchaseService.loginUser(authUser.uid);
-          console.log("✅ [AuthContext] User logged into RevenueCat");
-        } catch (rcError) {
-          console.error(
-            "⚠️ [AuthContext] Failed to login to RevenueCat:",
-            rcError,
-          );
-          // Continue even if RevenueCat login fails
-        }
 
         let profileExists = false;
         try {
@@ -173,6 +161,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             20,
           );
 
+        // Look up referrer by friend code if provided
+        let referredBy: string | undefined;
+        if (userData.friendCode) {
+          console.log("🔍 [AuthContext] Looking up referral code:", userData.friendCode);
+          referredBy = (await validateFriendCode(userData.friendCode)) ?? undefined;
+          console.log("🔍 [AuthContext] Referral lookup result:", referredBy || "not found");
+        }
+
         const profileData = {
           email,
           firstName: userData.firstName,
@@ -181,7 +177,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           phoneNumber: userData.phoneNumber,
           phoneCode: userData.phoneCode,
           countryCode: userData.countryCode,
-          friendCode: userData.friendCode,
           username,
           notificationsEnabled: true,
           notificationPreferences: {
@@ -190,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             promotions: true,
           },
           termsAccepted: true, // Terms are accepted before reaching signup
-          referredBy: userData.friendCode ? undefined : undefined, // TODO: Lookup referrer by friendCode
+          referredBy,
         };
 
         // Create Firestore user profile
@@ -253,18 +248,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setError(null);
       setLoading(true);
-
-      // Log out from RevenueCat first
-      try {
-        await purchaseService.logoutUser();
-        console.log("✅ [AuthContext] User logged out from RevenueCat");
-      } catch (rcError) {
-        console.error(
-          "⚠️ [AuthContext] Failed to logout from RevenueCat:",
-          rcError,
-        );
-        // Continue even if RevenueCat logout fails
-      }
 
       await signOut();
       setUser(null);

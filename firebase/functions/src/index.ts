@@ -20,9 +20,13 @@ export {
 } from "./notifications/sendPushNotification";
 
 // Export payment functions
-export { revenueCatWebhook } from "./payments/revenuecatWebhook";
+
 export { submitKyc } from "./payments/submitKyc";
 export { createDeposit } from "./payments/createDeposit";
 export { createWithdrawal } from "./payments/createWithdrawal";
 export { dLocalWebhook } from "./payments/dLocalWebhook";
 export { getFeeEstimate } from "./payments/getFeeEstimate";
+
+// Export referral functions
+export { processReferral } from "./referrals/processReferral";
+export { validateFriendCode } from "./referrals/validateFriendCode";
