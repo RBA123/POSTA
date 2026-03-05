@@ -4,7 +4,7 @@
  * Manages Firestore user documents (CRUD operations)
  */
 
-import { doc, setDoc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc, Timestamp, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "../lib/firebaseConfig";
 import type {
   User,
@@ -34,9 +34,8 @@ export async function createUserProfile(
       throw new Error("User profile already exists");
     }
 
-    // Generate friend code if not provided
-    const friendCode =
-      userData.friendCode || generateFriendCode(userData.firstName);
+    // Always generate the user's own unique friend code
+    const friendCode = generateFriendCode(userData.firstName);
 
     // Calculate initial winRate (0% since no bets yet)
     const winRate = 0;
@@ -223,25 +222,31 @@ export function generateFriendCode(firstName: string): string {
 
 /**
  * Validate if a friend code exists and is valid
- * Returns the user UID if found, null otherwise
+ * Returns the referrer's UID if found, null otherwise
  */
 export async function validateFriendCode(
   friendCode: string,
 ): Promise<string | null> {
   try {
-    // Friend codes are stored in user documents
-    // We need to query users collection (requires index)
-    // For now, we'll check if the format is valid
-    // Full validation requires a query which we'll handle in the hook
-
     if (!friendCode || friendCode.length < 4) {
       return null;
     }
 
-    // Note: Full validation requires querying users collection
-    // This is a placeholder - actual validation will be done via query
-    return null;
+    const usersRef = collection(db, "users");
+    const q = query(
+      usersRef,
+      where("friendCode", "==", friendCode.toUpperCase().trim()),
+      limit(1),
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    return snapshot.docs[0].id;
   } catch (error) {
+    console.error("Error validating friend code:", error);
     return null;
   }
 }

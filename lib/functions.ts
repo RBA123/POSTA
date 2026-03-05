@@ -230,6 +230,22 @@ export async function sendCustomNotification(
   return result.data;
 }
 
+// ============================================================================
+// REFERRAL FUNCTIONS
+// ============================================================================
+
+export async function validateFriendCode(
+  friendCode: string,
+): Promise<string | null> {
+  const validateFunction = httpsCallable<
+    { friendCode: string },
+    { referrerId: string | null }
+  >(functions, "validateFriendCode");
+
+  const result = await validateFunction({ friendCode });
+  return result.data.referrerId;
+}
+
 export async function markNotificationRead(
   notificationId: string,
 ): Promise<{ success: boolean }> {

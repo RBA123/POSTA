@@ -6,7 +6,7 @@ import { verifyDLocalWebhookSignature } from "./dLocalClient";
  * dLocalWebhook — HTTP Cloud Function
  *
  * Handles payment and payout notifications from dLocal.
- * Follows the same pattern as revenuecatWebhook.ts.
+ * Verifies webhook signatures and updates transaction/balance state.
  *
  * Payment statuses: PAID, REJECTED, CANCELLED, PENDING, AUTHORIZED
  * Payout statuses (numeric): 100=pending, 200=paid, 300=cancelled, 400=rejected
