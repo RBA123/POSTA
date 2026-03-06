@@ -23,7 +23,7 @@ import {
   resetPassword,
 } from "../services/auth.service";
 import { createUserProfile, getUserProfile } from "../services/user.service";
-import { validateFriendCode } from "../lib/functions";
+import { validateFriendCode, updateLastLogin } from "../lib/functions";
 import type { SignUpData } from "../services/auth.service";
 
 interface AuthContextType {
@@ -105,6 +105,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           // Profile doesn't exist or error loading it
           console.error("❌ [AuthContext] Error fetching profile:", err);
           setProfileExists(false);
+        }
+
+        // Track last login for retention metrics
+        if (profileExists) {
+          updateLastLogin().catch((err) =>
+            console.warn("Failed to update lastLoginAt:", err),
+          );
         }
 
         setLoading(false);

@@ -12,6 +12,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
     { path: "/dashboard", label: "Dashboard", icon: "📊" },
     { path: "/markets", label: "Markets", icon: "📈" },
     { path: "/markets/create", label: "Create Market", icon: "➕" },
+    { path: "/analytics", label: "Analytics", icon: "📉" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

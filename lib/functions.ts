@@ -231,6 +231,18 @@ export async function sendCustomNotification(
 }
 
 // ============================================================================
+// ANALYTICS FUNCTIONS
+// ============================================================================
+
+export async function updateLastLogin(): Promise<void> {
+  const updateLastLoginFunction = httpsCallable<void, { success: boolean }>(
+    functions,
+    "updateLastLogin",
+  );
+  await updateLastLoginFunction();
+}
+
+// ============================================================================
 // REFERRAL FUNCTIONS
 // ============================================================================
 

@@ -31,7 +31,7 @@ export function MarketDetailPage() {
   const { data: market, isLoading, error } = useMarket(marketId || "");
   const {
     mutate: deleteMarket,
-    isPending: isDeleting,
+    isPending: _isDeleting,
     error: deleteError,
   } = useDeleteMarket();
   const [showSettlementModal, setShowSettlementModal] = useState(false);
