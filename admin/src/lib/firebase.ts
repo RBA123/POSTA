@@ -3,14 +3,14 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 
-// Firebase configuration
+// Firebase configuration - must match the mobile app's project (porta-main)
 const firebaseConfig = {
-  apiKey: "AIzaSyBsqijOYbdAehqW282VjthfOR3CejkVH7A",
-  authDomain: "liberta-main.firebaseapp.com",
-  projectId: "liberta-main",
-  storageBucket: "liberta-main.firebasestorage.app",
-  messagingSenderId: "446575654136",
-  appId: "1:446575654136:ios:2a1e270a388d6c1add370d",
+  apiKey: "AIzaSyCPRgZpboRyueW8cplGASUezTdZdL1Fx4c",
+  authDomain: "porta-main.firebaseapp.com",
+  projectId: "porta-main",
+  storageBucket: "porta-main.firebasestorage.app",
+  messagingSenderId: "354126583899",
+  appId: "1:354126583899:web:29ade165020f9ff3e3877e",
 };
 
 // Initialize Firebase App

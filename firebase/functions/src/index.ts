@@ -30,3 +30,7 @@ export { getFeeEstimate } from "./payments/getFeeEstimate";
 // Export referral functions
 export { processReferral } from "./referrals/processReferral";
 export { validateFriendCode } from "./referrals/validateFriendCode";
+
+// Export analytics functions
+export { getAnalytics } from "./analytics/getAnalytics";
+export { updateLastLogin } from "./analytics/updateLastLogin";
