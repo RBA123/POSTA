@@ -13,6 +13,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
     { path: "/markets", label: "Markets", icon: "📈" },
     { path: "/markets/create", label: "Create Market", icon: "➕" },
     { path: "/analytics", label: "Analytics", icon: "📉" },
+    { path: "/leaderboard", label: "Leaderboard", icon: "🏆" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -20,7 +21,7 @@ export function Sidebar({ onLogout }: SidebarProps) {
   return (
     <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 flex flex-col z-40 hidden lg:flex">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">Liberta Admin</h1>
+        <h1 className="text-xl font-bold text-gray-900">Posta Admin</h1>
       </div>
       
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

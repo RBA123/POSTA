@@ -4,11 +4,6 @@
     "slug": "Posta",
     "version": "1.0.0",
     "orientation": "portrait",
-    "extra": {
-      "eas": {
-        "projectId": "faef0fb9-aa3d-4665-a07a-cddfc9b49f93"
-      }
-    },
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -60,6 +55,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "gabrielcastillo"
+    "owner": "gabrielcastillo",
+    "extra": {
+      "eas": {
+        "projectId": "c6dfb676-c0a3-4164-96cf-a55e2de2d6cb"
+      }
+    }
   }
 }

@@ -169,6 +169,10 @@ export interface Market {
   siVolume: number; // Volume on "Sí" side
   noVolume: number; // Volume on "No" side
 
+  // Market Maker
+  // ⚠️ INTEGER CENTS — phantom liquidity split 50/50 to dampen early odds swings
+  marketMakerVolume?: number;
+
   // Status & Timing
   status: MarketStatus;
   isUrgent: boolean; // For EN VIVO markets

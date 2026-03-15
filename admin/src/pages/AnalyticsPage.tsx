@@ -36,6 +36,9 @@ interface AnalyticsData {
     activeLastWeek: number;
     activeLastMonth: number;
   };
+  referralAdoptionRate: number;
+  predictionRate: number;
+  topMarkets: { marketId: string; question: string; totalBets: number; totalVolumeCents: number }[];
 }
 
 function formatCents(cents: number): string {
@@ -243,6 +246,48 @@ export function AnalyticsPage() {
           </div>
         </Card>
       </div>
+
+      {/* New Metrics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Referral Adoption Rate</CardTitle>
+          </CardHeader>
+          <p className="text-4xl font-bold text-orange-600 mb-2">{data.referralAdoptionRate}%</p>
+          <p className="text-sm text-gray-500">of users signed up using a friend referral code</p>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Prediction Rate</CardTitle>
+          </CardHeader>
+          <p className="text-4xl font-bold text-blue-600 mb-2">{data.predictionRate}%</p>
+          <p className="text-sm text-gray-500">of users have placed at least one bet</p>
+        </Card>
+      </div>
+
+      {/* Top Markets */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Top Markets by Bets</CardTitle>
+        </CardHeader>
+        {data.topMarkets.length === 0 ? (
+          <div className="text-center py-6 text-gray-500">No markets yet</div>
+        ) : (
+          <div className="space-y-3">
+            {data.topMarkets.map((market, i) => (
+              <div key={market.marketId} className="flex items-center gap-4">
+                <span className="text-2xl font-black text-gray-300 w-8">#{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{market.question}</p>
+                  <p className="text-xs text-gray-400">{formatCents(market.totalVolumeCents)} volume</p>
+                </div>
+                <Badge variant="default">{market.totalBets} bets</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* Referrals */}
       <Card>

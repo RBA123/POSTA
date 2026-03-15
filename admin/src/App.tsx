@@ -8,6 +8,7 @@ import { MarketsPage } from "./pages/MarketsPage";
 import { CreateMarketPage } from "./pages/CreateMarketPage";
 import { MarketDetailPage } from "./pages/MarketDetailPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient({
@@ -61,6 +62,7 @@ function App() {
               <Route path="markets/create" element={<CreateMarketPage />} />
               <Route path="markets/:marketId" element={<MarketDetailPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="leaderboard" element={<LeaderboardPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

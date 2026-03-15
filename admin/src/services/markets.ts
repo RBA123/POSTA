@@ -19,6 +19,7 @@ export interface CreateMarketData {
   tags?: string[];
   imageUrl?: string;
   countryBets?: CountryBet[];
+  marketMakerVolume?: number; // Integer cents — phantom 50/50 liquidity
 }
 
 export interface SettleMarketData {

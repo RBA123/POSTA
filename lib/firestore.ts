@@ -288,11 +288,12 @@ export function formatRelativeTime(timestamp: Timestamp): string {
  * Format volume number to display string
  */
 export function formatVolume(volume: number): string {
-  if (volume >= 1000000) {
-    return `$${(volume / 1000000).toFixed(1)}M`;
-  } else if (volume >= 1000) {
-    return `$${(volume / 1000).toFixed(0)}K`;
+  const dollars = volume / 100;
+  if (dollars >= 1000000) {
+    return `$${(dollars / 1000000).toFixed(1)}M`;
+  } else if (dollars >= 1000) {
+    return `$${(dollars / 1000).toFixed(0)}K`;
   }
-  return `$${volume.toFixed(0)}`;
+  return `$${dollars.toFixed(0)}`;
 }
 

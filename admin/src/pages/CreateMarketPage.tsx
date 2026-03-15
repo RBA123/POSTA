@@ -23,6 +23,7 @@ interface MarketFormData {
   isUrgent: boolean;
   tags: string;
   imageUrl?: string;
+  marketMakerDollars: string; // Dollar amount string; converted to cents on submit
 }
 
 export function CreateMarketPage() {
@@ -58,6 +59,7 @@ export function CreateMarketPage() {
       openAt: getCurrentLocalDateTime(),
       isUrgent: false,
       category: "en_vivo",
+      marketMakerDollars: "1000",
     },
   });
 
@@ -131,6 +133,12 @@ export function CreateMarketPage() {
           .filter(Boolean)
       : [];
 
+    // Convert dollars to integer cents
+    const mmDollars = parseFloat(data.marketMakerDollars || "0");
+    const marketMakerVolume = Math.floor(
+      isNaN(mmDollars) || mmDollars < 0 ? 0 : mmDollars * 100,
+    );
+
     createMarket({
       question: data.question,
       description: data.description || undefined,
@@ -142,6 +150,7 @@ export function CreateMarketPage() {
       imageUrl: data.imageUrl || undefined,
       countryBets:
         hasCountryBets && countries.length > 0 ? countries : undefined,
+      marketMakerVolume,
     });
   };
 
@@ -533,6 +542,39 @@ export function CreateMarketPage() {
               )}
             </div>
           )}
+
+          <div>
+            <label
+              htmlFor="marketMakerDollars"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Market Maker Liquidity ($)
+            </label>
+            <Input
+              id="marketMakerDollars"
+              type="number"
+              min="0"
+              step="1"
+              {...register("marketMakerDollars")}
+              placeholder="1000"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Phantom liquidity split 50/50 Sí/No. Higher values make early
+              bets move the odds less. Set to 0 to disable.
+            </p>
+            {(() => {
+              const val = parseFloat(watch("marketMakerDollars") || "0");
+              if (!isNaN(val) && val > 0) {
+                return (
+                  <p className="mt-1 text-sm text-blue-600 font-medium">
+                    📊 ${val.toLocaleString()} total phantom volume — $
+                    {(val / 2).toLocaleString()} per side
+                  </p>
+                );
+              }
+              return null;
+            })()}
+          </div>
 
           <div>
             <label
