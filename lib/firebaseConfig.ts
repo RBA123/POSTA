@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, connectAuthEmulator } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
@@ -19,8 +20,10 @@ const firebaseConfig = {
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth - Firebase v11+ handles React Native persistence automatically
-export const auth = getAuth(app);
+// Initialize Auth with AsyncStorage persistence so sessions survive app restarts
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
 // Initialize services
 export const db = getFirestore(app);

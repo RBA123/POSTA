@@ -190,7 +190,7 @@ export const placeBet = functions
           amount,
           probability,
           potentialWin,
-          countryCode: countryCode || undefined,
+          ...(countryCode ? { countryCode } : {}),
           status: "pending",
           placedAt: now,
           createdAt: now,
@@ -205,7 +205,7 @@ export const placeBet = functions
           amount,
           probability,
           potentialWin,
-          countryCode: countryCode || undefined,
+          ...(countryCode ? { countryCode } : {}),
           placedAt: now,
         });
 

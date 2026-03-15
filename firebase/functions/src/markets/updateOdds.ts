@@ -40,6 +40,12 @@ export const updateMarketOdds = functions.region('us-central1').firestore
       const siVolume = marketData.siVolume || 0;
       const totalVolume = marketData.totalVolume || 0;
 
+      // Market maker phantom liquidity (split 50/50) dampens early odds swings
+      const marketMakerVolume = marketData.marketMakerVolume || 0;
+      const mmHalf = Math.floor(marketMakerVolume / 2);
+      const effectiveSiVolume = siVolume + mmHalf;
+      const effectiveTotalVolume = totalVolume + marketMakerVolume;
+
       // Minimum probability to prevent Infinity errors (allows contrarian bets)
       const MIN_PROBABILITY = 1; // 1% minimum
 
@@ -47,8 +53,8 @@ export const updateMarketOdds = functions.region('us-central1').firestore
       let siProbability = 50; // Default 50/50
       let noProbability = 50;
 
-      if (totalVolume > 0) {
-        const rawSiProb = (siVolume / totalVolume) * 100;
+      if (effectiveTotalVolume > 0) {
+        const rawSiProb = (effectiveSiVolume / effectiveTotalVolume) * 100;
         // Enforce minimum probability: clamp between MIN_PROBABILITY and (100 - MIN_PROBABILITY)
         siProbability = Math.max(
           MIN_PROBABILITY,
@@ -119,6 +125,12 @@ export const recalculateMarketOdds = functions.region('us-central1').https.onCal
 
     const totalVolume = siVolume + noVolume;
 
+    // Market maker phantom liquidity
+    const marketMakerVolume = marketDoc.data()!.marketMakerVolume || 0;
+    const mmHalf = Math.floor(marketMakerVolume / 2);
+    const effectiveSiVolume = siVolume + mmHalf;
+    const effectiveTotalVolume = totalVolume + marketMakerVolume;
+
     // Minimum probability to prevent Infinity errors (allows contrarian bets)
     const MIN_PROBABILITY = 1; // 1% minimum
 
@@ -126,8 +138,8 @@ export const recalculateMarketOdds = functions.region('us-central1').https.onCal
     let siProbability = 50;
     let noProbability = 50;
 
-    if (totalVolume > 0) {
-      const rawSiProb = (siVolume / totalVolume) * 100;
+    if (effectiveTotalVolume > 0) {
+      const rawSiProb = (effectiveSiVolume / effectiveTotalVolume) * 100;
       // Enforce minimum probability: clamp between MIN_PROBABILITY and (100 - MIN_PROBABILITY)
       siProbability = Math.max(
         MIN_PROBABILITY,

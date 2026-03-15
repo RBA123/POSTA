@@ -33,6 +33,9 @@ interface AnalyticsResponse {
     activeLastWeek: number;
     activeLastMonth: number;
   };
+  referralAdoptionRate: number;
+  predictionRate: number;
+  topMarkets: { marketId: string; question: string; totalBets: number; totalVolumeCents: number }[];
 }
 
 export const getAnalytics = functions
@@ -54,10 +57,11 @@ export const getAnalytics = functions
     const sevenDaysAgo = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(todayStart.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // Fetch users and transactions in parallel
-    const [usersSnap, transactionsSnap] = await Promise.all([
+    // Fetch users, transactions, and markets in parallel
+    const [usersSnap, transactionsSnap, marketsSnap] = await Promise.all([
       db.collection("users").get(),
       db.collection("transactions").get(),
+      db.collection("markets").get(),
     ]);
 
     // ---- SIGNUPS ----
@@ -195,6 +199,27 @@ export const getAnalytics = functions
       if (lastLogin >= thirtyDaysAgo) activeLastMonth++;
     }
 
+    // ---- REFERRAL ADOPTION RATE ----
+    const usersWithReferral = users.filter((u) => (u as any).referredBy).length;
+    const referralAdoptionRate =
+      users.length > 0 ? Math.round((usersWithReferral / users.length) * 100) : 0;
+
+    // ---- PREDICTION RATE (% of users who placed at least 1 bet) ----
+    const usersWithBets = users.filter((u) => ((u as any).totalPositions || 0) > 0).length;
+    const predictionRate =
+      users.length > 0 ? Math.round((usersWithBets / users.length) * 100) : 0;
+
+    // ---- TOP MARKETS BY BETS ----
+    const topMarkets = marketsSnap.docs
+      .map((d) => ({
+        marketId: d.id,
+        question: d.data().question || "",
+        totalBets: d.data().totalBets || 0,
+        totalVolumeCents: d.data().totalVolume || 0,
+      }))
+      .sort((a, b) => b.totalBets - a.totalBets)
+      .slice(0, 3);
+
     const response: AnalyticsResponse = {
       signups: {
         total: users.length,
@@ -229,6 +254,9 @@ export const getAnalytics = functions
         activeLastWeek,
         activeLastMonth,
       },
+      referralAdoptionRate,
+      predictionRate,
+      topMarkets,
     };
 
     return response;

@@ -80,6 +80,7 @@ export const createMarket = functions
       tags,
       imageUrl,
       countryBets,
+      marketMakerVolume,
     } = data;
 
     // Validate input
@@ -130,6 +131,15 @@ export const createMarket = functions
         status = "open";
       }
 
+      // Validate marketMakerVolume if provided
+      const mmVolume = marketMakerVolume != null ? Math.floor(Number(marketMakerVolume)) : 0;
+      if (mmVolume < 0) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "marketMakerVolume must be a non-negative integer (cents)",
+        );
+      }
+
       // Create market document
       const marketRef = db.collection("markets").doc();
       const marketData: any = {
@@ -144,6 +154,7 @@ export const createMarket = functions
         uniqueBettors: 0,
         siVolume: 0,
         noVolume: 0,
+        marketMakerVolume: mmVolume,
         status,
         isUrgent: isUrgent || false,
         openAt: openAtTimestamp,

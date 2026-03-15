@@ -247,6 +247,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         stack: err.stack,
         error: err,
       });
+      setError(err.message || "Error al iniciar sesión");
+      setLoading(false);
+      throw err;
     }
   }, []);
 

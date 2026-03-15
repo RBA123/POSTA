@@ -34,3 +34,6 @@ export { validateFriendCode } from "./referrals/validateFriendCode";
 // Export analytics functions
 export { getAnalytics } from "./analytics/getAnalytics";
 export { updateLastLogin } from "./analytics/updateLastLogin";
+
+// Export admin functions
+export { resetLeaderboard } from "./admin/resetLeaderboard";
