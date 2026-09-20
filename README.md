@@ -1,6 +1,6 @@
-# Posta — Real-time Sports Prediction Markets
+# GanaYA — Real-time Sports Prediction Markets
 
-Working product of **GanaYA**, a prediction-markets fintech venture I co-founded in Ecuador (Feb–Jul 2026). Posta is a mobile app where users place virtual bets on sports markets with live, dynamically updating odds — built sports-first as our go-to-market wedge for Latin America.
+Working product of **GanaYA**, a prediction-markets fintech venture I co-founded in Ecuador (Feb–Jul 2026). A mobile app where users place virtual bets on sports markets with live, dynamically updating odds — built sports-first as our go-to-market wedge for Latin America.
 
 > GanaYA suspended operations in July 2026 after new licensing requirements broke unit economics — a deliberate product decision. The app below is the working product we shipped.
 
