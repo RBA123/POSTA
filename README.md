@@ -1,58 +1,34 @@
-# Posta
+# Posta — Real-time Sports Prediction Markets
 
-A real-time sports betting mobile application built with React Native, Expo, and Firebase. Liberta enables users to place virtual bets on sports markets with dynamic odds that update in real-time.
+Working product of **GanaYA**, a prediction-markets fintech venture I co-founded in Ecuador (Feb–Jul 2026). Posta is a mobile app where users place virtual bets on sports markets with live, dynamically updating odds — built sports-first as our go-to-market wedge for Latin America.
 
-# TODO:
+> GanaYA suspended operations in July 2026 after new licensing requirements broke unit economics — a deliberate product decision. The app below is the working product we shipped.
 
-- Make sure notifications work and improve the notifications UI
-  – Test multiple users betting, explain how the betting works.
-  – Make the dates be in english in the admin panel
-  – add margin right to the chevrons in the admin panel
-  – make sure posisiones activas works
+## What it does
 
-## Quick Start
+- Real-time sports betting markets with dynamic, live-updating odds
+- Virtual balance system (no real money — pure prediction-market mechanics)
+- User profiles, statistics, and activity tracking
+- Push notifications for market movements
+- Admin panel for creating and managing markets
+- Multiple market categories (EN VIVO, Partidos, Torneos, and more)
 
-### Installation
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-### Running the App
-
-Start the development server:
-
-```bash
-npm start
-```
-
-Run on specific platforms:
-
-```bash
-npm run ios      # iOS simulator
-npm run android  # Android emulator
-npm run web      # Web browser
-```
-
-## Technology Stack
+## Technology stack
 
 - **Frontend**: React Native (Expo), TypeScript, React Navigation, TanStack Query, NativeWind
 - **Backend**: Firebase (Authentication, Firestore, Cloud Functions)
-- **Cloud Functions**: Node.js 20, TypeScript
-- **Region**: us-central1
+- **Cloud Functions**: Node.js 20, TypeScript (us-central1)
 
 ## Documentation
 
-Comprehensive documentation is available in the `docs/` folder:
+Detailed docs live in the `docs/` folder:
 
-- **[App Overview](docs/app.md)** - General information about the app, features, and user flow
-- **[Frontend Architecture](docs/frontend.md)** - Detailed frontend architecture, components, and patterns
-- **[Backend Architecture](docs/backend.md)** - Firebase backend implementation, Cloud Functions, and data model
-- **[Admin Tool Plan](docs/admin.md)** - Plan for admin dashboard to manage markets
+- **[App Overview](docs/app.md)** — features and user flow
+- **[Frontend Architecture](docs/frontend.md)** — components and patterns
+- **[Backend Architecture](docs/backend.md)** — Firebase implementation, Cloud Functions, data model
+- **[Admin Tool Plan](docs/admin.md)** — admin dashboard for managing markets
 
-## Project Structure
+## Project structure
 
 ```
 Liberta/
@@ -69,35 +45,11 @@ Liberta/
 └── docs/                # Documentation
 ```
 
-## Key Features
+## Quick start
 
-- Real-time betting markets with dynamic odds
-- Virtual balance system
-- Live market updates
-- User profiles and statistics
-- Activity tracking
-- Push notifications
-- Multiple market categories (EN VIVO, Partidos, Torneos, etc.)
-
-## Firebase Setup
-
-The app uses Firebase for authentication, database, and serverless functions. See [Backend Architecture](docs/backend.md) for detailed setup instructions.
-
-## Development
-
-### Prerequisites
-
-- Node.js 20+
-- npm or yarn
-- Expo CLI
-- Firebase CLI (for backend deployment)
-
-### Environment Setup
-
-1. Install dependencies: `npm install`
-2. Configure Firebase (see `docs/backend.md`)
-3. Start development server: `npm start`
-
-## License
-
-[Add your license here]
+```bash
+npm install
+npm start            # development server
+npm run ios          # iOS simulator
+npm run android      # Android emulator
+npm run web          # web browser
